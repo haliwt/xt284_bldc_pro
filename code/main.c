@@ -2,6 +2,8 @@
 #include "cms8s6990.h"
 #include "led.h"
 #include "key.h"
+#include "bemf.h"
+#include "pwm.h"
 
 uint32_t Systemclock = 24000000;
 
@@ -18,6 +20,8 @@ int main(void)
 {		
 	LED_Init();
 	KEY_Init();
+	ACMP1_Config();
+	EPWM_Config();
 
 	while(1)
 	{	
