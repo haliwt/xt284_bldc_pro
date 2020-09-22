@@ -159,6 +159,11 @@ void LSE_IRQHandler(void)  interrupt LSE_VECTOR
  ******************************************************************************/
 void ACMP_IRQHandler(void)  interrupt ACMP_VECTOR 
 {
+	if(ACMP_GetIntFlag(ACMP1))
+	{
+		
+		ACMP_ClearIntFlag(ACMP1);
+	}	
 	
 }
 /******************************************************************************

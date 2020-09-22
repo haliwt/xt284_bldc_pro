@@ -1,6 +1,43 @@
 #include "key.h"
 
+/******************************************************************************
+ **
+ ** Function Name:	void delay_10us(uint16_t n) 
+ ** Function : 延时10*n微秒 
+ ** Input Ref:NO
+ ** Return Ref:NO
+ **   
+ ******************************************************************************/
+void Delay_ms(uint16_t n)   
+{  
+    uint16_t i=0,j;  
+    for(i=0;i<n;i++) {
 
+	     for(j=0;j<100;j++){
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+	     }
+		 
+		  
+     } 
+}  
+
+/**********************************************************************
+	*
+	*
+	*
+	*
+	*
+	*
+***********************************************************************/
 void KEY_Init(void)
 {
 	/*
@@ -28,4 +65,29 @@ void KEY_Init(void)
 
 	
 }
+/****************************************************
+	*
+	*Function Name: uint8_t HDKey_Scan(uint8_t mode)
+	*Function :
+	*Inpute Ref: 0 ---涓嶆敮鎸佽繛缁寜閿?
+	*Return Ref: 0 --娌℃湁鎸夐敭鎸変笅锛?1---鏈夋寜閿寜涓?
+	*
+*****************************************************/
+uint8_t HDKey_Scan(uint8_t mode)
+{
+	
+		static uint8_t key_up=1;	 //掳麓录眉脣脡驴陋卤锚脰戮
+		if(mode==1)key_up=1;	// 鏀寔杩炵画鎸夐敭
+		if(key_up&&(POWER_KEY== 1))
+		{
+		    key_up =0 ;
+			Delay_ms(20);
+			if(POWER_KEY== 1 ) 	return POWER_PRES;
+		
+		}else if(POWER_KEY==0)key_up=1;
+		return 0;	//娌℃湁鎸夐敭鎸変笅
+}
+
+
+
 

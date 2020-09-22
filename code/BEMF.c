@@ -55,6 +55,10 @@ void ACMP1_Config(void)
 	GPIO_SET_MUX_MODE(P02CFG, GPIO_P02_MUX_C1P2);  //BEMF U
 
 
+	GPIO_SET_MUX_MODE(P05CFG, GPIO_P05_MUX_C1N); //connector negative CMP
+	GPIO_SET_MUX_MODE(P01CFG, GPIO_MUX_C1O);//比较器的输出口--P01
+
+
 	/*
 	(10) start On ACMP1
 	*/		
