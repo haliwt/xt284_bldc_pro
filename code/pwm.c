@@ -16,14 +16,16 @@ void EPWM_Config(void)
 	EPWM_ConfigChannelClk(EPWM2, EPWM_CLK_DIV_1);
 	EPWM_ConfigChannelClk(EPWM4, EPWM_CLK_DIV_1);
 	//设置EPWM 周期以及占空比	
-	EPWM_ConfigChannelPeriod(EPWM0, 0x12C0); //Tpmw = (PWMDn + 1) * 1/8(us)=1.2ms
-	EPWM_ConfigChannelPeriod(EPWM2, 0x12C0);
-	EPWM_ConfigChannelPeriod(EPWM4, 0x12C0);
+	//EPWM_ConfigChannelPeriod(EPWM0, 0x12C0); //Tpmw = PWMDn *2 * 1/8(us)=1.2ms 
+    EPWM_ConfigChannelPeriod(EPWM0, 0x00FA);  //Tpmw = 1/16(KHz) 16KHZ = PWMDn =250 =0xFA
+	EPWM_ConfigChannelPeriod(EPWM2, 0x00FA);
+	EPWM_ConfigChannelPeriod(EPWM4, 0x00FA);
 
 	#if (1)
-	EPWM_ConfigChannelSymDuty(EPWM0, 0x0960);//EPWM_ConfigChannelAsymDuty(uint8_t ChannelNum,uint16_t UpCmp, uint16_t DowmCmp)
-	EPWM_ConfigChannelSymDuty(EPWM2, 0x0960);
-	EPWM_ConfigChannelSymDuty(EPWM4, 0x0960);
+	//EPWM_ConfigChannelSymDuty(EPWM0, 0x0960);//
+	EPWM_ConfigChannelSymDuty(EPWM0, 0x007D); // 50%
+	EPWM_ConfigChannelSymDuty(EPWM2, 0x007D);
+	EPWM_ConfigChannelSymDuty(EPWM4, 0x007D);
 	#elif (0)
 	EPWM_ConfigChannelSymDuty(EPWM0, 0);
 	EPWM_ConfigChannelSymDuty(EPWM2, 0);

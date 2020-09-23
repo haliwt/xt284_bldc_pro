@@ -1,13 +1,32 @@
 #include "bemf.h"
 
-/*********************************************
+/*****************************************************************
 	*
 	*Function Name:void ACMP1_Config(void)
 	*Function:
 	*Input Ref: NO
 	*Output Ref:NO
 	*
-**********************************************/
+*******************************************************************/
+void CMP_InputSignal(void)
+{
+    GPIO_SET_MUX_MODE(P01CFG, GPIO_MUX_GPIO);		//设置P01为GPIO模式
+	GPIO_ENABLE_INPUT(P0TRIS, GPIO_PIN_1);			//设置为输入模式
+	GPIO_ENABLE_RD(P0RD, GPIO_PIN_1);	//开启下拉
+
+
+
+}
+
+
+/******************************************************************
+	*
+	*Function Name:void ACMP1_Config(void)
+	*Function:
+	*Input Ref: NO
+	*Output Ref:NO
+	*
+******************************************************************/
 void ACMP1_Config(void)
 {
 #define NULL  0
@@ -56,7 +75,7 @@ void ACMP1_Config(void)
 
 
 	GPIO_SET_MUX_MODE(P05CFG, GPIO_P05_MUX_C1N); //connector negative CMP
-	GPIO_SET_MUX_MODE(P01CFG, GPIO_MUX_C1O);//比较器的输出口--P01
+	GPIO_SET_MUX_MODE(P36CFG, GPIO_MUX_C1O);//比较器的输出口--P36
 
 
 	/*

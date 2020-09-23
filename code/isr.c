@@ -1,6 +1,7 @@
 
-
 #include "cms8s6990.h"
+#include "motor.h"
+
 
 
 
@@ -161,7 +162,8 @@ void ACMP_IRQHandler(void)  interrupt ACMP_VECTOR
 {
 	if(ACMP_GetIntFlag(ACMP1))
 	{
-		
+		//if(SENSEN_H ==1)SENSEN_H =1;  //正端输入电压高于负端输入电压值 
+
 		ACMP_ClearIntFlag(ACMP1);
 	}	
 	

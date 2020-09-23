@@ -20,10 +20,12 @@ uint32_t Systemclock = 24000000;
 int main(void)
 {		
 	static uint8_t pwflg =0,powerkey;
+	uint16_t startnum=0;
     LED_Init();
 	KEY_Init();
 	ACMP1_Config();
 	EPWM_Config();
+	CMP_InputSignal();
 
 	while(1)
 	{	
@@ -34,19 +36,26 @@ int main(void)
            pwflg = pwflg ^ 0x01;
             if(pwflg ==1){
                     LED1 = 1;
-                    MOS_U_V	;
-                   // MOS_U_W	;
-                  // MOS_V_W	;
-                //MOS_V_U	;
-                //	MOS_W_U;
-                  //  MOS_W_V	;
-                  // MOS_OFF;	
+                    LED0 =1;
+					startnum++;
+			        if(startnum < 1000)
+					   PowerOn_MotorRun();
+					 else{
+
+						NO_HallSensor_DectorPhase();
+
+					 }
+                  
             }
            else {
                LED1 = 0;
+               LED0= 0;
                MOS_OFF;	
            }
-	}		
+	   }
+
+	   
+	   
    }
 }
 

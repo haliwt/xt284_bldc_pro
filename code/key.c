@@ -1,5 +1,13 @@
 #include "key.h"
 
+
+void delay_us(uint8_t n)
+{
+    while(n--);
+
+
+}
+
 /******************************************************************************
  **
  ** Function Name:	void delay_10us(uint16_t n) 
