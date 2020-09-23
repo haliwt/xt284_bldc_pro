@@ -706,10 +706,11 @@ void  OPEN(void)
 					case 0:
 						{
 						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
+						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
 						PWMD0L   = 0x00;
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
+						BLDC.motor_step++;
 						break;
 						}
 					case 1:
@@ -719,6 +720,7 @@ void  OPEN(void)
 						PWMD1L   = 0x00;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
+						BLDC.motor_step++;
 						break;
 						}
 					case 2:
@@ -728,6 +730,7 @@ void  OPEN(void)
 						PWMD0L   = 0x00;
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
+						BLDC.motor_step++;
 						break;
 						}
 					case 3:
@@ -737,6 +740,7 @@ void  OPEN(void)
 						PWMD1L   = 0x00;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
+						BLDC.motor_step++;
 						break;
 						}
 					case 4:
@@ -746,6 +750,7 @@ void  OPEN(void)
 						PWMD0L   = 0x00;
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
+						BLDC.motor_step++;
 						break;
 						}
 					case 5:
@@ -755,6 +760,7 @@ void  OPEN(void)
 						PWMD1L   = 0x00;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
+						BLDC.motor_step=0; //WT.EDIT
 						break;
 						}
 					default :{MOS_OFF;break;}
@@ -762,187 +768,7 @@ void  OPEN(void)
 				com_charge();
 
 
-     #if 0
-
-	   switch(BLDC.open_status)
-		{
-			case   OPEN_CONF_COM:
-				BLDC.zero_check_time.all =  BLDC.open_period;
-				confirm_phase();
-				com_charge();
-				BLDC.duzhuan_time = 0;
-				BLDC.check_over_time = 0;
-			  BLDC.open_period = _open_max_time;
-				BLDC.zero_check_time.all =  BLDC.open_period;
-				TH1 = 0;
-				TL1 = 0;
-				TF1 = 0;
-				BLDC.open_status = OPEN_WAIT_CHECK;
-				break;
-			case   OPEN_WAIT_CHECK:
-				if(TF1)
-				{
-					TF1 = 0;
-					BLDC.open_status = OPEN_CHECK_ZERO;
-				}
-				break;
-			case   OPEN_CHECK_B:
-				if((BLDC.EMI_flag&0x80)==0x00)
-				{
-					BLDC.open_status = OPEN_CHECK_ZERO;
-				}
-				if((--BLDC.zero_check_time.all) == 0)
-				{
-					BLDC.open_status = OPEN_COM_CHARGE;
-					BLDC.EMI_OK_count = 0;
-					BLDC.turn_OK_count = 0;
-				}
-				break;
-			case  OPEN_CHECK_ZERO:
-				BLDC.zero_now_time.one.h  = TH0;
-				BLDC.zero_now_time.one.l  = TL0;
-				if(BLDC.EMI_flag&0x80)
-				{
-					if(++BLDC.EMI_OK_count>=10)
-					{
-						BLDC.EMI_OK_count = 0;
-						TH0 = 0;
-						TL0 = 0;
-						TF0 = 0;
-						BLDC.zero_period.all =  (BLDC.zero_now_time.all<<2);//240
-						if(++BLDC.turn_OK_count>5)
-						{
-							BLDC.turn_OK_count = 0;
-							MOS_OFF;
-							BLDC.output_time.all = BLDC.zero_now_time.all >>1;//30
-							BLDC.output_time.all -= (BLDC.zero_now_time.all >>2);//30
-							BLDC.zero_check_time.all = BLDC.output_time.all >>1;
-							BLDC.status = _LOOP;
-							TL1 = ~BLDC.zero_check_time.one.l;					
-							TH1 = ~BLDC.zero_check_time.one.h; 
-							TF1 = 0;
-							BLDC.loop_status = _WAIT_CHECK;
-						}
-						else
-						{
-							BLDC.open_status = OPEN_COM_CHARGE;
-						}
-					}
-				}
-				else
-				{
-					BLDC.EMI_OK_count = 0;
-				}
-				if((--BLDC.zero_check_time.all) == 0)
-				{
-					BLDC.open_status = OPEN_COM_CHARGE;
-					BLDC.EMI_OK_count = 0;
-					BLDC.turn_OK_count = 0;
-				}
-				break;
-			case  OPEN_COM_CHARGE:
-				BLDC.open_period -= (BLDC.open_period/15+1);
-				if(BLDC.open_period<_open_min_time)
-				{
-					BLDC.open_period = _open_max_time;
-					if(++BLDC.start_times>3)
-					{
-						BLDC.error  |= _emf_Error;
-						BLDC.start_times = 0;
-					}
-				}
-				BLDC.zero_check_time.all =  BLDC.open_period;
-				BLDC.duzhuan_time = 0;
-				BLDC.check_over_time = 0;
-				//confirm_phase();
-				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
-
-				BLDC.output_time.all = _DEGAUSS_TIME;
-				TL1 = ~BLDC.output_time.one.l;					
-				TH1 = ~BLDC.output_time.one.h; 
-				TF1 = 0;
-				
-				switch(BLDC.motor_step)
-				{
-					case 0:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 1:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 2:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 3:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 4:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 5:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					default :{MOS_OFF;break;}
-				}
-				com_charge();
-				BLDC.open_status = OPEN_DEGAUSS;
-				break;
-			case  OPEN_DEGAUSS:
-				if(TF1)//&&((BLDC.EMI_flag&0x80)==0x00))
-				{
-					PWMD1L   = pwm_now.change.count[1];
-					PWMD1H   = pwm_now.change.count[0];
-					PWMD0L   = 0x00;
-					PWMD0H   = 0x00;
-					PWMLOADEN = 0x03;
-					TH1 = 0x7f;
-					TL1 = 0;
-					TF1 = 0;
-					BLDC.open_status = OPEN_WAIT_CHECK;
-				}
-				break;
-			case  OPEN_ERROR:
-				break;
-			default:BLDC.loop_status = OPEN_CONF_COM;
-				break;
-		}
-	#endif 
+    
 }
 
 void	BREAK(void)
