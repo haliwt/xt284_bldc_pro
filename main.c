@@ -33,9 +33,9 @@ void	main(void)
 				     OPEN();
 				else{
 				  CHECK();//sound a little 
-                  LOOP();
+                 // LOOP();
                   // CHECK();
-                  com_charge();
+                 // com_charge();
                      count =4000;
 				}
      

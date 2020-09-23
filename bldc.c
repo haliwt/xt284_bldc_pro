@@ -348,7 +348,22 @@ void  CHECK(void)
 		C1CON0 = 0x82;
 		delay_us(20);
 		if(C1CON1&0x80){BLDC.EMF_now |= 0x04;}//W  ---BEMF 
-		
+
+		switch(BLDC.EMF_now)
+		{
+
+
+					case 0x06:{MOS_U_V;break;}  //A+ B- '6'
+					case 0x04:{MOS_W_V;break;}    //C+ B-  "4"
+					case 0x05:{MOS_W_U;break;}   //C+ A- "5"
+					case 0x01:{MOS_V_U;break;}     //B+ A-   "1"
+					case 0X03:{MOS_V_W;break;}       //B+ C - "3"
+					case 0X02:{MOS_U_W;break;}        // A+ C-  "2"
+					default :{MOS_OFF;break;}
+		}
+		}
+
+	#if 0
 		if(BLDC.EMF_last != BLDC.EMF_now)
 		{
 			BLDC.duzhuan_time = 0;
@@ -576,6 +591,7 @@ void  CHECK(void)
 		BLDC.status = _OPEN;
 		BLDC.open_status = OPEN_CONF_COM;
 	}
+	#endif 
 }
 	
 void	confirm_phase(void)
