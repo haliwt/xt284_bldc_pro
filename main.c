@@ -29,14 +29,15 @@ void	main(void)
 		    BLDC_start();
                 
                 count++ ;
-				if(count < 5000)
+				if(count < 2000)
 				     OPEN();
 				else{
-				   count =6000;
+				  
                   LOOP();
                   CHECK();
-                 com_charge();
-					}
+                  com_charge();
+                     count =4000;
+				}
      
 			
 	
