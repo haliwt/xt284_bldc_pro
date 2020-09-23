@@ -19,8 +19,8 @@ uint32_t Systemclock = 24000000;
 
 int main(void)
 {		
-	static uint8_t pwflg =0,powerkey;
-	uint16_t startnum=0;
+	static uint8_t pwflg =0,powerkey,poweron=0;
+	static uint16_t startnum=0;
     LED_Init();
 	KEY_Init();
 	ACMP1_Config();
@@ -29,22 +29,33 @@ int main(void)
 
 	while(1)
 	{	
-        
+        MOS_OFF;
+		
 		powerkey =HDKey_Scan(0);
 		if(powerkey == 1){
             
            pwflg = pwflg ^ 0x01;
             if(pwflg ==1){
-                    LED1 = 1;
+                   
                     LED0 =1;
-					startnum++;
-			        if(startnum < 1000)
-					   PowerOn_MotorRun();
-					 else{
-
-						NO_HallSensor_DectorPhase();
-
-					 }
+			
+			        if(poweron==0){
+                        poweron++;
+			         for(startnum=0;startnum<3000;startnum++){
+					  
+                            ON_BLDC_INTE;
+                         Start_MotorRun();
+					        LED1 = 1;
+			           }
+                      }
+			          else {
+                        
+                       LED1 = 0;
+						//NO_HallSensor_DectorPhase();
+						No_HallSensor_Input();
+                          
+			          }
+					 
                   
             }
            else {

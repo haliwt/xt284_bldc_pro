@@ -3,7 +3,18 @@
 
 void delay_us(uint8_t n)
 {
-    while(n--);
+   do
+	{
+		_nop_();
+		_nop_();
+		_nop_();
+		_nop_();
+		_nop_();
+		_nop_();
+		_nop_();
+		_nop_();
+	}
+	while(--n);
 
 
 }

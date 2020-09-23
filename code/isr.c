@@ -2,7 +2,7 @@
 #include "cms8s6990.h"
 #include "motor.h"
 
-
+uint8_t intBEMF ;
 
 
 
@@ -160,9 +160,12 @@ void LSE_IRQHandler(void)  interrupt LSE_VECTOR
  ******************************************************************************/
 void ACMP_IRQHandler(void)  interrupt ACMP_VECTOR 
 {
+	static uint8_t intflg =0;
 	if(ACMP_GetIntFlag(ACMP1))
 	{
-		//if(SENSEN_H ==1)SENSEN_H =1;  //正端输入电压高于负端输入电压值 
+		intflg = intflg ^ 0x01;
+		if(intflg ==1)intBEMF =1;
+		else intBEMF = 0;
 
 		ACMP_ClearIntFlag(ACMP1);
 	}	

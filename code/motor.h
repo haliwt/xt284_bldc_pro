@@ -16,12 +16,26 @@
 #define     SENSE_H       P36
 
 
+#define   ON_BLDC_INTE     {PWMPIF = 0x00;PWMZIF = 0x00;PWMUIF = 0x00;PWMDIF = 0x00;EIE2 |= 0x08;} // enable PWM interrupter
+#define   OFF_BLDC_INTE    {PWMPIF = 0x00;PWMZIF = 0x00;PWMUIF = 0x00;PWMDIF = 0x00;EIE2 &=~0x08;} //disable PWM interrupter
+
+#define   ON_PWM_IN_INTE     {T2IF = 0x00;ET2 = 1;} //ET2 =timer2 总中断允许位
+#define   OFF_PWM_IN_INTE    {T2IF = 0x00;ET2 = 0;}
+
 
 extern uint8_t gPhase;
+
+extern uint8_t intBEMF;
 uint8_t NO_HallSensor_GetPinState(void);
 
 void NO_HallSensor_DectorPhase(void);
 void PowerOn_MotorRun(void);
+void Start_MotorRun(void);
+void	com_charge(void);
+void No_HallSensor_Input(void);
+
+
+
 
 
 
