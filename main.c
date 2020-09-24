@@ -32,8 +32,8 @@ void	main(void)
 				if(count < 2000)
 				     OPEN();
 				else{
-				  CHECK();//sound a little 
-                 // LOOP();
+			//	  CHECK();//sound a little 
+                  LOOP();
                   // CHECK();
                  // com_charge();
                      count =4000;
