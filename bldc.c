@@ -701,11 +701,11 @@ void EPWM_IRQHandler(void)  interrupt 18
 	BLDC.EMI_flag = C1CON1;
 	if(BLDC.EMI_flag&0x80)
 	{
-		_FG_L;
+		//_FG_L;
 	}
 	else
 	{
-		_FG_H;
+		//_FG_H;
 	}
 	check_FB();
 	

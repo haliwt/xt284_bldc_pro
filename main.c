@@ -12,10 +12,10 @@ void	main(void)
 
 
 	hardware_init();
+	KEY_Init();;
 	bldc_value_init();
 	adc_value_init();
 	pwm_value_init();
-	key_value_init();
 	check_current_offset();
 	MOS_OFF;
 	BLDC.status = 1;

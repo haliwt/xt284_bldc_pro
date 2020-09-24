@@ -32,7 +32,7 @@ void	adc_value_init(void)
 }
 
 
-static  void  delay_us(void)
+static  void  delay_adc_us(void)
 {
 	_nop_();
 	_nop_();
@@ -62,7 +62,7 @@ uint16_t	get_current_now(void)
 	ADCON0 |= 0x80;
 	ADCON1 = 0x3F|0x80;
 	ADCLDO = 0x00;//5V
-	delay_us();
+	delay_adc_us();
 	_start_ADC;
 	while(ADCON0&0x02);
 	temp4.change.count[1] = ADRESL;
@@ -83,7 +83,7 @@ void	check_current_offset(void)
 	ADCON0 |= 0x80;
 	ADCON1 = OP_current_channal|0x80;
 	ADCLDO = 0x00;//5V
-	delay_us();
+	delay_adc_us();
 	ADC.current_sum = 0;
 	for(ADC.current_count=0;ADC.current_count<16;ADC.current_count++)
 	{
@@ -109,7 +109,7 @@ void	read_current(void)
 	ADCON0 |= 0x80;
 	ADCON1 = OP_current_channal|0x80;
 	ADCLDO = 0x00;//5V
-	delay_us();
+	delay_adc_us();
 	_start_ADC;
 	while(ADCON0&0x02);
 	temp3.change.count[1] = ADRESL;
@@ -141,7 +141,7 @@ void	read_voltage(void)
 	ADCON0 &= ~0x80;
 	ADCON1 = voltage_channal|0x80;
 	ADCLDO = 0xE0;//3V
-	delay_us();
+	delay_adc_us();
 	_start_ADC;
 	while(ADCON0&0x02);
 	temp3.change.count[1] = ADRESL;
@@ -161,7 +161,7 @@ void	read_pwm_adc(void)
 	ADCON0 &= ~0x80;
 	ADCON1 = pwm_adc_channal|0x80;
 	ADCLDO = 0x00;//5V
-	delay_us();
+	delay_adc_us();
 	_start_ADC;
 	while(ADCON0&0x02);
 	temp3.change.count[1] = ADRESL;
