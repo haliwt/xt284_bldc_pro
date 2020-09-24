@@ -610,8 +610,14 @@ void	check_FB(void)
 	}
 }
 
-
-
+/********************************************************************
+	*
+	*Function Name:void BLDC_start(void)
+	*Function:
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/
 void	BLDC_start(void)
 {
 	BLDC.mode = _run;
@@ -705,7 +711,7 @@ void BLDC_main(void)
 		set_error();
 		if(BLDC.error != _no_error)
 		{
-			BLDC_stop();
+			MotorStop();
 		}
 	}
 	else  
@@ -717,6 +723,14 @@ void BLDC_main(void)
 		}
 	}
 }
+/********************************************************************
+	*
+	*Function Name:void MotorStop(void)
+	*Function:INTERRUPT
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/
 
 void EPWM_IRQHandler(void)  interrupt 18
 {
