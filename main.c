@@ -37,14 +37,13 @@ void	main(void)
                    LED1=1;
                    
                   count++ ;
-				if(count < 2000)
-				     OPEN();
+				if(count < 2000){
+				     StartMotorRun();
+                     Test();//sound a little 
+                }
 				else{
-			        //	  CHECK();//sound a little 
-                    LOOP();
-                  // CHECK();
-                 // com_charge();
-                     count =4000;
+                    MotorRun();
+                    count =4000;
 				}
      
 			 
@@ -52,7 +51,19 @@ void	main(void)
                else{
                 LED0=0;
                 LED1=0;
-                MOS_OFF;
+              
+                MotorStop();
+                   hardware_init();
+                    KEY_Init();
+                    LED_Init();
+                    bldc_value_init();
+                    adc_value_init();
+                    pwm_value_init();
+                    check_current_offset();
+                    MOS_OFF;
+                    BLDC.status = 1;
+                    BLDC.error = _pwm_limit_error; 
+                    BLDC.pwm_set = 1000;
                
                }
            }

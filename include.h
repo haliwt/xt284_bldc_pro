@@ -22,8 +22,8 @@
 #define		MOS_BREAK		{PWMMASKE = 0x3F;}//PWMFBKC = 0x10;}
 #define		MOS_OFF			{PWMMASKE = 0x3f;}//PWMFBKC = 0x00;}
 
-#define   _FG_H              P3_6=0 //P2_4 = 0;
-#define   _FG_L              P3_6= 1// P2_4 = 1;
+#define   _FG_H              P36=0 //P2_4 = 0;
+#define   _FG_L              P36= 1// P2_4 = 1;
 
 
 #define   hall_1	 5

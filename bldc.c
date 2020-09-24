@@ -166,8 +166,15 @@ void  out_pwm(unsigned int    in)
 	}
 }
 
-
-void	LOOP(void)
+/********************************************************************
+	*
+	*Function Name:void MotoRun(void)
+	*Function:
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/
+void MotorRun(void)
 {
 	unsigned char i;
 	for(i=0;i<8;i++)
@@ -326,15 +333,15 @@ void	LOOP(void)
 }
 /*************************************************************
 	*
-	*Function Name() : void CHECK(void)
+	*Function Name() : void Test(void)
 	*Function : check reserves voltage BEMF
 	*Input Ref: NO
 	*Return: Ref : NO
 	*
 *************************************************************/
-void  CHECK(void)
+void  Test(void)
 {
-//	if(++BLDC.check_over_time<5000)
+	if(++BLDC.check_over_time<5000)
 	{
 		BLDC.duzhuan_time = 0;
 		BLDC.EMF_now = 0;
@@ -487,7 +494,15 @@ void	confirm_phase(void)
 	}
 }
 
-void  OPEN(void)
+/********************************************************************
+	*
+	*Function Name:void MotorStop(void)
+	*Function:
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/				
+void  StartMotorRun(void)
 {
        switch(BLDC.motor_step)
 				{
@@ -583,11 +598,11 @@ void	check_FB(void)
 	{
 		case   _STOP:
 			break;
-		case  _CHECK:CHECK();
+		case  _CHECK:Test(); //CHECK();
 			break;
-		case  _OPEN:OPEN();
+		case  _OPEN:StartMotorRun();//OPEN();
 			break;
-		case  _LOOP:LOOP();
+		case  _LOOP:MotorRun();//LOOP();
 			break;
 		case  _BREAK:BREAK();
 			break;
@@ -595,8 +610,14 @@ void	check_FB(void)
 	}
 }
 
-
-
+/********************************************************************
+	*
+	*Function Name:void BLDC_start(void)
+	*Function:
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/
 void	BLDC_start(void)
 {
 	BLDC.mode = _run;
@@ -604,8 +625,15 @@ void	BLDC_start(void)
 	BLDC.status = _CHECK;
 	ON_BLDC_INTE;
 }
-
-void	BLDC_stop(void)
+/********************************************************************
+	*
+	*Function Name:void MotorStop(void)
+	*Function:
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/
+void	 MotorStop(void)
 {
 	BLDC.mode = _stop;
 	MOS_OFF;
@@ -683,7 +711,7 @@ void BLDC_main(void)
 		set_error();
 		if(BLDC.error != _no_error)
 		{
-			BLDC_stop();
+			MotorStop();
 		}
 	}
 	else  
@@ -695,17 +723,25 @@ void BLDC_main(void)
 		}
 	}
 }
+/********************************************************************
+	*
+	*Function Name:void MotorStop(void)
+	*Function:INTERRUPT
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/
 
 void EPWM_IRQHandler(void)  interrupt 18
 {
 	BLDC.EMI_flag = C1CON1;
 	if(BLDC.EMI_flag&0x80)
 	{
-		//_FG_L;
+		_FG_L;
 	}
 	else
 	{
-		//_FG_H;
+		_FG_H;
 	}
 	check_FB();
 	

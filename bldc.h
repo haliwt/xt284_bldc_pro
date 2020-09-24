@@ -8,14 +8,17 @@ void	BLDC_main(void);
 void  blcd_start(void);
 void BLDC_start(void);
 
-void  blcd_stop(void);
+void  MotorStop(void);
 void  out_pwm(unsigned int  in);
 unsigned int  soft_pwm(unsigned int in,unsigned int out);	
 void  check_FB(void);
-void  OPEN(void);
+void  StartMotorRun(void);
+
 void	confirm_phase(void);
-void  CHECK(void);
-void	LOOP(void);
+void  Test(void);
+
+
+void  MotorRun(void);
 void com_charge(void);
 
 
