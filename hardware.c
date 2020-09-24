@@ -70,8 +70,9 @@ void	gpio_init(void)
 	P23CFG = 0x00;//
 	P24CFG = 0x00;//
 	P25CFG = 0x00;//
-	P26CFG = 0x01;//Vin
-	
+	//P26CFG = 0x01;//Vin
+	P26CFG = 0x00;//Vin
+    
 	P30CFG = 0x01;//OP_OUT
 	P31CFG = 0x01;//OP_N
 	P32CFG = 0x01;//OP_P
