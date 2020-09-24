@@ -38,10 +38,10 @@ void	main(void)
                    
                   count++ ;
 				if(count < 2000)
-				     OPEN();
+				     StartMotorRun();
 				else{
 			        //	  CHECK();//sound a little 
-                    LOOP();
+                    MotorRun();
                   // CHECK();
                  // com_charge();
                      count =4000;
@@ -52,7 +52,8 @@ void	main(void)
                else{
                 LED0=0;
                 LED1=0;
-                MOS_OFF;
+              
+                MotorStop();
                
                }
            }

@@ -166,8 +166,15 @@ void  out_pwm(unsigned int    in)
 	}
 }
 
-
-void	LOOP(void)
+/********************************************************************
+	*
+	*Function Name:void MotoRun(void)
+	*Function:
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/
+void MotorRun(void)
 {
 	unsigned char i;
 	for(i=0;i<8;i++)
@@ -487,7 +494,15 @@ void	confirm_phase(void)
 	}
 }
 
-void  OPEN(void)
+/********************************************************************
+	*
+	*Function Name:void MotorStop(void)
+	*Function:
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/				
+void  StartMotorRun(void)
 {
        switch(BLDC.motor_step)
 				{
@@ -604,8 +619,15 @@ void	BLDC_start(void)
 	BLDC.status = _CHECK;
 	ON_BLDC_INTE;
 }
-
-void	BLDC_stop(void)
+/********************************************************************
+	*
+	*Function Name:void MotorStop(void)
+	*Function:
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/
+void	 MotorStop(void)
 {
 	BLDC.mode = _stop;
 	MOS_OFF;
@@ -701,11 +723,11 @@ void EPWM_IRQHandler(void)  interrupt 18
 	BLDC.EMI_flag = C1CON1;
 	if(BLDC.EMI_flag&0x80)
 	{
-		//_FG_L;
+		_FG_L;
 	}
 	else
 	{
-		//_FG_H;
+		_FG_H;
 	}
 	check_FB();
 	
