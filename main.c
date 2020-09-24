@@ -39,7 +39,7 @@ void	main(void)
                   count++ ;
 				if(count < 2000){
 				     StartMotorRun();
-                     Test();//sound a little 
+                     StartTest();//sound a little 
                 }
 				else{
                     MotorRun();

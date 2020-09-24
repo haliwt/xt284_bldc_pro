@@ -333,13 +333,13 @@ void MotorRun(void)
 }
 /*************************************************************
 	*
-	*Function Name() : void Test(void)
+	*Function Name() : void StartTest(void)
 	*Function : check reserves voltage BEMF
 	*Input Ref: NO
 	*Return: Ref : NO
 	*
 *************************************************************/
-void  Test(void)
+void  StartTest(void)
 {
 	if(++BLDC.check_over_time<5000)
 	{
@@ -598,7 +598,7 @@ void	check_FB(void)
 	{
 		case   _STOP:
 			break;
-		case  _CHECK:Test(); //CHECK();
+		case  _CHECK:StartTest(); //CHECK();
 			break;
 		case  _OPEN:StartMotorRun();//OPEN();
 			break;
@@ -734,7 +734,20 @@ void BLDC_main(void)
 
 void EPWM_IRQHandler(void)  interrupt 18
 {
-	BLDC.EMI_flag = C1CON1;
+    static uint8_t temp;
+	temp = C1CON1;
+	if(temp & 0x80 == 0){
+	    delay_us(20);
+		if(temp & 0x80 == 0)
+			BLDC.EMI_flag = C1CON1;
+    }
+
+	if(temp & 0x80 == 1){
+	    delay_us(20);
+		if(temp & 0x80 == 1)
+			BLDC.EMI_flag = C1CON1;
+    }
+	
 	if(BLDC.EMI_flag&0x80)
 	{
 		_FG_L;

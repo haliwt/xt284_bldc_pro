@@ -15,7 +15,7 @@ void  check_FB(void);
 void  StartMotorRun(void);
 
 void	confirm_phase(void);
-void  Test(void);
+void  StartTest(void);
 
 
 void  MotorRun(void);

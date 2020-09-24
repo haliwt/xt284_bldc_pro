@@ -48,6 +48,10 @@ void KEY_Init(void)
 	GPIO_ENABLE_INPUT(P2TRIS, GPIO_PIN_4);			//设置为输入模式
 	GPIO_ENABLE_RD(P2RD, GPIO_PIN_4);	//开启下拉
 
+
+	
+	
+
 	#if 0
 	/*
 	(2)设置中断方式
