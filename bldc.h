@@ -16,7 +16,7 @@ void  check_FB(void);
 void  StartMotorRun(void);
 
 void	confirm_phase(void);
-void  CHECK(void);
+void  Test(void);
 
 void  MotorRun(void);
 void com_charge(void);

@@ -127,7 +127,14 @@ unsigned int  soft_pwm(unsigned int in,unsigned int out)
 	}
 	return  out;
 }
-
+/***********************************************************************************
+	*
+	*Function Name: void out_pwm(uint8_t n)
+	*Function :
+	*
+	*
+	*
+***********************************************************************************/
 void  out_pwm(unsigned int    in)
 {
 	if(in>_pwm_max){in = _pwm_max;}
@@ -137,7 +144,7 @@ void  out_pwm(unsigned int    in)
 	if(in<350)
 	{
 		PWMPIE = 0x00;  //周期中断
-		PWMZIE = 0x01;  //零点中断
+		PWMZIE = 0x01;  //零点中断--通道 2 --使能
 		PWMUIE = 0x00;  //向上比较中断
 		PWMDIE = 0x00;  //向下比较中断
 		PWMPIF = 0x00;  //中断标志
@@ -147,7 +154,7 @@ void  out_pwm(unsigned int    in)
 	}
 	else if(in>450)
 	{
-		PWMPIE = 0x01;  //周期中断
+		PWMPIE = 0x01;  //周期中断---1 -中断使能
 		PWMZIE = 0x00;  //零点中断
 		PWMUIE = 0x00;  //向上比较中断
 		PWMDIE = 0x00;  //向下比较中断
@@ -156,7 +163,7 @@ void  out_pwm(unsigned int    in)
 		PWMUIF = 0x00;
 		PWMDIF = 0x00;
 	}
-	if(BLDC.loop_status != _DEGAUSS)
+	if(BLDC.loop_status != _DEGAUSS) //_DEGAUSS = 5 消磁
 	{
 		PWMD1L   = pwm_now.change.count[1];
 		PWMD1H   = pwm_now.change.count[0];
@@ -169,7 +176,7 @@ void  out_pwm(unsigned int    in)
 /********************************************************************
 	*
 	*Function Name:void MotoRun(void)
-	*Function:
+	*Function:Motor normal run for works
 	*Inputr Ref:NO
 	*Return Ref:NO
 	*
@@ -333,13 +340,13 @@ void MotorRun(void)
 }
 /*************************************************************
 	*
-	*Function Name() : void CHECK(void)
+	*Function Name() : void Test(void)
 	*Function : check reserves voltage BEMF
 	*Input Ref: NO
 	*Return: Ref : NO
 	*
 *************************************************************/
-void  CHECK(void)
+void  Test(void)
 {
 	if(++BLDC.check_over_time<5000)
 	{
@@ -598,11 +605,11 @@ void	check_FB(void)
 	{
 		case   _STOP:
 			break;
-		case  _CHECK:CHECK();
+		case  _CHECK:Test();
 			break;
-		case  _OPEN: StartMotorRun();//OPEN();
+		case  _OPEN: StartMotorRun();
 			break;
-		case  _LOOP:MotorRun();//LOOP();
+		case  _LOOP:MotorRun();
 			break;
 		case  _BREAK:BREAK();
 			break;
@@ -639,7 +646,7 @@ void MotorStop(void)
 	MOS_OFF;
 	BLDC.pwm_out = 0;
 	out_pwm(BLDC.pwm_out);
-	BLDC.status = _STOP;
+	BLDC.status = _STOP; //_STOP =0 
 	OFF_BLDC_INTE;
 	BLDC.reset_time = 0;
 }
@@ -703,7 +710,7 @@ void BLDC_main(void)
 {
 	if(BLDC.mode)
 	{
-		if(BLDC.status != _LOOP)
+		if(BLDC.status != _LOOP) //_lOOP =3
 		{
 			if(BLDC.pwm_out>_start_max_pwm)
 			{
@@ -741,7 +748,8 @@ void BLDC_main(void)
 
 void EPWM_IRQHandler(void)  interrupt 18
 {
-	BLDC.EMI_flag = C1CON1;
+	//C1CON2 =0X13;
+    BLDC.EMI_flag = C1CON1;
 	if(BLDC.EMI_flag&0x80)
 	{
 		_FG_L;

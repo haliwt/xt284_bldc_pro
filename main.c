@@ -38,10 +38,10 @@ void	main(void)
                     count++ ;
                     if(count < 2000){
                       StartMotorRun();
-                      CHECK();
+                      Test();
                     }
                     else{
-                        confirm_phase();
+                       // confirm_phase();
                         MotorRun();
                         count =4000;
                     }
@@ -53,7 +53,7 @@ void	main(void)
                     MotorStop();
                    #if 1
                   // PreMotor_Condition();
-                   hardware_init();
+                     hardware_init();
                     KEY_Init();
                     LED_Init();
                     bldc_value_init();
