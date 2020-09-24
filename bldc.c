@@ -341,7 +341,7 @@ void MotorRun(void)
 *************************************************************/
 void  CHECK(void)
 {
-//	if(++BLDC.check_over_time<5000)
+	if(++BLDC.check_over_time<5000)
 	{
 		BLDC.duzhuan_time = 0;
 		BLDC.EMF_now = 0;
@@ -600,9 +600,9 @@ void	check_FB(void)
 			break;
 		case  _CHECK:CHECK();
 			break;
-		case  _OPEN:OPEN();
+		case  _OPEN: StartMotorRun();//OPEN();
 			break;
-		case  _LOOP:LOOP();
+		case  _LOOP:MotorRun();//LOOP();
 			break;
 		case  _BREAK:BREAK();
 			break;
@@ -612,15 +612,15 @@ void	check_FB(void)
 
 /********************************************************************
 	*
-	*Function Name:void BLDC_start(void)
+	*Function Name:PreMotor_Condition();
 	*Function:
 	*Inputr Ref:NO
 	*Return Ref:NO
 	*
 *********************************************************************/
-void	BLDC_start(void)
+void  PreMotor_Condition()
 {
-	BLDC.mode = _run;
+    BLDC.mode = _run;
 	bldc_value_init();
 	BLDC.status = _CHECK;
 	ON_BLDC_INTE;
@@ -633,7 +633,7 @@ void	BLDC_start(void)
 	*Return Ref:NO
 	*
 *********************************************************************/
-void	 MotorStop(void)
+void MotorStop(void)
 {
 	BLDC.mode = _stop;
 	MOS_OFF;
@@ -643,7 +643,14 @@ void	 MotorStop(void)
 	OFF_BLDC_INTE;
 	BLDC.reset_time = 0;
 }
-
+/********************************************************************
+	*
+	*Function Name:
+	*Function:
+	*Inputr Ref:NO
+	*Return Ref:NO
+	*
+*********************************************************************/
 void	set_error(void)
 {
 	if(++BLDC.duzhuan_time>_en_duzhuan_time)
@@ -719,7 +726,7 @@ void BLDC_main(void)
 		reset_error();
 		if(BLDC.error == _no_error)
 		{
-			BLDC_start();
+			PreMotor_Condition();
 		}
 	}
 }

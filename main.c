@@ -26,35 +26,47 @@ void	main(void)
 	
 	while(1)
 	{
-         
-		    BLDC_start();
-        
-           pflg =  HDKey_Scan(0);
-           if(pflg==1){
+      
+		PreMotor_Condition();
+		pflg =  HDKey_Scan(0);
+          if(pflg==1){
                poweronflg = poweronflg ^0x01;
                if(poweronflg ==1){
                  LED0=1;
-                   LED1=1;
-                   
-                  count++ ;
-				if(count < 2000)
-				     StartMotorRun();
-				else{
-			        //	  CHECK();//sound a little 
-                    MotorRun();
-                  // CHECK();
-                 // com_charge();
-                     count =4000;
-				}
-     
-			 
+                 LED1=1;
+                
+                    count++ ;
+                    if(count < 2000){
+                      StartMotorRun();
+                      CHECK();
+                    }
+                    else{
+                        confirm_phase();
+                        MotorRun();
+                        count =4000;
+                    }
                }
                else{
-                LED0=0;
-                LED1=0;
-              
-                MotorStop();
-               
+                    LED0=0;
+                    LED1=0;
+                    count =0;
+                    MotorStop();
+                   #if 1
+                  // PreMotor_Condition();
+                   hardware_init();
+                    KEY_Init();
+                    LED_Init();
+                    bldc_value_init();
+                    adc_value_init();
+                    pwm_value_init();
+                  
+                    check_current_offset();
+                    MOS_OFF;
+                    BLDC.status = 1;
+                    BLDC.error = _pwm_limit_error; 
+                    BLDC.pwm_set = 1000;
+                   #endif 
+                   
                }
            }
               

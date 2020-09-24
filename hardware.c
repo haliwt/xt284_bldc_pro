@@ -29,7 +29,7 @@ void	gpio_init(void)
 	P1DS   = 0x00;  //输入模式
 	P1     = 0x00;  //输出
 	
-	P2TRIS = 0x1C;  //方向
+	P2TRIS = 0x18;  //方向 0B0001 1000 0X1C
 	P2OD   = 0x0C;  //开漏
 	P2RD   = 0x00;  //下拉
 	P2UP   = 0x00;  //上拉

@@ -6,7 +6,8 @@
 void	bldc_value_init(void);
 void	BLDC_main(void);
 void  blcd_start(void);
-void BLDC_start(void);
+
+void PreMotor_Condition(void);
 
 void  MotorStop(void);
 void  out_pwm(unsigned int  in);

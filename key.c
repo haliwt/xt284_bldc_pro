@@ -4,7 +4,7 @@
 /******************************************************************************
  **
  ** Function Name:	void delay_10us(uint16_t n) 
- ** Function : 延时10*n微秒 
+ ** Function : delay 1ms
  ** Input Ref:NO
  ** Return Ref:NO
  **   
