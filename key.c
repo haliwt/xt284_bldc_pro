@@ -1,23 +1,5 @@
-#include "key.h"
-
-
-void delay_us(uint8_t n)
-{
-   do
-	{
-		_nop_();
-		_nop_();
-		_nop_();
-		_nop_();
-		_nop_();
-		_nop_();
-		_nop_();
-		_nop_();
-	}
-	while(--n);
-
-
-}
+#include<include.h>
+#include "my_type.h"
 
 /******************************************************************************
  **
@@ -106,7 +88,5 @@ uint8_t HDKey_Scan(uint8_t mode)
 		}else if(POWER_KEY==0)key_up=1;
 		return 0;	//娌℃湁鎸夐敭鎸変笅
 }
-
-
 
 

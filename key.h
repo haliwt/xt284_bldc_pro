@@ -1,6 +1,9 @@
-#ifndef __KEY_H__
-#define __KEY_H__
+#ifndef _KEY_H_
+#define _KEY_H_
 #include "cms8s6990.h"
+
+
+
 
 #define POWER_KEY  P24
 
@@ -15,4 +18,6 @@ void delay_us(uint8_t n);
 uint8_t HDKey_Scan(uint8_t mode);
 
 
-#endif 
+#endif
+
+
