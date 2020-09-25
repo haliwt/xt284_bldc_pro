@@ -71,7 +71,7 @@ void	bldc_value_init(void)
 	BLDC.EMI_NG_count = 0;
 	BLDC.turn_OK_count = 0;
 	
-	BLDC.duzhuan_time = 0;
+	BLDC.stem_time= 0;
 	
 	BLDC.open_period = _open_max_time;
 	BLDC.check_over_time = 0;
@@ -80,7 +80,7 @@ void	bldc_value_init(void)
 	BLDC.zero_period.all = 0xffff;
 	
 	BLDC.read_EMF = 0;    
-	BLDC.EMF_now = 0;   
+	BLDC.BEMF_Number = 0;   
 	BLDC.EMF_last = 0;
 	
 	BLDC.output_time.all = 0xffff;
@@ -214,7 +214,7 @@ void MotorRun(void)
 					BLDC.zero_check_time.all = BLDC.output_time.all >>1;
 					BLDC.zero_check_time.all -= _DEGAUSS_TIME;
 				  BLDC.zero_check_time.all -= (BLDC.zero_check_time.all>>3);
-					BLDC.duzhuan_time = 0;
+					BLDC.stem_time= 0;
 					TL1 = ~BLDC.output_time.one.l;					
 					TH1 = ~BLDC.output_time.one.h; 
 					TF1 = 0;
@@ -343,20 +343,20 @@ void  StartTest(void)
 {
 	if(++BLDC.check_over_time<5000)
 	{
-		BLDC.duzhuan_time = 0;
-		BLDC.EMF_now = 0;
+		BLDC.stem_time= 0;
+		BLDC.BEMF_Number = 0;
 		C1CON2 = 0x00; //比较控制寄存器2 --
 		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
 		delay_us(20);
-		if(C1CON1&0x80){BLDC.EMF_now |= 0x01;} //U --BEMF
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x01;} //U --BEMF
 		C1CON0 = 0x81;
 		delay_us(20);
-		if(C1CON1&0x80){BLDC.EMF_now |= 0x02;} //V ---BEMF
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x02;} //V ---BEMF
 		C1CON0 = 0x82;
 		delay_us(20);
-		if(C1CON1&0x80){BLDC.EMF_now |= 0x04;}//W  ---BEMF 
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x04;}//W  ---BEMF 
 
-		switch(BLDC.EMF_now)
+		switch(BLDC.BEMF_Number)
 		{
 
 
@@ -383,20 +383,20 @@ void  StartTest(void)
 void  NormalMotorRun(void)
 {
 	
-		BLDC.duzhuan_time = 0;
-		BLDC.EMF_now = 0;
+		BLDC.stem_time= 0;
+		BLDC.BEMF_Number = 0;
 		C1CON2 = 0x00; //比较控制寄存器2 --
 		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
 		delay_us(20);
-		if(C1CON1&0x80){BLDC.EMF_now |= 0x01;} //U --BEMF
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x01;} //U --BEMF
 		C1CON0 = 0x81;
 		delay_us(20);
-		if(C1CON1&0x80){BLDC.EMF_now |= 0x02;} //V ---BEMF
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x02;} //V ---BEMF
 		C1CON0 = 0x82;
 		delay_us(20);
-		if(C1CON1&0x80){BLDC.EMF_now |= 0x04;}//W  ---BEMF 
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x04;}//W  ---BEMF 
 
-		switch(BLDC.EMF_now) //模拟有霍尔6步换向
+		switch(BLDC.BEMF_Number) //模拟有霍尔6步换向
 		{
 
 
@@ -622,7 +622,7 @@ void	BREAK(void)
 		BLDC.check_over_time--;
 		out_pwm(_break_pwm);
 		MOS_BREAK;
-		BLDC.duzhuan_time = 0;
+		BLDC.stem_time= 0;
 	}
 	else
 	{
@@ -687,10 +687,10 @@ void	 MotorStop(void)
 
 void	set_error(void)
 {
-	if(++BLDC.duzhuan_time>_en_duzhuan_time)
+	if(++BLDC.stem_time>_en_duzhuan_time)
 	{
 		BLDC.error  |= _duzhuan_error;
-		BLDC.duzhuan_time = 0;
+		BLDC.stem_time= 0;
 	}
 	if(BLDC.pwm_set<(_pwm_min_set))
 	{

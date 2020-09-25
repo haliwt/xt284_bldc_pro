@@ -138,7 +138,7 @@ typedef  struct
 	uint8_t    EMI_NG_count;
 	uint8_t    turn_OK_count;
 	
-	uint16_t   duzhuan_time;
+	uint16_t   stem_time;
 	
 	uint16_t   open_period;
 	uint16_t   check_over_time;
@@ -147,7 +147,7 @@ typedef  struct
 	union data32  zero_period;
 	
 	uint8_t    read_EMF;    
-	uint8_t    EMF_now;   
+	uint8_t    BEMF_Number;   
 	uint8_t    EMF_last;
 	
 	union data16   output_time;
