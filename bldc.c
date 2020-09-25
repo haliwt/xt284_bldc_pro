@@ -372,6 +372,47 @@ void  StartTest(void)
 
 	
 }
+/*************************************************************
+	*
+	*Function Name() : NormalMotorRun(void)
+	*Function : motor normal works
+	*Input Ref: NO
+	*Return: Ref : NO
+	*
+*************************************************************/
+void  NormalMotorRun(void)
+{
+	
+		BLDC.duzhuan_time = 0;
+		BLDC.EMF_now = 0;
+		C1CON2 = 0x00; //比较控制寄存器2 --
+		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.EMF_now |= 0x01;} //U --BEMF
+		C1CON0 = 0x81;
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.EMF_now |= 0x02;} //V ---BEMF
+		C1CON0 = 0x82;
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.EMF_now |= 0x04;}//W  ---BEMF 
+
+		switch(BLDC.EMF_now) //模拟有霍尔6步换向
+		{
+
+
+					case 0x06:{MOS_U_V;break;}  //A+ B- '6'
+					case 0x04:{MOS_W_V;break;}    //C+ B-  "4"
+					case 0x05:{MOS_W_U;break;}   //C+ A- "5"
+					case 0x01:{MOS_V_U;break;}     //B+ A-   "1"
+					case 0X03:{MOS_V_W;break;}       //B+ C - "3"
+					case 0X02:{MOS_U_W;break;}        // A+ C-  "2"
+				//	default :{MOS_OFF;break;}
+		}
+	
+
+	
+}
+
 	
 void	confirm_phase(void)
 {
@@ -734,21 +775,10 @@ void BLDC_main(void)
 
 void EPWM_IRQHandler(void)  interrupt 18
 {
-    static uint8_t temp;
-	temp = C1CON1;
-	if(temp & 0x80 == 0){
-	    delay_us(20);
-		if(temp & 0x80 == 0)
-			BLDC.EMI_flag = C1CON1;
-    }
+   
 
-	if(temp & 0x80 == 1){
-	    delay_us(20);
-		if(temp & 0x80 == 1)
-			BLDC.EMI_flag = C1CON1;
-    }
-	
-	if(BLDC.EMI_flag&0x80)
+	BLDC.EMI_flag = C1CON1;
+   if(BLDC.EMI_flag&0x80)
 	{
 		_FG_L;
 	}

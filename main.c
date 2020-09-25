@@ -21,9 +21,9 @@ void	main(void)
 	MOS_OFF;
 	BLDC.status = 1;
 	BLDC.error = _pwm_limit_error; 
-	BLDC.pwm_set = 1000;
+	//BLDC.pwm_set = 1000;
 
-	
+	BLDC.pwm_set = 5000;
 	while(1)
 	{
          
@@ -38,11 +38,13 @@ void	main(void)
                    
                   count++ ;
 				if(count < 2000){
-				     StartMotorRun();
+				  //   StartMotorRun();
                      StartTest();//sound a little 
+                     StartMotorRun();
                 }
 				else{
-                    MotorRun();
+                    //MotorRun();
+                    NormalMotorRun();
                     count =4000;
 				}
      

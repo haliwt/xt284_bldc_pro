@@ -21,6 +21,7 @@ void  StartTest(void);
 void  MotorRun(void);
 void com_charge(void);
 
+void NormalMotorRun(void);
 
 
 
