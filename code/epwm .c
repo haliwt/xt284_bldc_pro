@@ -10,7 +10,9 @@
 void EPWM_Config(void)
 {
 	//设置EPWM运行模式
-	EPWM_ConfigRunMode(EPWM_WFG_COMPLEMENTARY|EPWM_OC_INDEPENDENT|EPWM_OCU_SYMMETRIC|EPWM_COUNT_UP_DOWN); //互补模式+输出独立模式+对称计数模式+上下计数(中心对齐)模式
+	//EPWM_ConfigRunMode(EPWM_WFG_COMPLEMENTARY|EPWM_OC_INDEPENDENT|EPWM_OCU_SYMMETRIC|EPWM_COUNT_UP_DOWN); //互补模式+输出独立模式+对称计数模式+上下计数(中心对齐)模式
+    PWMCON = 0x02;
+	PWMOE  = 0x3F;
 	//设置EPWM运行时钟	
 	EPWM_ConfigChannelClk(EPWM0, EPWM_CLK_DIV_1);		
 	EPWM_ConfigChannelClk(EPWM2, EPWM_CLK_DIV_1);
@@ -38,7 +40,7 @@ void EPWM_Config(void)
 	#endif
 
 	//设置EPWM的加载方式为自动加载
-	EPWM_EnableAutoLoadMode(EPWM_CH_4_MSK|EPWM_CH_2_MSK|EPWM_CH_0_MSK);
+	EPWM_EnableAutoLoadMode(EPWM_CH_0_MSK|EPWM_CH_1_MSK|EPWM_CH_2_MSK|EPWM_CH_3_MSK|EPWM_CH_4_MSK|EPWM_CH_5_MSK);
 	//设置EPWM的输出极性
 	EPWM_DisableReverseOutput(EPWM_CH_0_MSK|EPWM_CH_1_MSK|EPWM_CH_2_MSK|EPWM_CH_3_MSK|EPWM_CH_4_MSK|EPWM_CH_5_MSK); //关闭反向输出
 	//设置EPWM输出

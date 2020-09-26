@@ -141,18 +141,18 @@ void NO_HallSensor_DectorPhase(void)
 
         case 0:  
               MOS_A_L	; // A+ C- "2"
-             // PWMOE = 0x02;
+              PWMOE = 0x02;
              if(intBEMF){  // BEMF "B"
 				
 					MOS_C_H;   //下半周
-					//PWMOE = 0x12;
+					PWMOE = 0x12;
 			        C1CON0 = 0x82;
-		          //  delay_us(20);
+		       
 					gPhase++;
 			  }
 			  else{
 				  MOS_B_H;
-                 // PWMOE = 0x06;
+                  PWMOE = 0x06;
 			  }
 			 
 			  
@@ -161,19 +161,19 @@ void NO_HallSensor_DectorPhase(void)
 
 		case 1:
 				 MOS_B_H; //A+ ,B- '6'
-               //  PWMOE = 0x04;
+                 PWMOE = 0x04;
 				if(!intBEMF){ //BEMF "C"
 				    MOS_A_L; //A+ 
-                 //   PWMOE = 0x06;
+                    PWMOE = 0x06;
 				    C1CON0 = 0x80;
-		        //   delay_us(20);
+		       
 				    gPhase ++;
 
 
 				}
 				else{
                       MOS_C_L;  //C+ ;
-                   //   PWMOE = 0X24;
+                      PWMOE = 0X24;
 
 				}
         break;
@@ -181,19 +181,19 @@ void NO_HallSensor_DectorPhase(void)
 		case 2:
 				
 				 MOS_C_L	; //C+,B- '4'
-               //  PWMOE = 0X20;
+                 PWMOE = 0X20;
 			    if(intBEMF){  //BEMF "A"
 
 				   MOS_B_H; //B-
-                 //   PWMOE = 0X24;
+                    PWMOE = 0X24;
 		           C1CON0 = 0x81;
-		         //   delay_us(20);
+		        
 				    gPhase ++;
 
 				}
 				else {
                     MOS_A_H ; //A-
-                  //  PWMOE =0X21;
+                    PWMOE =0X21;
 				}
 
 		break;
@@ -201,17 +201,17 @@ void NO_HallSensor_DectorPhase(void)
 		case 3:
 				
 				   MOS_A_H	; //C+ A- "5"
-                  // PWMOE = 0X01;
+                   PWMOE = 0X01;
 			   if(!intBEMF){
                     MOS_C_L;  //C+ ;
-                //   PWMOE= 0X21;
+                   PWMOE= 0X21;
                     C1CON0 = 0x21;
-		          //  delay_us(20);
+		         
 					gPhase ++ ;
                 }
 				else{
                     MOS_B_L ; //B+
-                   // PWMOE= 0X09;
+                    PWMOE= 0X09;
                 }
 				
 				
@@ -220,17 +220,17 @@ void NO_HallSensor_DectorPhase(void)
 
 		case 4:
 			     MOS_B_L	;//B+ A- "1"
-               //  PWMOE = 0X08;
+                 PWMOE = 0X08;
 			    if(intBEMF){
                     MOS_A_H; //A-
                     C1CON0 = 0x09;
-		         //  delay_us(20);
+		          
                     gPhase ++ ;
 
 				}
 				else {
                     MOS_C_H ; //C-
-                   // PWMOE = 0X18;
+                    PWMOE = 0X18;
                 }
 				
 
@@ -239,19 +239,19 @@ void NO_HallSensor_DectorPhase(void)
 		case 5: 
 				
 				    MOS_C_H	; //B+,C- "3"
-                 //   PWMOE = 0X10;
+                    PWMOE = 0X10;
                     if(!intBEMF){
 
 				      MOS_B_L; //B+ ;
-                     // PWMOE = 0X18;
+                      PWMOE = 0X18;
 				      C1CON0 = 0x81;
-		            //  delay_us(20);
+		              delay_us(20);
 					  gPhase =0;
 
 				    }
 					else{
                         MOS_A_L; // A+ ;
-                       // PWMOE =0X12;
+                        PWMOE =0X12;
                     }
 
 					
@@ -286,7 +286,7 @@ void PowerOn_MotorRun(void)
        case 0:
 			     
 	          MOS_W_U	;//C+ A -  '5'  //MOS_U_W	;//A+ C- "2"
-              delay_us(500);
+              delay_us(20);
 	          C1CON2 = 0x00; //比较控制寄存器2 --
 			  C1CON0 = 0x81; //SENSE_B("V") --输入V 
 			  gPhase=1;
@@ -299,7 +299,7 @@ void PowerOn_MotorRun(void)
         case 5:
 			     
 	           MOS_W_U	;//C+ A -  '5'  //MOS_U_W	;//A+ C- "2"
-              delay_us(500);
+              delay_us(40);
 	          C1CON2 = 0x00; //比较控制寄存器2 --
 			  C1CON0 = 0x81; //SENSE_B("V") --输入V 
 			  gPhase=1;
@@ -309,7 +309,7 @@ void PowerOn_MotorRun(void)
 
 		case 1:
 			    MOS_V_U	; //B+ A-  '1'//MOS_U_V	;  //A+ B-  "6"
-               delay_us(500);
+               delay_us(40);
 			   C1CON2 = 0x00; //比较控制寄存器2 --
                C1CON0 = 0x82; //BEMF "C" W 输入
                  gPhase =3;
@@ -317,7 +317,7 @@ void PowerOn_MotorRun(void)
 
 		case 3: 
 			   MOS_V_W;//B+ C-   "3"//MOS_W_V	;//C+ B-  "4"
-              delay_us(500);
+              delay_us(40);
 			  C1CON2 = 0x00; //比较控制寄存器2 --
 		      C1CON0 = 0x80; //BEMF "A" U
 		      gPhase =2 ;
@@ -326,7 +326,7 @@ void PowerOn_MotorRun(void)
 
 		case 2:
 			  MOS_U_W	;//A+ C- "2"//MOS_W_U	;//C+ A -  '5'
-              delay_us(500);
+             delay_us(40);
 			  C1CON2 = 0x00; //比较控制寄存器2 --
 		      C1CON0 = 0x81; //BEMF "B" V
 		      gPhase =6 ;
@@ -335,7 +335,7 @@ void PowerOn_MotorRun(void)
 
 		case 6:
 			 MOS_U_V	;  //A+ B-  "6"//MOS_V_U	; //B+ A-  '1'
-             delay_us(500);
+           delay_us(40);
 			 C1CON2 = 0x00; //比较控制寄存器2 --
 			 C1CON0 = 0x82; //BEMF "C" W
 			 gPhase =4 ;
@@ -345,7 +345,7 @@ void PowerOn_MotorRun(void)
 
 		case 4:
 			    MOS_W_V	;//C+ B-  "4"// MOS_V_W;//B+ C-   "3"
-			    delay_us(500);
+			   delay_us(40);
 				C1CON2 = 0x00; //比较控制寄存器2 --
 				C1CON0 = 0x80; //BEMF "A" U
 				gPhase =0;

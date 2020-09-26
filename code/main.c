@@ -33,7 +33,7 @@ int main(void)
 
 	while(1)
 	{	
-       // MOS_OFF;
+        MOS_OFF;
 
 
 		
@@ -45,34 +45,18 @@ int main(void)
                    
                     LED0 =1;
 			
-			        if(poweron==0){
-                        poweron++;
-			           
-					  
-                         ON_BLDC_INTE;
-                         
-                        for(startnum=0;startnum <5000;startnum++){
-                            Start_MotorRun();
-                           // PowerOn_MotorRun();
-					        LED1 = 1;
-			           }
-                      
-					  // NO_HallSensor_DectorPhase();
-                        No_HallSensor_Input();
-					// MOS_A_L;
-                         LED1 = 0;
+					
+					 MOS_A_L;
+                         LED1 = 1;
 					    
                           
 			          }
 					 
-                  
-            }
-           else {
-               LED1 = 0;
-               LED0= 0;
-               MOS_OFF;	
-               poweron=0;
-              // MOS_A_H;
+                else {
+               LED0 =0;
+			   LED1=0;
+              
+               MOS_A_H;
 			  
            }
 	   }

@@ -27,8 +27,8 @@
 #define     MOS_ON          {PWMMASKE = 0x00;}
 
 
-#define    MOS_A_H     {PWMMASKE = 0x3E;C1CON2 = 0x00;} //PG1 UH
-#define    MOS_A_L     {PWMMASKE = 0x3D;C1CON2 = 0x00;} //PG0 UL
+#define    MOS_A_H     {PWMMASKE = 0x3E;C1CON0 = 0x80;C1CON2 = 0x00;} //PG0 UH
+#define    MOS_A_L     {PWMMASKE = 0x3D;C1CON0 = 0x81;C1CON2 = 0x02;} //PG1 UL
 
 #define    MOS_B_H     {PWMMASKE = 0x3B;C1CON2 = 0x00;} //PG 
 #define    MOS_B_L     {PWMMASKE = 0x37;C1CON2 = 0x00;} 
