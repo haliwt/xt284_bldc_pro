@@ -38,9 +38,8 @@ void	main(void)
                    
                   count++ ;
 				if(count < 2000){
-				  //   StartMotorRun();
-                     StartTest();//sound a little 
-                     StartMotorRun();
+                    StartTest();//sound a little 
+                    StartMotorRun();
                 }
 				else{
                     //MotorRun();

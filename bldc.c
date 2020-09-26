@@ -382,7 +382,7 @@ void  StartTest(void)
 *************************************************************/
 void  NormalMotorRun(void)
 {
-	
+	#if 0
 		BLDC.stem_time= 0;
 		BLDC.BEMF_Number = 0;
 		C1CON2 = 0x00; //比较控制寄存器2 --
@@ -408,7 +408,88 @@ void  NormalMotorRun(void)
 					case 0X02:{MOS_U_W;break;}        // A+ C-  "2"
 				//	default :{MOS_OFF;break;}
 		}
-	
+	#endif 
+	unsigned char i;
+	for(i=0;i<8;i++)
+	{
+		switch(BLDC.loop_status)
+		{
+			case   _WAIT_CHECK:
+				if(TF1)//这里其实才是等待消磁
+				{
+					TF1 = 0;
+					BLDC.loop_status = _CHECK_ZERO;
+				}
+				break;
+			case   _CHECK_ZERO_B:
+				if(!(BLDC.EMI_flag&0x80))
+				{
+					BLDC.loop_status = _CHECK_ZERO;
+				}
+				/*if(TF1)
+				{
+					TF1 = 0;
+					BLDC.error  |= _emf_Error;
+				}*/
+				break;
+			case  _CHECK_ZERO://消磁完了之后等待过零点
+				BLDC.zero_now_time.one.h  = TH0;
+				BLDC.zero_now_time.one.l  = TL0;//这个值不停的跟新，直到比较器发生跳变
+				if(BLDC.EMI_flag&0x80)					//此时记录的就是上次过零点和下次过零点之间的时间，也就是60度的时间
+				{
+					TH0 = 0;
+					TL0 = 0;
+					TF0 = 0;
+					BLDC.zero_period.all = BLDC.zero_period.all - (BLDC.zero_period.all >>2) + BLDC.zero_now_time.all;//240   这一句的作用是将60度的
+					BLDC.output_time.all = BLDC.zero_period.all >>3;//30	除以8，也就是三十度的时间					              	时间扩大4倍，也就是240度的时间
+					
+					BLDC.step_read = BLDC.output_time.all;
+					
+					BLDC.output_time.all -= (BLDC.output_time.all>>2);//24度的时间
+					BLDC.zero_check_time.all = BLDC.output_time.all >>1;//12度的时间
+				  BLDC.zero_check_time.all += (BLDC.zero_check_time.all>>3);//12度的时间在加上一个值，这个值作为微调用
+					BLDC.stem_time = 0;
+					TL1 = ~BLDC.output_time.one.l;					
+					TH1 = ~BLDC.output_time.one.h; 
+					TF1 = 0;
+					
+					BLDC.step_time_sum += BLDC.step_read;
+					if(++BLDC.step_time_count>=64)
+					{
+						BLDC.step_time = BLDC.step_time_sum>>5;
+						BLDC.step_time_count = 0;
+						BLDC.step_time_sum = 0;
+						BLDC.step_updata_flag = 1;
+					}
+					BLDC.loop_status = _WAIT_COM;
+				}
+				/*if(TF1)
+				{
+					TF1 = 0;
+					BLDC.error  |= _emf_Error;
+				}*/
+				break;
+			case  _WAIT_COM://这里是等待延时30时间，但是这个延时时间并不一定是30度，根据实际情况调整
+				if(TF1)//
+				{
+					TF1 = 0;
+					BLDC.loop_status = _COM_CHARGE;
+				}
+				break;
+			case  _COM_CHARGE:
+				TL1 = ~BLDC.zero_check_time.one.l;	//这里是将消磁的时间加入定时器，随后立马换向				
+				TH1 = ~BLDC.zero_check_time.one.h; 
+				TF1 = 0;
+				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
+				com_charge();
+				BLDC.loop_status = _WAIT_CHECK;
+				break;
+			case  _ERROR:
+				break;
+			default:BLDC.loop_status = _WAIT_CHECK;
+				break;
+		}
+	}
 
 	
 }
