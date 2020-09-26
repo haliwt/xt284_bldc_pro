@@ -160,12 +160,18 @@ void LSE_IRQHandler(void)  interrupt LSE_VECTOR
  ******************************************************************************/
 void ACMP_IRQHandler(void)  interrupt ACMP_VECTOR 
 {
-	static uint8_t intflg =0;
 	if(ACMP_GetIntFlag(ACMP1))
 	{
-		intflg = intflg ^ 0x01;
-		if(intflg ==1)intBEMF =1;
-		else intBEMF = 0;
+		intBEMF = C1CON1; //反向电动势比较输出结果
+		if(intBEMF&0x80)
+		{
+			P36=1;  
+		}
+		else
+		{
+			P36=0;
+		}
+		//check_FB();
 
 		ACMP_ClearIntFlag(ACMP1);
 	}	

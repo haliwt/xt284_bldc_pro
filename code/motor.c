@@ -1,16 +1,30 @@
 #include "motor.h"
 
 uint8_t gPhase;
-
-
-
-void	BLDC_start(void)
+/*******************************************************************************
+	*
+	*Function Name: uint8_t NO_HallSensor_GetPinState(void)
+	*Function :Dector no hall senseor BEMF
+	*Input Ref:NO
+	*Return Ref:No
+	*
+*******************************************************************************/
+void BEMF_IOInit(void)
 {
-//	BLDC.mode = _run;
-//	bldc_value_init();
-//	BLDC.status = _CHECK;
-	ON_BLDC_INTE;
+    GPIO_SET_MUX_MODE(P01CFG, GPIO_MUX_GPIO);		//设置P01为GPIO模式
+	GPIO_ENABLE_INPUT(P0TRIS, GPIO_PIN_1);			//设置为输入模式
+	GPIO_ENABLE_RD(P0RD, GPIO_PIN_1);	//开启下拉
+
+	GPIO_SET_MUX_MODE(P36CFG, GPIO_MUX_GPIO);		//设置P36为GPIO模式
+	GPIO_ENABLE_INPUT(P3TRIS, GPIO_PIN_6);			//设置为输出模式
+	
+
+	
+ 
 }
+
+
+
 
 
 /*******************************************************************************
@@ -54,47 +68,58 @@ uint8_t NO_HallSensor_GetPinState(void)
 	*Return Ref:No
 	*
 *******************************************************************************/
-void No_HallSensor_Input(void)
+uint8_t  No_HallSensor_Input(void)
 {
      
-     gPhase = NO_HallSensor_GetPinState();
-	 switch (gPhase)
-	{
-		 case 5:
-		 	  MOS_W_U	; //C+ A- "5"
+        static uint8_t state;
+		state = 0;
+		C1CON2 = 0x00; //比较控制寄存器2 --
+		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
+		delay_us(20);
+		if(C1CON1&0x80){state |= 0x01;} //U --BEMF
+		C1CON0 = 0x81;
+		delay_us(20);
+		if(C1CON1&0x80){state |= 0x02;} //V ---BEMF
+		C1CON0 = 0x82;
+		delay_us(20);
+		if(C1CON1&0x80){state |= 0x04;}//W  ---BEMF 
+        
+        switch(state)
+		{
 
-		 break;
-
-		 case 1:
-
-		   MOS_V_U	;//B+ A- "1"
-
-		 break;
-
-		 case 3:
-		 		MOS_V_W	; //B+,C- "3"
-
-		 break;
-
-		 case 2:
-		 	 MOS_U_W	; // A+ C- "2"
-
-		 break;
-
-		 case 6:
-		 	   MOS_U_V	; //A+ ,B- '6'
-
-		 break;
-
-		 case 4:
-               	MOS_W_V	; //C+,B- '4'
-		 break;
-	}
-
-
+			case 0x06:{MOS_U_V;break;}  //A+ B- '6'
+			case 0x04:{MOS_W_V;break;}    //C+ B-  "4"
+			case 0x05:{MOS_W_U;break;}   //C+ A- "5"
+			case 0x01:{MOS_V_U;break;}     //B+ A-   "1"
+			case 0X03:{MOS_V_W;break;}       //B+ C - "3"
+			case 0X02:{MOS_U_W;break;}        // A+ C-  "2"
+			default :{MOS_OFF;break;}
+		}
 
 }
+/*******************************************************************************
+	*
+	*Function Name: uint8_t NO_HallSensor_GetPinState(void)
+	*Function :Dector no hall senseor BEMF
+	*Input Ref:NO
+	*Return Ref:No
+	*
+*******************************************************************************/
+void NoSensor_Phase(uint8_t state)
+{
+		switch(state)
+				{
 
+					case 0x06:{MOS_U_V;break;}  //A+ B- '6'
+					case 0x04:{MOS_W_V;break;}    //C+ B-  "4"
+					case 0x05:{MOS_W_U;break;}   //C+ A- "5"
+					case 0x01:{MOS_V_U;break;}     //B+ A-   "1"
+					case 0X03:{MOS_V_W;break;}       //B+ C - "3"
+					case 0X02:{MOS_U_W;break;}        // A+ C-  "2"
+					//default :{MOS_OFF;break;}
+				}
+
+}
 /*******************************************************************************
 	*
 	*Function Name: uint8_t NO_HallSensor_GetPinState(void)
@@ -105,103 +130,131 @@ void No_HallSensor_Input(void)
 *******************************************************************************/
 void NO_HallSensor_DectorPhase(void)
 {
-    static uint8_t sense,adj=0;
-
-	if(SENSE_H) sense =1; 
+    static uint8_t sense;
+	C1CON2 = 0x00; //比较控制寄存器2 --
+  //  sense = intBEMF & 0x80;
+   
+	if(SENSE) sense =1; 
 	else sense =0; 
-	adj=0;
+
 	switch(gPhase){
 
         case 0:  
-              if(adj==0)
-	              MOS_U_W	; // A+ C- "2"
-              if(intBEMF==0){
-					C1CON2 = 0x00; //比较控制寄存器2 --
-					C1CON0 = 0x81; //SENSE_B("V") --输入V 
+              MOS_A_L	; // A+ C- "2"
+             // PWMOE = 0x02;
+             if(intBEMF){  // BEMF "B"
+				
+					MOS_C_H;   //下半周
+					//PWMOE = 0x12;
+			        C1CON0 = 0x82;
+		          //  delay_us(20);
 					gPhase++;
 			  }
 			  else{
-				adj++;
+				  MOS_B_H;
+                 // PWMOE = 0x06;
 			  }
-			  if(adj==1)  MOS_V_W ; //"3"
+			 
 			  
 			  
         break;
 
 		case 1:
-				if(adj==0)
-				    MOS_U_V	; //A+ ,B- '6'
-				if(intBEMF==1){
-				C1CON2 = 0x00; //比较控制寄存器2 --
-                 C1CON0 = 0x82; //BEMF "C" W 输入
-                 gPhase ++;
+				 MOS_B_H; //A+ ,B- '6'
+               //  PWMOE = 0x04;
+				if(!intBEMF){ //BEMF "C"
+				    MOS_A_L; //A+ 
+                 //   PWMOE = 0x06;
+				    C1CON0 = 0x80;
+		        //   delay_us(20);
+				    gPhase ++;
 
 
 				}
-				else adj++;
+				else{
+                      MOS_C_L;  //C+ ;
+                   //   PWMOE = 0X24;
 
-				if(adj==1)MOS_U_W	; // "2"
-		        
-
-		break;
+				}
+        break;
 
 		case 2:
-				if(adj==0)
-				MOS_W_V	; //C+,B- '4'
-			    if(intBEMF==0){
-					C1CON2 = 0x00; //比较控制寄存器2 --
-		            C1CON0 = 0x80; //BEMF "A" U
-		           gPhase ++ ;
+				
+				 MOS_C_L	; //C+,B- '4'
+               //  PWMOE = 0X20;
+			    if(intBEMF){  //BEMF "A"
+
+				   MOS_B_H; //B-
+                 //   PWMOE = 0X24;
+		           C1CON0 = 0x81;
+		         //   delay_us(20);
+				    gPhase ++;
 
 				}
-				else adj++;
-				if(adj==1)  MOS_U_V	; // '6'
+				else {
+                    MOS_A_H ; //A-
+                  //  PWMOE =0X21;
+				}
 
 		break;
 
 		case 3:
-				if(adj==0)
-				   MOS_W_U	; //C+ A- "5"
-			    if(intBEMF==1){
-                   C1CON2 = 0x00; //比较控制寄存器2 --
-				   C1CON0 = 0x81; //BEMF "B" V
+				
+				   MOS_A_H	; //C+ A- "5"
+                  // PWMOE = 0X01;
+			   if(!intBEMF){
+                    MOS_C_L;  //C+ ;
+                //   PWMOE= 0X21;
+                    C1CON0 = 0x21;
+		          //  delay_us(20);
 					gPhase ++ ;
                 }
-				else adj++;
+				else{
+                    MOS_B_L ; //B+
+                   // PWMOE= 0X09;
+                }
 				
-				if(adj++)MOS_W_V	; //"4"
+				
 
 		break;
 
 		case 4:
-				if(adj==0)
-				  MOS_V_U	;//B+ A- "1"
-			    if(intBEMF==0){
-
-				     C1CON2 = 0x00; //比较控制寄存器2 --
-					 C1CON0 = 0x82; //BEMF "C" W
-					  gPhase ++ ;
+			     MOS_B_L	;//B+ A- "1"
+               //  PWMOE = 0X08;
+			    if(intBEMF){
+                    MOS_A_H; //A-
+                    C1CON0 = 0x09;
+		         //  delay_us(20);
+                    gPhase ++ ;
 
 				}
-				else adj++;
-
-				if(adj== 0) MOS_W_U	;  //"5"
+				else {
+                    MOS_C_H ; //C-
+                   // PWMOE = 0X18;
+                }
+				
 
 		break;
 
 		case 5: 
-				   if(adj==0)
-				   		MOS_V_W	; //B+,C- "3"
-                    if(intBEMF==1){
+				
+				    MOS_C_H	; //B+,C- "3"
+                 //   PWMOE = 0X10;
+                    if(!intBEMF){
 
-				     C1CON2 = 0x00; //比较控制寄存器2 --
-					 C1CON0 = 0x80; //BEMF "A" U
+				      MOS_B_L; //B+ ;
+                     // PWMOE = 0X18;
+				      C1CON0 = 0x81;
+		            //  delay_us(20);
 					  gPhase =0;
 
 				    }
-					else adj++ ;
+					else{
+                        MOS_A_L; // A+ ;
+                       // PWMOE =0X12;
+                    }
 
-					if(adj==1)   MOS_V_U	; //"1"
+					
 		
 
 		break;

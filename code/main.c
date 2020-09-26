@@ -21,15 +21,21 @@ int main(void)
 {		
 	static uint8_t pwflg =0,powerkey,poweron=0;
 	static uint16_t startnum=0;
+	volatile uint8_t hall=0 ;
     LED_Init();
-	KEY_Init();
+	BEMF_IOInit();
+	
+
+    KEY_Init();
 	ACMP1_Config();
 	EPWM_Config();
 	CMP_InputSignal();
 
 	while(1)
 	{	
-        MOS_OFF;
+       // MOS_OFF;
+
+
 		
 		powerkey =HDKey_Scan(0);
 		if(powerkey == 1){
@@ -41,18 +47,21 @@ int main(void)
 			
 			        if(poweron==0){
                         poweron++;
-			         for(startnum=0;startnum<3000;startnum++){
+			           
 					  
-                            ON_BLDC_INTE;
-                         Start_MotorRun();
+                         ON_BLDC_INTE;
+                         
+                        for(startnum=0;startnum <5000;startnum++){
+                            Start_MotorRun();
+                           // PowerOn_MotorRun();
 					        LED1 = 1;
 			           }
-                      }
-			          else {
-                        
-                       LED1 = 0;
-						//NO_HallSensor_DectorPhase();
-						No_HallSensor_Input();
+                      
+					  // NO_HallSensor_DectorPhase();
+                        No_HallSensor_Input();
+					// MOS_A_L;
+                         LED1 = 0;
+					    
                           
 			          }
 					 
@@ -62,6 +71,9 @@ int main(void)
                LED1 = 0;
                LED0= 0;
                MOS_OFF;	
+               poweron=0;
+              // MOS_A_H;
+			  
            }
 	   }
 
