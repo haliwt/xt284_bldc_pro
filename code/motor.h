@@ -27,19 +27,27 @@
 #define     MOS_ON          {PWMMASKE = 0x00;}
 
 
-#define    MOS_A_H     {PWMMASKE = 0x3E;C1CON0 = 0x80;C1CON2 = 0x00;} //PG0 UH
-#define    MOS_A_L     {PWMMASKE = 0x3D;C1CON0 = 0x81;C1CON2 = 0x02;} //PG1 UL
+#define    MOS_A_H    {PWMOE = 0x04;}// {PWMMASKE = 0x3E;C1CON0 = 0x80;C1CON2 = 0x00;} //PG0 UH
+#define    MOS_A_L     P16 //= //{PWMMASKE = 0x3D;C1CON0 = 0x81;C1CON2 = 0x02;} //PG1 UL
 
-#define    MOS_B_H     {PWMMASKE = 0x3B;C1CON2 = 0x00;} //PG 
-#define    MOS_B_L     {PWMMASKE = 0x37;C1CON2 = 0x00;} 
+#define    MOS_B_H    {PWMOE = 0x02;} //{PWMMASKE = 0x3B;C1CON2 = 0x00;} //PG 
+#define    MOS_B_L     P14//{PWMMASKE = 0x37;C1CON2 = 0x00;} 
 
-#define    MOS_C_H      {PWMMASKE = 0x2F;C1CON2 = 0x00;}
-#define    MOS_C_L      {PWMMASKE = 0x1F;C1CON2 = 0x00;}
+#define    MOS_C_H      {PWMOE = 0x01;} //{PWMMASKE = 0x2F;C1CON2 = 0x00;}
+#define    MOS_C_L      P00//{PWMMASKE = 0x1F;C1CON2 = 0x00;}
 
+
+#define UL   P16 //P16 =0; //UL
+#define VL   P14  //=0;//VL
+#define WL   P00  //=0;//WL
 
 #define     SENSE     P01
 
 
+
+#define UH   {PWMOE = 0x04;}
+#define VH   {PWMOE = 0x02;}
+#define WH   {PWMOE = 0x01;}
 
 #define   ON_BLDC_INTE     {PWMPIF = 0x00;PWMZIF = 0x00;PWMUIF = 0x00;PWMDIF = 0x00;EIE2 |= 0x08;} // enable PWM interrupter
 #define   OFF_BLDC_INTE    {PWMPIF = 0x00;PWMZIF = 0x00;PWMUIF = 0x00;PWMDIF = 0x00;EIE2 &=~0x08;} //disable PWM interrupter
@@ -53,18 +61,19 @@ extern uint8_t gPhase;
 extern uint8_t intBEMF;
 uint8_t NO_HallSensor_GetPinState(void);
 
-void NO_HallSensor_DectorPhase(void);
+
 void PowerOn_MotorRun(void);
 void Start_MotorRun(void);
 void	com_charge(void);
 uint8_t No_HallSensor_Input(void);
 void NoSensor_Phase(uint8_t state);
 void BEMF_IOInit(void);
+void NO_HallSensor_DectorPhase(uint8_t state);
 
 
-
-
-
+void OPEN(void);
+void OPEN2(void);
+uint8_t NoHall_PhaseValue(void) ;
 
 
 
