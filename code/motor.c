@@ -103,7 +103,7 @@ void OPEN2(void)
 		state = 0;
 		C1CON2 = 0x00; //比较控制寄存器2 --
 		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
-		delay_us(20);
+		delay_us(20);//delay_us(20);
 		if(C1CON1&0x80){state |= 0x01;} //U --BEMF
 		C1CON0 = 0x81;
 		delay_us(20);
@@ -121,10 +121,8 @@ void OPEN2(void)
               MOS_C_L =0;
               MOS_B_L = 0 ;
               MOS_A_L = 1;
-              delay_us(20);
-	          C1CON2 = 0x00; //比较控制寄存器2 --
-			  C1CON0 = 0x81; //SENSE_B("V") --输入V 
-			 
+              delay_us(40);
+              state =1;
 	          
 
 	    break;
@@ -134,9 +132,8 @@ void OPEN2(void)
                 MOS_B_L =0;
                 MOS_C_L =0;
                 MOS_A_L =1;
-                 delay_us(20);
-			   C1CON2 = 0x00; //比较控制寄存器2 --
-               C1CON0 = 0x82; //BEMF "C" W 输入
+               delay_us(40);
+                 state =3;
                
 		break;
 
@@ -145,9 +142,8 @@ void OPEN2(void)
                MOS_B_L =0;
                MOS_A_L =0 ;//关闭 A 
                MOS_C_L =1;
-               delay_us(20);
-			  C1CON2 = 0x00; //比较控制寄存器2 --
-		      C1CON0 = 0x80; //BEMF "A" U
+               delay_us(40);
+                 state =2;
 		     
 
 		break ;
@@ -157,9 +153,8 @@ void OPEN2(void)
                MOS_A_L=0;
                MOS_B_L=0; //turn off B
                MOS_C_L =1;
-                delay_us(20);
-			  C1CON2 = 0x00; //比较控制寄存器2 --
-		      C1CON0 = 0x81; //BEMF "B" V
+                delay_us(40);
+                state =6;
 		    
 
 		break;
@@ -169,9 +164,8 @@ void OPEN2(void)
              MOS_C_L =0; //关闭C
              MOS_A_L = 0; //关闭A
              MOS_B_L =1;
-              delay_us(20);
-			 C1CON2 = 0x00; //比较控制寄存器2 --
-			 C1CON0 = 0x82; //BEMF "C" W
+             delay_us(40);
+              state =4;
 			
 			
 
@@ -182,9 +176,8 @@ void OPEN2(void)
                 MOS_C_L =0; //关闭C
                 MOS_A_L = 0; //关闭A
 			    MOS_B_L=1;
-                  delay_us(20);
-				C1CON2 = 0x00; //比较控制寄存器2 --
-				C1CON0 = 0x80; //BEMF "A" U
+                delay_us(40);
+                 state =5;
 				
 
 		break;
@@ -408,9 +401,8 @@ void PowerOn_MotorRun(void)
               MOS_C_L =0;
               MOS_B_L = 0 ;
               MOS_A_L = 1;
-              delay_us(20);
-	          C1CON2 = 0x00; //比较控制寄存器2 --
-			  C1CON0 = 0x81; //SENSE_B("V") --输入V 
+              delay_us(40);
+	         
 			  gPhase=1;
 	          
 
@@ -424,9 +416,8 @@ void PowerOn_MotorRun(void)
                MOS_C_L=0;
                MOS_B_L =0; 
                MOS_A_L=1;
-                delay_us(20);
-	          C1CON2 = 0x00; //比较控制寄存器2 --
-			  C1CON0 = 0x81; //SENSE_B("V") --输入V 
+                delay_us(40);
+	        
 			  gPhase=1;
 	          
 
@@ -437,9 +428,8 @@ void PowerOn_MotorRun(void)
                 MOS_B_L =0;
                 MOS_C_L =0;
                 MOS_A_L =1;
-                 delay_us(20);
-			   C1CON2 = 0x00; //比较控制寄存器2 --
-               C1CON0 = 0x82; //BEMF "C" W 输入
+                 delay_us(40);
+			 
                  gPhase =3;
 		break;
 
@@ -448,9 +438,8 @@ void PowerOn_MotorRun(void)
                MOS_B_L =0;
                MOS_A_L =0 ;//关闭 A 
                MOS_C_L =1;
-               delay_us(20);
-			  C1CON2 = 0x00; //比较控制寄存器2 --
-		      C1CON0 = 0x80; //BEMF "A" U
+               delay_us(40);
+			  
 		      gPhase =2 ;
 
 		break ;
@@ -460,9 +449,7 @@ void PowerOn_MotorRun(void)
                MOS_A_L=0;
                MOS_B_L=0; //turn off B
                MOS_C_L =1;
-                delay_us(20);
-			  C1CON2 = 0x00; //比较控制寄存器2 --
-		      C1CON0 = 0x81; //BEMF "B" V
+               delay_us(40);
 		      gPhase =6 ;
 
 		break;
@@ -472,9 +459,8 @@ void PowerOn_MotorRun(void)
              MOS_C_L =0; //关闭C
              MOS_A_L = 0; //关闭A
              MOS_B_L =1;
-              delay_us(20);
-			 C1CON2 = 0x00; //比较控制寄存器2 --
-			 C1CON0 = 0x82; //BEMF "C" W
+              delay_us(40);
+		
 			 gPhase =4 ;
 			
 
@@ -485,9 +471,8 @@ void PowerOn_MotorRun(void)
                 MOS_C_L =0; //关闭C
                 MOS_A_L = 0; //关闭A
 			    MOS_B_L=1;
-                  delay_us(20);
-				C1CON2 = 0x00; //比较控制寄存器2 --
-				C1CON0 = 0x80; //BEMF "A" U
+                  delay_us(40);
+				
 				gPhase =0;
 
 		break;

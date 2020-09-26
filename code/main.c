@@ -34,11 +34,7 @@ int main(void)
 
 	while(1)
 	{	
-   
-
-
-		
-		powerkey =HDKey_Scan(0);
+        powerkey =HDKey_Scan(0);
 		if(powerkey == 1){
             
            pwflg = pwflg ^ 0x01;
@@ -49,7 +45,7 @@ int main(void)
                 if(poweron==0){
                     poweron ++ ;
 					startnum++;
-                     for(startnum=0;startnum<3000;startnum++){
+                     for(startnum=0;startnum<500;startnum++){
                       
 					    PowerOn_MotorRun();
                         OPEN2();
