@@ -45,21 +45,25 @@ int main(void)
                 if(poweron==0){
                     poweron ++ ;
 					startnum++;
-                     for(startnum=0;startnum<500;startnum++){
+                   for(startnum=0;startnum<3000;startnum++){
                       
-					    PowerOn_MotorRun();
+					  //  PowerOn_MotorRun();
+                       
+                        OPEN3();
                         OPEN2();
                         
                          LED1=1;
                          
 					    
-                        }
-                 }
+                      }
+             
                   state =  NoHall_PhaseValue() ;
-                  NO_HallSensor_DectorPhase(state);
+                  //NO_HallSensor_DectorPhase(state);
+                    InputValue_DectorPhase(state);
                  LED1=0;
-                 
-              }	 
+                }
+                  
+              }
                else {
                        LED0 =0;
                        LED1=0;
@@ -73,11 +77,11 @@ int main(void)
 			  
                  }
 	        
-            }
-}
+            
+      }
 
 }
-
+}
 
 
 
