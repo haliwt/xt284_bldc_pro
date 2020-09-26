@@ -61,7 +61,7 @@ static  void	delay_us(uint8_t  in)
 
 void	bldc_value_init(void)
 {
-	BLDC.cw_ccw_in = 0;
+		BLDC.cw_ccw_in = 0;
 	BLDC.cw_ccw_now = 0;
 	BLDC.EMI_flag = 0;
 	BLDC.EMI_count = 0;
@@ -71,7 +71,7 @@ void	bldc_value_init(void)
 	BLDC.EMI_NG_count = 0;
 	BLDC.turn_OK_count = 0;
 	
-	BLDC.stem_time= 0;
+	BLDC.stem_time = 0;
 	
 	BLDC.open_period = _open_max_time;
 	BLDC.check_over_time = 0;
@@ -86,7 +86,7 @@ void	bldc_value_init(void)
 	BLDC.output_time.all = 0xffff;
 	BLDC.zero_check_time.all = 0xffff;
 	
-	BLDC.pwm_out = _start_pwm_set;
+	BLDC.pwm_out = _start_pwm_set; //ÆµÂÊ
 	BLDC.reset_time = 0;
 	
 	BLDC.loop_status = 0;
@@ -169,167 +169,117 @@ void  out_pwm(unsigned int    in)
 /********************************************************************
 	*
 	*Function Name:void MotoRun(void)
-	*Function:
+	*Function:open
 	*Inputr Ref:NO
 	*Return Ref:NO
 	*
 *********************************************************************/
 void MotorRun(void)
 {
-	unsigned char i;
-	for(i=0;i<8;i++)
-	{
-		switch(BLDC.loop_status)
+	switch(BLDC.open_status)
 		{
-			case   _WAIT_CHECK:
+			case   OPEN_CONF_COM:
+				BLDC.zero_check_time.all =  BLDC.open_period;
+				confirm_phase();
+				com_charge();
+				BLDC.stem_time = 0;
+				BLDC.check_over_time = 0;
+			  BLDC.open_period = _open_max_time;
+				BLDC.zero_check_time.all =  BLDC.open_period;
+				TH1 = 0;
+				TL1 = 0;
+				TF1 = 0;
+				BLDC.open_status = OPEN_WAIT_CHECK;
+				break;
+			case   OPEN_WAIT_CHECK:
 				if(TF1)
 				{
-					TF1 = 0; //
-					BLDC.loop_status = _CHECK_ZERO;
+					TF1 = 0;
+					BLDC.open_status = OPEN_CHECK_ZERO;
 				}
 				break;
-			case   _CHECK_ZERO_B:
+			case   OPEN_CHECK_B:
 				if((BLDC.EMI_flag&0x80)==0x00)
 				{
-					BLDC.loop_status = _CHECK_ZERO;
+					BLDC.open_status = OPEN_CHECK_ZERO;
 				}
-				/*if(TF1)
+				if((--BLDC.zero_check_time.all) == 0)
 				{
-					TF1 = 0;
-					BLDC.error  |= _emf_Error;
-				}*/
+					BLDC.open_status = OPEN_COM_CHARGE;
+					BLDC.EMI_OK_count = 0;
+					BLDC.turn_OK_count = 0;
+				}
 				break;
-			case  _CHECK_ZERO:
+			case  OPEN_CHECK_ZERO:
 				BLDC.zero_now_time.one.h  = TH0;
 				BLDC.zero_now_time.one.l  = TL0;
 				if(BLDC.EMI_flag&0x80)
 				{
-					TH0 = 0;
-					TL0 = 0;
-					TF0 = 0;
-					BLDC.zero_period.all = BLDC.zero_period.all - (BLDC.zero_period.all >>2) + BLDC.zero_now_time.all;//240
-					BLDC.output_time.all = BLDC.zero_period.all >>3;//30
-					BLDC.step_read = BLDC.output_time.all;
-					BLDC.output_time.all -= (BLDC.output_time.all>>3);
-					BLDC.zero_check_time.all = BLDC.output_time.all >>1;
-					BLDC.zero_check_time.all -= _DEGAUSS_TIME;
-				  BLDC.zero_check_time.all -= (BLDC.zero_check_time.all>>3);
-					BLDC.stem_time= 0;
-					TL1 = ~BLDC.output_time.one.l;					
-					TH1 = ~BLDC.output_time.one.h; 
-					TF1 = 0;
-					
-					BLDC.step_time_sum += BLDC.step_read;
-					if(++BLDC.step_time_count>=64)
+					if(++BLDC.EMI_OK_count>=10)
 					{
-						BLDC.step_time = BLDC.step_time_sum>>5;
-						BLDC.step_time_count = 0;
-						BLDC.step_time_sum = 0;
-						BLDC.step_updata_flag = 1;
+						BLDC.EMI_OK_count = 0;
+						TH0 = 0;
+						TL0 = 0;
+						TF0 = 0;
+						BLDC.zero_period.all =  (BLDC.zero_now_time.all<<2);//240
+						if(++BLDC.turn_OK_count>5)
+						{
+							BLDC.turn_OK_count = 0;
+							MOS_OFF;
+							BLDC.output_time.all = BLDC.zero_now_time.all >>1;//30
+							BLDC.output_time.all -= (BLDC.zero_now_time.all >>2);//30
+							BLDC.zero_check_time.all = BLDC.output_time.all >>1;
+							BLDC.status = _LOOP;
+							TL1 = ~BLDC.zero_check_time.one.l;					
+							TH1 = ~BLDC.zero_check_time.one.h; 
+							TF1 = 0;
+							BLDC.loop_status = _WAIT_CHECK;
+						}
+						else
+						{
+							BLDC.open_status = OPEN_COM_CHARGE;
+						}
 					}
-					BLDC.loop_status = _WAIT_COM;
 				}
-				/*if(TF1)
+				else
 				{
-					TF1 = 0;
-					BLDC.error  |= _emf_Error;
-				}*/
-				break;
-			case  _WAIT_COM:
-				if(TF1)
+					BLDC.EMI_OK_count = 0;
+				}
+				if((--BLDC.zero_check_time.all) == 0)
 				{
-					TF1 = 0;
-					BLDC.loop_status = _COM_CHARGE;
+					BLDC.open_status = OPEN_COM_CHARGE;
+					BLDC.EMI_OK_count = 0;
+					BLDC.turn_OK_count = 0;
 				}
 				break;
-			case  _COM_CHARGE:
-				BLDC.output_time.all = _DEGAUSS_TIME;
-				TL1 = ~BLDC.output_time.one.l;					
-				TH1 = ~BLDC.output_time.one.h; 
-				TF1 = 0;
+			case  OPEN_COM_CHARGE:
+				BLDC.open_period -= (BLDC.open_period/15+1);
+				if(BLDC.open_period<_open_min_time)
+				{
+					BLDC.open_period = _open_max_time;
+					if(++BLDC.start_times>3)
+					{
+						BLDC.error  |= _emf_Error;
+						BLDC.start_times = 0;
+					}
+				}
+				BLDC.zero_check_time.all =  BLDC.open_period;
+				//confirm_phase();
 				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
-				switch(BLDC.motor_step)
-				{
-					case 0:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 1:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 2:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 3:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 4:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 5:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					default :{MOS_OFF;break;}
-				}
+				
 				com_charge();
-				BLDC.loop_status = _DEGAUSS;
+				BLDC.stem_time = 0;
+				BLDC.check_over_time = 0;
+				TH1 = 0x7f;
+				TL1 = 0;
+				TF1 = 0;
+				BLDC.open_status = OPEN_WAIT_CHECK;
 				break;
-			case  _DEGAUSS:
-				if(TF1)//&&((BLDC.EMI_flag&0x80)==0x00))
-				{
-					
-					PWMD1L   = pwm_now.change.count[1];
-					PWMD1H   = pwm_now.change.count[0];
-					PWMD0L   = 0x00;
-					PWMD0H   = 0x00;
-					PWMLOADEN = 0x03;
-					TH1 = ~BLDC.zero_check_time.one.h;
-					TL1 = ~BLDC.zero_check_time.one.l; 
-					TF1 = 0;
-					BLDC.loop_status = _WAIT_CHECK;
-				}
-				break;	
-			case  _ERROR:
+			case  OPEN_ERROR:
 				break;
-			default:BLDC.loop_status = _WAIT_CHECK;
+			default:BLDC.loop_status = OPEN_CONF_COM;
 				break;
 		}
-	}
 }
 /*************************************************************
 	*
@@ -341,6 +291,7 @@ void MotorRun(void)
 *************************************************************/
 void  StartTest(void)
 {
+	#if 0
 	if(++BLDC.check_over_time<5000)
 	{
 		BLDC.stem_time= 0;
@@ -369,7 +320,251 @@ void  StartTest(void)
 					default :{MOS_OFF;break;}
 		}
 	}
-
+  #endif 
+#if 1
+  if(++BLDC.check_over_time<5000)
+	{
+		BLDC.stem_time = 0;
+		BLDC.BEMF_Number = 0;
+		C1CON2 = 0x00;
+		C1CON0 = 0x80;
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x01;}
+		C1CON0 = 0x81;
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x02;}
+		C1CON0 = 0x82;
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x04;}
+		
+		if(BLDC.EMF_last != BLDC.BEMF_Number)
+		{
+			BLDC.start_times = 0;
+			BLDC.zero_now_time.one.h  = TH0;
+			BLDC.zero_now_time.one.l  = TL0;
+			TH0 = 0;
+			TL0 = 0;
+			TF0 = 0;
+			BLDC.zero_period.all = BLDC.zero_period.all - (BLDC.zero_period.all >>2) + BLDC.zero_now_time.all;//240
+			BLDC.output_time.all = BLDC.zero_period.all >>3;//30
+			BLDC.output_time.all -= (BLDC.output_time.all>>3);
+			BLDC.zero_check_time.all = BLDC.output_time.all >>2;
+			//BLDC.zero_check_time.all -= (BLDC.zero_check_time.all>>3);
+			
+			switch(BLDC.BEMF_Number)
+			{
+				case 1:
+					if(BLDC.EMF_last == 3)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 5)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 3;}
+					else{BLDC.motor_step = 4;}
+					
+					break;
+				case 3:
+					if(BLDC.EMF_last == 2)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 1)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 2;}
+					else{BLDC.motor_step = 5;}
+					break;
+				case 2:
+					
+					if(BLDC.EMF_last == 6)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 3)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 1;}
+					else{BLDC.motor_step = 0;}
+					break;
+				case 6:
+					if(BLDC.EMF_last == 4)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 2)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 0;}
+					else{BLDC.motor_step = 1;}
+					break;
+				case 4:
+					if(BLDC.EMF_last == 5)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 6)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 5;}
+					else{BLDC.motor_step = 2;}
+					break;
+				case 5:
+					if(BLDC.EMF_last == 1)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 4)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 4;}
+					else{BLDC.motor_step = 3;}
+					break;
+				default:
+					break;
+			}
+			BLDC.EMF_last = BLDC.BEMF_Number;
+		}
+		if(BLDC.EMI_count>=5)
+		{
+			BLDC.EMI_count = 0;
+			if(BLDC.check_cw_ccw_flag == BLDC.cw_ccw_now)
+			{
+				switch(BLDC.motor_step)
+				{
+					case 0:{MOS_U_V;break;}
+					case 1:{MOS_W_V;break;}
+					case 2:{MOS_W_U;break;}
+					case 3:{MOS_V_U;break;}
+					case 4:{MOS_V_W;break;}
+					case 5:{MOS_U_W;break;}
+					default :{MOS_OFF;break;}
+				}
+				TL1 = ~BLDC.zero_check_time.one.l;					
+				TH1 = ~BLDC.zero_check_time.one.h; 
+				TF1 = 0;
+				BLDC.loop_status = _WAIT_CHECK;
+				BLDC.status = _LOOP;
+				BLDC.EMI_NG_count = 0;
+			}
+			else
+			{
+				BLDC.check_over_time = 0;
+				BLDC.check_over_time = _break_time;
+				MOS_OFF;
+				BLDC.status = _BREAK;
+			}
+		}
+	}
+	else
+	{
+		BLDC.status = _OPEN;
+		BLDC.open_status = OPEN_CONF_COM;
+	}
+  #endif 
 	
 }
 /*************************************************************
