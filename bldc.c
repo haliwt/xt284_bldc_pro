@@ -405,6 +405,88 @@ void  NormalMotorRun(void)
 				TH1 = ~BLDC.zero_check_time.one.h; 
 				TF1 = 0;
 				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
+				 {
+						switch(BLDC.motor_step)
+				{
+					case 0:
+						{
+							EPWM_ConfigChannelPeriod(EPWM0, 0x960); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x960); //t=10khz
+							
+							EPWM_ConfigChannelSymDuty(EPWM0, 0x4B0);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
+					
+						PWMLOADEN = 0x03;
+						BLDC.motor_step++;
+						break;
+						}
+					case 1:
+						{
+							EPWM_ConfigChannelPeriod(EPWM0, 0x960); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x960); //t=10khz
+							
+							EPWM_ConfigChannelSymDuty(EPWM0, 0x4B0);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
+					
+						 PWMLOADEN = 0x03;
+						BLDC.motor_step++;
+						break;
+						}
+					case 2:
+						{
+							EPWM_ConfigChannelPeriod(EPWM0, 0x960); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x960); //t=10khz
+							
+							EPWM_ConfigChannelSymDuty(EPWM0, 0x4B0);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
+					
+						 PWMLOADEN = 0x03;
+						BLDC.motor_step++;
+						break;
+						}
+					case 3:
+						{
+						    EPWM_ConfigChannelPeriod(EPWM0, 0x960); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x960); //t=10khz
+							
+							EPWM_ConfigChannelSymDuty(EPWM0, 0x4B0);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
+					
+						 PWMLOADEN = 0x03; 
+						BLDC.motor_step++;
+						break;
+						}
+					case 4:
+						{
+							EPWM_ConfigChannelPeriod(EPWM0, 0x960); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x960); //t=10khz
+							
+							EPWM_ConfigChannelSymDuty(EPWM0, 0x4B0);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
+						
+						 PWMLOADEN = 0x03;
+						BLDC.motor_step++;
+						break;
+						}
+					case 5:
+						{
+						EPWM_ConfigChannelPeriod(EPWM0, 0x960); //T = 400 *2 *1/8 
+						EPWM_ConfigChannelPeriod(EPWM1, 0x960); //t=10khz
+						
+						EPWM_ConfigChannelSymDuty(EPWM0, 0x4B0);
+						EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
+						
+						 PWMLOADEN = 0x03;
+						BLDC.motor_step=0; //WT.EDIT
+						break;
+						}
+					default :{MOS_OFF;break;}
+				} 
+					 
+					 
+					 
+				 }
+				
 				com_charge();
 				BLDC.loop_status = _WAIT_CHECK;
 				break;
@@ -637,10 +719,10 @@ void  StartMotorRun(void)
 ***********************************************************************************/
 void  DutyRef(void)
 {
-   EPWM_ConfigChannelPeriod(EPWM0, 0x320); //T = 400 *2 *1/8 
-	EPWM_ConfigChannelPeriod(EPWM1, 0x320); //t=10khz
+    EPWM_ConfigChannelPeriod(EPWM0, 0x960); //T = 400 *2 *1/8 
+	EPWM_ConfigChannelPeriod(EPWM1, 0x960); //t=10khz
 	
-    EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
+    EPWM_ConfigChannelSymDuty(EPWM0, 0x4B0);
 	EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
 	PWMLOADEN = 0x03;
 					
@@ -682,7 +764,7 @@ void	check_FB(void)
 			break;
 		case  _OPEN:StartMotorRun();//OPEN();
 			break;
-		case  _LOOP:MotorRun();//LOOP();
+		case  _LOOP:NormalMotorRun();//MotorRun();//LOOP();
 			break;
 		case  _BREAK:BREAK();
 			break;

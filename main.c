@@ -40,15 +40,15 @@ void	main(void)
                      count++ ;
                     StartTest();//sound a little 
                     StartMotorRun();
-                    LED0=1;
-                   LED1=1;
+                    LED0=0;
+                   LED1=0;
                 }
 				
-                    LED0=0;
-                    LED1= 0;
-                    DutyRef();
-                 //   NormalMotorRun();
-                BLDC_start();
+                    LED0=1;
+                    LED1= 1;
+                   
+                    NormalMotorRun();
+              //  BLDC_start();
                  
                    
 				
