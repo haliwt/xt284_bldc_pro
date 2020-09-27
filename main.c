@@ -1,6 +1,6 @@
 #include<include.h>
 #include "my_type.h"
-
+#include "epwm.h"
 
 SYS_TYPES sys;
 CHANGE_TYPES  temp1;
@@ -36,7 +36,7 @@ void	main(void)
                  
                    
                  
-				if(count < 200){
+				if(count < 600){
                      count++ ;
                     StartTest();//sound a little 
                     StartMotorRun();

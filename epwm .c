@@ -11,7 +11,9 @@ void EPWM_Config(void)
 {
 	//设置EPWM运行模式
 	EPWM_ConfigRunMode(EPWM_WFG_COMPLEMENTARY|EPWM_OC_INDEPENDENT|EPWM_OCU_SYMMETRIC|EPWM_COUNT_UP_DOWN); //互补模式+输出独立模式+对称计数模式+上下计数(中心对齐)模式
-	//设置EPWM运行时钟	
+	PWMCON = 0x0A;
+    PWMOE  = 0x3F;
+    //设置EPWM运行时钟	
 	EPWM_ConfigChannelClk(EPWM0, EPWM_CLK_DIV_1);		
 	EPWM_ConfigChannelClk(EPWM2, EPWM_CLK_DIV_1);
 	EPWM_ConfigChannelClk(EPWM4, EPWM_CLK_DIV_1);
@@ -19,14 +21,14 @@ void EPWM_Config(void)
 	//EPWM_ConfigChannelPeriod(EPWM0, 0x12C0); //Tpmw = PWMDn *2 * 1/8(us)=1.2ms 
    // EPWM_ConfigChannelPeriod(EPWM0, 0x00FA);  //Tpmw = 1/16(KHz) 16KHZ = PWMDn =250 =0xFA
     EPWM_ConfigChannelPeriod(EPWM0, 0x0190);  //Tpmw = 1/10(KHz) 16KHZ = PWMDn = 0x190
-	EPWM_ConfigChannelPeriod(EPWM2, 0x0190);
-	EPWM_ConfigChannelPeriod(EPWM4, 0x0190);
+	EPWM_ConfigChannelPeriod(EPWM1, 0x0190);
+	
 
 	#if (1)
 	//EPWM_ConfigChannelSymDuty(EPWM0, 0x0960);//
 	EPWM_ConfigChannelSymDuty(EPWM0, 0x00c8); // 50%
-	EPWM_ConfigChannelSymDuty(EPWM2, 0x00c8);
-	EPWM_ConfigChannelSymDuty(EPWM4, 0x00c8);
+	EPWM_ConfigChannelSymDuty(EPWM1, 0x00c8);
+	
 	#elif (0)
 	EPWM_ConfigChannelSymDuty(EPWM0, 0);
 	EPWM_ConfigChannelSymDuty(EPWM2, 0);
@@ -64,5 +66,5 @@ void EPWM_Config(void)
 	GPIO_SET_MUX_MODE(P13CFG, GPIO_MUX_PG4); //WH
 	GPIO_SET_MUX_MODE(P00CFG, GPIO_MUX_PG5); //WL
 	//开启EPWM
-	EPWM_Start(EPWM_CH_4_MSK|EPWM_CH_2_MSK|EPWM_CH_0_MSK|EPWM_CH_1_MSK|EPWM_CH_3_MSK|EPWM_CH_5_MSK);
+	EPWM_Start(EPWM_CH_4_MSK|EPWM_CH_2_MSK);
 }

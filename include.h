@@ -11,6 +11,7 @@
 #include <led.H>
 #include <flash.H>
 #include "intrins.h" 
+#include <epwm.h>
 
 
 #define		MOS_U_V			{PWMMASKE = 0x39;C1CON0 = 0x82;C1CON2 = 0x00;} //C1COCN2 = Bit5 0’˝≥£ ‰≥ˆ
@@ -79,7 +80,7 @@
 #define   ON_BLDC_INTE     {PWMPIF = 0x00;PWMZIF = 0x00;PWMUIF = 0x00;PWMDIF = 0x00;EIE2 |= 0x08;} // enable PWM interrupter
 #define   OFF_BLDC_INTE    {PWMPIF = 0x00;PWMZIF = 0x00;PWMUIF = 0x00;PWMDIF = 0x00;EIE2 &=~0x08;} //disable PWM interrupter
 
-#define   ON_PWM_IN_INTE     {T2IF = 0x00;ET2 = 1;} //ET2 =timer2 ÊÄª‰∏≠Êñ≠ÂÖÅËÆ∏‰Ωç
+#define   ON_PWM_IN_INTE     {T2IF = 0x00;ET2 = 1;} //ET2 =timer2 ÊÄª‰∏≠Êñ?ÂÖÅË?∏‰Ωç
 #define   OFF_PWM_IN_INTE    {T2IF = 0x00;ET2 = 0;}
 
 //#define   ON_HALL_INTE       {P3EXTIF = 0x00;P3EXTIE = 0x46;}

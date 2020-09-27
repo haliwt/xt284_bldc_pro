@@ -95,7 +95,7 @@ void	gpio_init(void)
 	PS_ADET  = 0x3f;
 	PS_FB    = 0x3f;
 }
-
+#if 1
 void	pwm_init(void)
 {
 	PWMCON = 0x0A;//
@@ -115,9 +115,12 @@ void	pwm_init(void)
 	PWMCNTM =   0x3F;
 	PWMCNTE =   0x3F;
 	PWMCNTCLR = 0x3F;
+    
+    EPWM_ConfigChannelPeriod(EPWM0, 0x0190);  //Tpmw = 1/10(KHz) 16KHZ = PWMDn = 0x190
+	EPWM_ConfigChannelPeriod(EPWM1, 0x0190);
 	
-	PWMP0L = 0x20; //周期值
-	PWMP0H = 0x03;
+//	PWMP0L = 0x20; //周期值
+//	PWMP0H = 0x03;
 	PWMP1L = 0x20;
 	PWMP1H = 0x03;
 	PWMP2L = 0x00;
@@ -128,11 +131,14 @@ void	pwm_init(void)
 	PWMP4H = 0x00;
 	PWMP5L = 0x00;
 	PWMP5H = 0x00;
+    
+    EPWM_ConfigChannelSymDuty(EPWM0, 0x00c8); // 50%
+	EPWM_ConfigChannelSymDuty(EPWM1, 0x00c8);
 	
-	PWMD0L = 0x00;//比较值
-	PWMD0H = 0x00;
-	PWMD1L = 0x20;
-	PWMD1H = 0x03;
+	//PWMD0L = 0x00;//比较值
+	//PWMD0H = 0x00;
+	//PWMD1L = 0x20;
+	//PWMD1H = 0x03;
 	
 	PWMD2L = 0x00;
 	PWMD2H = 0x00;
@@ -179,7 +185,7 @@ void	pwm_init(void)
 	PWMUIF = 0x00;
 	PWMDIF = 0x00;
 }
-
+#endif 
 static void ACMP_Dealy(void)
 {
 	volatile uint8_t i;

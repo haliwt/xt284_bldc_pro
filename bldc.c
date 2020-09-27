@@ -321,251 +321,6 @@ void  StartTest(void)
 		}
 	}
   #endif 
-#if 0
-  if(++BLDC.check_over_time<5000)
-	{
-		BLDC.stem_time = 0;
-		BLDC.BEMF_Number = 0;
-		C1CON2 = 0x00;
-		C1CON0 = 0x80;
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x01;}
-		C1CON0 = 0x81;
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x02;}
-		C1CON0 = 0x82;
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x04;}
-		
-		if(BLDC.EMF_last != BLDC.BEMF_Number)
-		{
-			BLDC.start_times = 0;
-			BLDC.zero_now_time.one.h  = TH0;
-			BLDC.zero_now_time.one.l  = TL0;
-			TH0 = 0;
-			TL0 = 0;
-			TF0 = 0;
-			BLDC.zero_period.all = BLDC.zero_period.all - (BLDC.zero_period.all >>2) + BLDC.zero_now_time.all;//240
-			BLDC.output_time.all = BLDC.zero_period.all >>3;//30
-			BLDC.output_time.all -= (BLDC.output_time.all>>3);
-			BLDC.zero_check_time.all = BLDC.output_time.all >>2;
-			//BLDC.zero_check_time.all -= (BLDC.zero_check_time.all>>3);
-			
-			switch(BLDC.BEMF_Number)
-			{
-				case 1:
-					if(BLDC.EMF_last == 3)
-					{
-						if(BLDC.check_cw_ccw_flag == _CW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CW;
-						}
-					}
-					if(BLDC.EMF_last == 5)
-					{
-						if(BLDC.check_cw_ccw_flag == _CCW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CCW;
-						}
-					}
-					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 3;}
-					else{BLDC.motor_step = 4;}
-					
-					break;
-				case 3:
-					if(BLDC.EMF_last == 2)
-					{
-						if(BLDC.check_cw_ccw_flag == _CW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CW;
-						}
-					}
-					if(BLDC.EMF_last == 1)
-					{
-						if(BLDC.check_cw_ccw_flag == _CCW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CCW;
-						}
-					}
-					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 2;}
-					else{BLDC.motor_step = 5;}
-					break;
-				case 2:
-					
-					if(BLDC.EMF_last == 6)
-					{
-						if(BLDC.check_cw_ccw_flag == _CW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CW;
-						}
-					}
-					if(BLDC.EMF_last == 3)
-					{
-						if(BLDC.check_cw_ccw_flag == _CCW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CCW;
-						}
-					}
-					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 1;}
-					else{BLDC.motor_step = 0;}
-					break;
-				case 6:
-					if(BLDC.EMF_last == 4)
-					{
-						if(BLDC.check_cw_ccw_flag == _CW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CW;
-						}
-					}
-					if(BLDC.EMF_last == 2)
-					{
-						if(BLDC.check_cw_ccw_flag == _CCW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CCW;
-						}
-					}
-					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 0;}
-					else{BLDC.motor_step = 1;}
-					break;
-				case 4:
-					if(BLDC.EMF_last == 5)
-					{
-						if(BLDC.check_cw_ccw_flag == _CW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CW;
-						}
-					}
-					if(BLDC.EMF_last == 6)
-					{
-						if(BLDC.check_cw_ccw_flag == _CCW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CCW;
-						}
-					}
-					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 5;}
-					else{BLDC.motor_step = 2;}
-					break;
-				case 5:
-					if(BLDC.EMF_last == 1)
-					{
-						if(BLDC.check_cw_ccw_flag == _CW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CW;
-						}
-					}
-					if(BLDC.EMF_last == 4)
-					{
-						if(BLDC.check_cw_ccw_flag == _CCW)
-						{
-							BLDC.EMI_count++;
-						}
-						else
-						{
-							BLDC.EMI_count = 0;
-							BLDC.check_cw_ccw_flag = _CCW;
-						}
-					}
-					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 4;}
-					else{BLDC.motor_step = 3;}
-					break;
-				default:
-					break;
-			}
-			BLDC.EMF_last = BLDC.BEMF_Number;
-		}
-		if(BLDC.EMI_count>=5)
-		{
-			BLDC.EMI_count = 0;
-			if(BLDC.check_cw_ccw_flag == BLDC.cw_ccw_now)
-			{
-				switch(BLDC.motor_step)
-				{
-					case 0:{MOS_U_V;break;}
-					case 1:{MOS_W_V;break;}
-					case 2:{MOS_W_U;break;}
-					case 3:{MOS_V_U;break;}
-					case 4:{MOS_V_W;break;}
-					case 5:{MOS_U_W;break;}
-					default :{MOS_OFF;break;}
-				}
-				TL1 = ~BLDC.zero_check_time.one.l;					
-				TH1 = ~BLDC.zero_check_time.one.h; 
-				TF1 = 0;
-				BLDC.loop_status = _WAIT_CHECK;
-				BLDC.status = _LOOP;
-				BLDC.EMI_NG_count = 0;
-			}
-			else
-			{
-				BLDC.check_over_time = 0;
-				BLDC.check_over_time = _break_time;
-				MOS_OFF;
-				BLDC.status = _BREAK;
-			}
-		}
-	}
-	else
-	{
-		BLDC.status = _OPEN;
-		BLDC.open_status = OPEN_CONF_COM;
-	}
-  #endif 
-	
 }
 /*************************************************************
 	*
@@ -799,70 +554,79 @@ void  StartMotorRun(void)
 				{
 					case 0:
 						{
-						PWMD1L   = 0x90; //Õ¼¿Õ±È
-						PWMD1H   = 0x01;    //
-						PWMD0L   = 0xA0;  //
-						PWMD0H   = 0x00;
+							EPWM_ConfigChannelPeriod(EPWM0, 0x0320); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x0320); //t=10khz
+							
+							EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+					
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
 						break;
 						}
 					case 1:
 						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
+							EPWM_ConfigChannelPeriod(EPWM0, 0x0320); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x0320); //t=10khz
+							
+							EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+					
+						 PWMLOADEN = 0x03;
 						BLDC.motor_step++;
 						break;
 						}
 					case 2:
 						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0xA0;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
+								EPWM_ConfigChannelPeriod(EPWM0, 0x320); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x0320); //t=10khz
+							
+							EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+					
+						 PWMLOADEN = 0x03;
 						BLDC.motor_step++;
 						break;
 						}
 					case 3:
 						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
+						    EPWM_ConfigChannelPeriod(EPWM0, 0x0320); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x0320); //t=10khz
+							
+							EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+					
+						 PWMLOADEN = 0x03; 
 						BLDC.motor_step++;
 						break;
 						}
 					case 4:
 						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0xA0;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
+							EPWM_ConfigChannelPeriod(EPWM0, 0x320); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x320); //t=10khz
+							
+							EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+						
+						 PWMLOADEN = 0x03;
 						BLDC.motor_step++;
 						break;
 						}
 					case 5:
 						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
+						EPWM_ConfigChannelPeriod(EPWM0, 0x320); //T = 400 *2 *1/8 
+						EPWM_ConfigChannelPeriod(EPWM1, 0x320); //t=10khz
+						
+						EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
+						EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+						
+						 PWMLOADEN = 0x03;
 						BLDC.motor_step=0; //WT.EDIT
 						break;
 						}
 					default :{MOS_OFF;break;}
 				}
 				com_charge();
-
-
-    
 }
 /**********************************************************************************
 	*
@@ -873,13 +637,18 @@ void  StartMotorRun(void)
 ***********************************************************************************/
 void  DutyRef(void)
 {
-    
+    EPWM_ConfigChannelPeriod(EPWM0, 0x0320); //T = 400 *2 *1/8 
+	EPWM_ConfigChannelPeriod(EPWM1, 0x0320); //t=10khz
+	
+    EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
+	EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+	PWMLOADEN = 0x03;
 					
-					
+	#if 0				
 	EPWM_ConfigChannelSymDuty(EPWM0, 0x0190);
 	EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
-		PWMLOADEN = 0x03;
-					
+	PWMLOADEN = 0x03;
+	#endif 				
 
 
     
