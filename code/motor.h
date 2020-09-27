@@ -77,5 +77,7 @@ uint8_t NoHall_PhaseValue(void) ;
 
 void InputValue_DectorPhase(uint8_t state);
 void OPEN3(void);
+void NoSense_InterruptPhase(void);
+
 
 #endif 

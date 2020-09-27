@@ -57,9 +57,10 @@ int main(void)
 					    
                       }
              
-                  state =  NoHall_PhaseValue() ;
+                 // state =  NoHall_PhaseValue() ;
                   //NO_HallSensor_DectorPhase(state);
-                    InputValue_DectorPhase(state);
+                   // InputValue_DectorPhase(state);
+                   NoSense_InterruptPhase();
                  LED1=0;
                 }
                   

@@ -782,6 +782,105 @@ void InputValue_DectorPhase(uint8_t state)
 }
 /*******************************************************************************
 	*
+	*Function Name: uint8_t NO_HallSensor_GetPinState(void)
+	*Function :Dector no hall senseor BEMF
+	*Input Ref:NO
+	*Return Ref:No
+	*
+*******************************************************************************/
+void NoSense_InterruptPhase(void)
+{
+   if(gPhase >6)gPhase =0;
+  
+	switch(gPhase){
+
+        case 1:  
+              MOS_A_H	; // A+ C- "2"
+             
+           
+				MOS_A_L =0;
+                MOS_B_L =0 ;
+					
+                 MOS_C_L =1;   //œ¬∞Î÷‹
+                    
+			
+			
+			 
+			  
+			  
+        break;
+
+		case 2:
+				   MOS_A_H; //A+ 
+                  MOS_A_L =0;
+                   MOS_C_L =0; //turn off C.
+                   MOS_B_L =1; //A+ ,B- '6'
+               
+				
+        break;
+
+		case 3:
+				
+				 MOS_C_H	; //C+,B- '4'
+               
+			   
+                   MOS_C_L =0;
+                   MOS_A_L =0;
+				   MOS_B_L=1; //B-
+                  
+		         
+
+		break;
+
+		case 4:
+				 MOS_C_H;  //C+ ;
+                MOS_C_L =0;
+                  MOS_B_L =0;
+				   MOS_A_L =1	; //C+ A- "5"
+                   
+			  
+				
+				
+
+		break;
+
+		case 5:
+			     MOS_B_H	;//B+ A- "1"
+                
+			   
+                    MOS_C_L=0;
+                    MOS_B_L=0;
+                    MOS_A_L=1; //A-
+                
+				
+
+		break;
+
+		case 6: 
+				      MOS_B_H; //B+ ;
+                      MOS_A_L=0;
+                    MOS_B_L =0;
+				    MOS_C_L=1	; //B+,C- "3"
+                     gPhase =1;
+                  
+
+					
+		
+
+		break;
+
+
+
+
+
+
+	}
+
+
+}
+
+/*******************************************************************************
+	*
 	*Function Name: void PowerOn_MotorRun(void)
 	*Function :Dector no hall senseor BEMF
 	*Input Ref:NO
@@ -887,86 +986,7 @@ void PowerOn_MotorRun(void)
 
 }
 
-/*******************************************************************************
-	*
-	*Function Name: void Start_MotorRun(void)
-	*Function :Dector no hall senseor BEMF
-	*Input Ref:NO
-	*Return Ref:No
-	*
-*******************************************************************************/
-void OPEN(void)
-{
-	 PWMCON = 0X0A;
-     PWMOE  = 0x07;
-     switch(gPhase)
-					{
-						case 0:
-							{
-							PWMD1L	 = 0x90;
-							PWMD1H	 = 0x01;
-							PWMD0L	 = 0x00;
-							PWMD0H	 = 0x00;
-							PWMLOADEN = 0x03;
-                            gPhase ++;
-							break;
-							}
-						case 1:
-							{
-							PWMD0L	 = 0x90;
-							PWMD0H	 = 0x01;
-							PWMD1L	 = 0x00;
-							PWMD1H	 = 0x00;
-							PWMLOADEN = 0x03;
-                                 gPhase ++;
-							break;
-							}
-						case 2:
-							{
-							PWMD1L	 = 0x90;
-							PWMD1H	 = 0x01;
-							PWMD0L	 = 0x00;
-							PWMD0H	 = 0x00;
-							PWMLOADEN = 0x03;
-                                 gPhase ++;
-							break;
-							}
-						case 3:
-							{
-							PWMD0L	 = 0x90;
-							PWMD0H	 = 0x01;
-							PWMD1L	 = 0x00;
-							PWMD1H	 = 0x00;
-							PWMLOADEN = 0x03;
-                                 gPhase ++;
-							break;
-							}
-						case 4:
-							{
-							PWMD1L	 = 0x90;
-							PWMD1H	 = 0x01;
-							PWMD0L	 = 0x00;
-							PWMD0H	 = 0x00;
-							PWMLOADEN = 0x03;
-                                 gPhase ++;
-							break;
-							}
-						case 5:
-							{
-							PWMD0L	 = 0x90;
-							PWMD0H	 = 0x01;
-							PWMD1L	 = 0x00;
-							PWMD1H	 = 0x00;
-							PWMLOADEN = 0x03;
-                                 gPhase =0;
-							break;
-							}
-						default :{MOS_OFF;break;}
-					}
-					com_charge();
 
-
-}
 void	com_charge(void)
 {
 	switch(gPhase)

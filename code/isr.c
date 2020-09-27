@@ -162,6 +162,7 @@ void ACMP_IRQHandler(void)  interrupt ACMP_VECTOR
 {
 	if(ACMP_GetIntFlag(ACMP1))
 	{
+		#if 0
 		intBEMF = C1CON1; //反向电动势比较输出结果
 		if(intBEMF&0x80)
 		{
@@ -172,7 +173,7 @@ void ACMP_IRQHandler(void)  interrupt ACMP_VECTOR
 			P36=0;
 		}
 		//check_FB();
-
+       #endif 
 		ACMP_ClearIntFlag(ACMP1);
 	}	
 	
@@ -207,8 +208,20 @@ void Timer4_IRQHandler(void)  interrupt TMR4_VECTOR
  ** \return none
  ******************************************************************************/
 void EPWM_IRQHandler(void)  interrupt EPWM_VECTOR
-{
-
+{ 
+    static uint8_t arr[2],i=0 ;
+    if (EPWM_GetZeroIntFlag(EPWM0))
+	{
+		intBEMF = C1CON1; //反向电动势比较输出结果
+        i++;
+        if(i==1)arr[0]=intBEMF& 0x80;
+        else {
+            i=0;
+            arr[1]=intBEMF& 0x80;
+        }
+        if(arr[0]!=arr[1])gPhase ++ ;
+		EPWM_ClearZeroIntFlag(EPWM0); 
+	}
 }
 /******************************************************************************
  ** \brief	 ADC interrupt service function
