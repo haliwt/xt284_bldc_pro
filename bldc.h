@@ -6,8 +6,7 @@
 void	bldc_value_init(void);
 void	BLDC_main(void);
 void  blcd_start(void);
-
-void PreMotor_Condition(void);
+void BLDC_start(void);
 
 void  MotorStop(void);
 void  out_pwm(unsigned int  in);
@@ -16,12 +15,15 @@ void  check_FB(void);
 void  StartMotorRun(void);
 
 void	confirm_phase(void);
-void  Test(void);
+void  StartTest(void);
+
 
 void  MotorRun(void);
 void com_charge(void);
 
+void NormalMotorRun(void);
 
+void  DutyRef(void);
 
 
 #endif

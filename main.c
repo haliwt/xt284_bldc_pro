@@ -21,52 +21,57 @@ void	main(void)
 	MOS_OFF;
 	BLDC.status = 1;
 	BLDC.error = _pwm_limit_error; 
-	BLDC.pwm_set = 1000;
+	//BLDC.pwm_set = 1000;
 
-	
+	BLDC.pwm_set = 5000;
 	while(1)
 	{
-      
-		PreMotor_Condition();
-		pflg =  HDKey_Scan(0);
-          if(pflg==1){
+         
+		    BLDC_start();
+        
+           pflg =  HDKey_Scan(0);
+           if(pflg==1){
                poweronflg = poweronflg ^0x01;
                if(poweronflg ==1){
-                 LED0=1;
-                 LED1=1;
-                
-                    count++ ;
-                    if(count < 2000){
-                      StartMotorRun();
-                      Test();
-                    }
-                    else{
-                       // confirm_phase();
-                        MotorRun();
-                        count =4000;
-                    }
+                 
+                   
+                 
+				if(count < 200){
+                     count++ ;
+                    StartTest();//sound a little 
+                    StartMotorRun();
+                    LED0=1;
+                   LED1=1;
+                }
+				
+                    LED0=0;
+                    LED1= 0;
+                 //   DutyRef();
+                 //   NormalMotorRun();
+                BLDC_start();
+                 
+                   
+				
+     
+			 
                }
                else{
-                    LED0=0;
-                    LED1=0;
-                    count =0;
-                    MotorStop();
-                   #if 1
-                  // PreMotor_Condition();
-                     hardware_init();
+                LED0=1;
+                LED1=0;
+               count=0;
+                MotorStop();
+                   hardware_init();
                     KEY_Init();
                     LED_Init();
                     bldc_value_init();
                     adc_value_init();
                     pwm_value_init();
-                  
                     check_current_offset();
                     MOS_OFF;
                     BLDC.status = 1;
                     BLDC.error = _pwm_limit_error; 
                     BLDC.pwm_set = 1000;
-                   #endif 
-                   
+               
                }
            }
               

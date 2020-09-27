@@ -4,7 +4,7 @@
 /******************************************************************************
  **
  ** Function Name:	void delay_10us(uint16_t n) 
- ** Function : delay 1ms
+ ** Function : 延时10*n微秒 
  ** Input Ref:NO
  ** Return Ref:NO
  **   
@@ -47,6 +47,10 @@ void KEY_Init(void)
 	GPIO_SET_MUX_MODE(P24CFG, GPIO_MUX_GPIO);		//设置P24为GPIO模式
 	GPIO_ENABLE_INPUT(P2TRIS, GPIO_PIN_4);			//设置为输入模式
 	GPIO_ENABLE_RD(P2RD, GPIO_PIN_4);	//开启下拉
+
+
+	
+	
 
 	#if 0
 	/*

@@ -61,7 +61,7 @@ static  void	delay_us(uint8_t  in)
 
 void	bldc_value_init(void)
 {
-	BLDC.cw_ccw_in = 0;
+		BLDC.cw_ccw_in = 0;
 	BLDC.cw_ccw_now = 0;
 	BLDC.EMI_flag = 0;
 	BLDC.EMI_count = 0;
@@ -71,7 +71,7 @@ void	bldc_value_init(void)
 	BLDC.EMI_NG_count = 0;
 	BLDC.turn_OK_count = 0;
 	
-	BLDC.duzhuan_time = 0;
+	BLDC.stem_time = 0;
 	
 	BLDC.open_period = _open_max_time;
 	BLDC.check_over_time = 0;
@@ -80,13 +80,13 @@ void	bldc_value_init(void)
 	BLDC.zero_period.all = 0xffff;
 	
 	BLDC.read_EMF = 0;    
-	BLDC.EMF_now = 0;   
+	BLDC.BEMF_Number = 0;   
 	BLDC.EMF_last = 0;
 	
 	BLDC.output_time.all = 0xffff;
 	BLDC.zero_check_time.all = 0xffff;
 	
-	BLDC.pwm_out = _start_pwm_set;
+	BLDC.pwm_out = _start_pwm_set; //频率
 	BLDC.reset_time = 0;
 	
 	BLDC.loop_status = 0;
@@ -127,14 +127,7 @@ unsigned int  soft_pwm(unsigned int in,unsigned int out)
 	}
 	return  out;
 }
-/***********************************************************************************
-	*
-	*Function Name: void out_pwm(uint8_t n)
-	*Function :
-	*
-	*
-	*
-***********************************************************************************/
+
 void  out_pwm(unsigned int    in)
 {
 	if(in>_pwm_max){in = _pwm_max;}
@@ -144,7 +137,7 @@ void  out_pwm(unsigned int    in)
 	if(in<350)
 	{
 		PWMPIE = 0x00;  //周期中断
-		PWMZIE = 0x01;  //零点中断--通道 2 --使能
+		PWMZIE = 0x01;  //零点中断
 		PWMUIE = 0x00;  //向上比较中断
 		PWMDIE = 0x00;  //向下比较中断
 		PWMPIF = 0x00;  //中断标志
@@ -154,7 +147,7 @@ void  out_pwm(unsigned int    in)
 	}
 	else if(in>450)
 	{
-		PWMPIE = 0x01;  //周期中断---1 -中断使能
+		PWMPIE = 0x01;  //周期中断
 		PWMZIE = 0x00;  //零点中断
 		PWMUIE = 0x00;  //向上比较中断
 		PWMDIE = 0x00;  //向下比较中断
@@ -163,7 +156,7 @@ void  out_pwm(unsigned int    in)
 		PWMUIF = 0x00;
 		PWMDIF = 0x00;
 	}
-	if(BLDC.loop_status != _DEGAUSS) //_DEGAUSS = 5 消磁
+	if(BLDC.loop_status != _DEGAUSS)
 	{
 		PWMD1L   = pwm_now.change.count[1];
 		PWMD1H   = pwm_now.change.count[0];
@@ -176,27 +169,429 @@ void  out_pwm(unsigned int    in)
 /********************************************************************
 	*
 	*Function Name:void MotoRun(void)
-	*Function:Motor normal run for works
+	*Function:open
 	*Inputr Ref:NO
 	*Return Ref:NO
 	*
 *********************************************************************/
 void MotorRun(void)
 {
+	switch(BLDC.open_status)
+		{
+			case   OPEN_CONF_COM:
+				BLDC.zero_check_time.all =  BLDC.open_period;
+				confirm_phase();
+				com_charge();
+				BLDC.stem_time = 0;
+				BLDC.check_over_time = 0;
+			  BLDC.open_period = _open_max_time;
+				BLDC.zero_check_time.all =  BLDC.open_period;
+				TH1 = 0;
+				TL1 = 0;
+				TF1 = 0;
+				BLDC.open_status = OPEN_WAIT_CHECK;
+				break;
+			case   OPEN_WAIT_CHECK:
+				if(TF1)
+				{
+					TF1 = 0;
+					BLDC.open_status = OPEN_CHECK_ZERO;
+				}
+				break;
+			case   OPEN_CHECK_B:
+				if((BLDC.EMI_flag&0x80)==0x00)
+				{
+					BLDC.open_status = OPEN_CHECK_ZERO;
+				}
+				if((--BLDC.zero_check_time.all) == 0)
+				{
+					BLDC.open_status = OPEN_COM_CHARGE;
+					BLDC.EMI_OK_count = 0;
+					BLDC.turn_OK_count = 0;
+				}
+				break;
+			case  OPEN_CHECK_ZERO:
+				BLDC.zero_now_time.one.h  = TH0;
+				BLDC.zero_now_time.one.l  = TL0;
+				if(BLDC.EMI_flag&0x80)
+				{
+					if(++BLDC.EMI_OK_count>=10)
+					{
+						BLDC.EMI_OK_count = 0;
+						TH0 = 0;
+						TL0 = 0;
+						TF0 = 0;
+						BLDC.zero_period.all =  (BLDC.zero_now_time.all<<2);//240
+						if(++BLDC.turn_OK_count>5)
+						{
+							BLDC.turn_OK_count = 0;
+							MOS_OFF;
+							BLDC.output_time.all = BLDC.zero_now_time.all >>1;//30
+							BLDC.output_time.all -= (BLDC.zero_now_time.all >>2);//30
+							BLDC.zero_check_time.all = BLDC.output_time.all >>1;
+							BLDC.status = _LOOP;
+							TL1 = ~BLDC.zero_check_time.one.l;					
+							TH1 = ~BLDC.zero_check_time.one.h; 
+							TF1 = 0;
+							BLDC.loop_status = _WAIT_CHECK;
+						}
+						else
+						{
+							BLDC.open_status = OPEN_COM_CHARGE;
+						}
+					}
+				}
+				else
+				{
+					BLDC.EMI_OK_count = 0;
+				}
+				if((--BLDC.zero_check_time.all) == 0)
+				{
+					BLDC.open_status = OPEN_COM_CHARGE;
+					BLDC.EMI_OK_count = 0;
+					BLDC.turn_OK_count = 0;
+				}
+				break;
+			case  OPEN_COM_CHARGE:
+				BLDC.open_period -= (BLDC.open_period/15+1);
+				if(BLDC.open_period<_open_min_time)
+				{
+					BLDC.open_period = _open_max_time;
+					if(++BLDC.start_times>3)
+					{
+						BLDC.error  |= _emf_Error;
+						BLDC.start_times = 0;
+					}
+				}
+				BLDC.zero_check_time.all =  BLDC.open_period;
+				//confirm_phase();
+				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
+				
+				com_charge();
+				BLDC.stem_time = 0;
+				BLDC.check_over_time = 0;
+				TH1 = 0x7f;
+				TL1 = 0;
+				TF1 = 0;
+				BLDC.open_status = OPEN_WAIT_CHECK;
+				break;
+			case  OPEN_ERROR:
+				break;
+			default:BLDC.loop_status = OPEN_CONF_COM;
+				break;
+		}
+}
+/*************************************************************
+	*
+	*Function Name() : void StartTest(void)
+	*Function : check reserves voltage BEMF
+	*Input Ref: NO
+	*Return: Ref : NO
+	*
+*************************************************************/
+void  StartTest(void)
+{
+	#if 1
+	if(++BLDC.check_over_time<5000)
+	{
+		BLDC.stem_time= 0;
+		BLDC.BEMF_Number = 0;
+		C1CON2 = 0x00; //比较控制寄存器2 --
+		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x01;} //U --BEMF
+		C1CON0 = 0x81;
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x02;} //V ---BEMF
+		C1CON0 = 0x82;
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x04;}//W  ---BEMF 
+
+		switch(BLDC.BEMF_Number)
+		{
+
+
+					case 0x06:{MOS_U_V;break;}  //A+ B- '6'
+					case 0x04:{MOS_W_V;break;}    //C+ B-  "4"
+					case 0x05:{MOS_W_U;break;}   //C+ A- "5"
+					case 0x01:{MOS_V_U;break;}     //B+ A-   "1"
+					case 0X03:{MOS_V_W;break;}       //B+ C - "3"
+					case 0X02:{MOS_U_W;break;}        // A+ C-  "2"
+					default :{MOS_OFF;break;}
+		}
+	}
+  #endif 
+#if 0
+  if(++BLDC.check_over_time<5000)
+	{
+		BLDC.stem_time = 0;
+		BLDC.BEMF_Number = 0;
+		C1CON2 = 0x00;
+		C1CON0 = 0x80;
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x01;}
+		C1CON0 = 0x81;
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x02;}
+		C1CON0 = 0x82;
+		delay_us(20);
+		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x04;}
+		
+		if(BLDC.EMF_last != BLDC.BEMF_Number)
+		{
+			BLDC.start_times = 0;
+			BLDC.zero_now_time.one.h  = TH0;
+			BLDC.zero_now_time.one.l  = TL0;
+			TH0 = 0;
+			TL0 = 0;
+			TF0 = 0;
+			BLDC.zero_period.all = BLDC.zero_period.all - (BLDC.zero_period.all >>2) + BLDC.zero_now_time.all;//240
+			BLDC.output_time.all = BLDC.zero_period.all >>3;//30
+			BLDC.output_time.all -= (BLDC.output_time.all>>3);
+			BLDC.zero_check_time.all = BLDC.output_time.all >>2;
+			//BLDC.zero_check_time.all -= (BLDC.zero_check_time.all>>3);
+			
+			switch(BLDC.BEMF_Number)
+			{
+				case 1:
+					if(BLDC.EMF_last == 3)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 5)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 3;}
+					else{BLDC.motor_step = 4;}
+					
+					break;
+				case 3:
+					if(BLDC.EMF_last == 2)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 1)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 2;}
+					else{BLDC.motor_step = 5;}
+					break;
+				case 2:
+					
+					if(BLDC.EMF_last == 6)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 3)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 1;}
+					else{BLDC.motor_step = 0;}
+					break;
+				case 6:
+					if(BLDC.EMF_last == 4)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 2)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 0;}
+					else{BLDC.motor_step = 1;}
+					break;
+				case 4:
+					if(BLDC.EMF_last == 5)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 6)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 5;}
+					else{BLDC.motor_step = 2;}
+					break;
+				case 5:
+					if(BLDC.EMF_last == 1)
+					{
+						if(BLDC.check_cw_ccw_flag == _CW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CW;
+						}
+					}
+					if(BLDC.EMF_last == 4)
+					{
+						if(BLDC.check_cw_ccw_flag == _CCW)
+						{
+							BLDC.EMI_count++;
+						}
+						else
+						{
+							BLDC.EMI_count = 0;
+							BLDC.check_cw_ccw_flag = _CCW;
+						}
+					}
+					if(BLDC.check_cw_ccw_flag == _CW){BLDC.motor_step = 4;}
+					else{BLDC.motor_step = 3;}
+					break;
+				default:
+					break;
+			}
+			BLDC.EMF_last = BLDC.BEMF_Number;
+		}
+		if(BLDC.EMI_count>=5)
+		{
+			BLDC.EMI_count = 0;
+			if(BLDC.check_cw_ccw_flag == BLDC.cw_ccw_now)
+			{
+				switch(BLDC.motor_step)
+				{
+					case 0:{MOS_U_V;break;}
+					case 1:{MOS_W_V;break;}
+					case 2:{MOS_W_U;break;}
+					case 3:{MOS_V_U;break;}
+					case 4:{MOS_V_W;break;}
+					case 5:{MOS_U_W;break;}
+					default :{MOS_OFF;break;}
+				}
+				TL1 = ~BLDC.zero_check_time.one.l;					
+				TH1 = ~BLDC.zero_check_time.one.h; 
+				TF1 = 0;
+				BLDC.loop_status = _WAIT_CHECK;
+				BLDC.status = _LOOP;
+				BLDC.EMI_NG_count = 0;
+			}
+			else
+			{
+				BLDC.check_over_time = 0;
+				BLDC.check_over_time = _break_time;
+				MOS_OFF;
+				BLDC.status = _BREAK;
+			}
+		}
+	}
+	else
+	{
+		BLDC.status = _OPEN;
+		BLDC.open_status = OPEN_CONF_COM;
+	}
+  #endif 
+	
+}
+/*************************************************************
+	*
+	*Function Name() : NormalMotorRun(void)
+	*Function : motor normal works
+	*Input Ref: NO
+	*Return: Ref : NO
+	*
+*************************************************************/
+void  NormalMotorRun(void)
+{
+	
 	unsigned char i;
 	for(i=0;i<8;i++)
 	{
 		switch(BLDC.loop_status)
 		{
 			case   _WAIT_CHECK:
-				if(TF1)
+				if(TF1)//这里其实才是等待消磁
 				{
-					TF1 = 0; //
+					TF1 = 0;
 					BLDC.loop_status = _CHECK_ZERO;
 				}
 				break;
 			case   _CHECK_ZERO_B:
-				if((BLDC.EMI_flag&0x80)==0x00)
+				if(!(BLDC.EMI_flag&0x80))
 				{
 					BLDC.loop_status = _CHECK_ZERO;
 				}
@@ -206,22 +601,23 @@ void MotorRun(void)
 					BLDC.error  |= _emf_Error;
 				}*/
 				break;
-			case  _CHECK_ZERO:
+			case  _CHECK_ZERO://消磁完了之后等待过零点
 				BLDC.zero_now_time.one.h  = TH0;
-				BLDC.zero_now_time.one.l  = TL0;
-				if(BLDC.EMI_flag&0x80)
+				BLDC.zero_now_time.one.l  = TL0;//这个值不停的跟新，直到比较器发生跳变
+				if(BLDC.EMI_flag&0x80)					//此时记录的就是上次过零点和下次过零点之间的时间，也就是60度的时间
 				{
 					TH0 = 0;
 					TL0 = 0;
 					TF0 = 0;
-					BLDC.zero_period.all = BLDC.zero_period.all - (BLDC.zero_period.all >>2) + BLDC.zero_now_time.all;//240
-					BLDC.output_time.all = BLDC.zero_period.all >>3;//30
+					BLDC.zero_period.all = BLDC.zero_period.all - (BLDC.zero_period.all >>2) + BLDC.zero_now_time.all;//240   这一句的作用是将60度的
+					BLDC.output_time.all = BLDC.zero_period.all >>3;//30	除以8，也就是三十度的时间					              	时间扩大4倍，也就是240度的时间
+					
 					BLDC.step_read = BLDC.output_time.all;
-					BLDC.output_time.all -= (BLDC.output_time.all>>3);
-					BLDC.zero_check_time.all = BLDC.output_time.all >>1;
-					BLDC.zero_check_time.all -= _DEGAUSS_TIME;
-				  BLDC.zero_check_time.all -= (BLDC.zero_check_time.all>>3);
-					BLDC.duzhuan_time = 0;
+					
+					BLDC.output_time.all -= (BLDC.output_time.all>>2);//24度的时间
+					BLDC.zero_check_time.all = BLDC.output_time.all >>1;//12度的时间
+				  BLDC.zero_check_time.all += (BLDC.zero_check_time.all>>3);//12度的时间在加上一个值，这个值作为微调用
+					BLDC.stem_time = 0;
 					TL1 = ~BLDC.output_time.one.l;					
 					TH1 = ~BLDC.output_time.one.h; 
 					TF1 = 0;
@@ -242,143 +638,31 @@ void MotorRun(void)
 					BLDC.error  |= _emf_Error;
 				}*/
 				break;
-			case  _WAIT_COM:
-				if(TF1)
+			case  _WAIT_COM://这里是等待延时30时间，但是这个延时时间并不一定是30度，根据实际情况调整
+				if(TF1)//
 				{
 					TF1 = 0;
 					BLDC.loop_status = _COM_CHARGE;
 				}
 				break;
 			case  _COM_CHARGE:
-				BLDC.output_time.all = _DEGAUSS_TIME;
-				TL1 = ~BLDC.output_time.one.l;					
-				TH1 = ~BLDC.output_time.one.h; 
+				TL1 = ~BLDC.zero_check_time.one.l;	//这里是将消磁的时间加入定时器，随后立马换向				
+				TH1 = ~BLDC.zero_check_time.one.h; 
 				TF1 = 0;
 				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
-				switch(BLDC.motor_step)
-				{
-					case 0:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 1:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 2:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 3:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 4:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					case 5:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						break;
-						}
-					default :{MOS_OFF;break;}
-				}
 				com_charge();
-				BLDC.loop_status = _DEGAUSS;
+				BLDC.loop_status = _WAIT_CHECK;
 				break;
-			case  _DEGAUSS:
-				if(TF1)//&&((BLDC.EMI_flag&0x80)==0x00))
-				{
-					
-					PWMD1L   = pwm_now.change.count[1];
-					PWMD1H   = pwm_now.change.count[0];
-					PWMD0L   = 0x00;
-					PWMD0H   = 0x00;
-					PWMLOADEN = 0x03;
-					TH1 = ~BLDC.zero_check_time.one.h;
-					TL1 = ~BLDC.zero_check_time.one.l; 
-					TF1 = 0;
-					BLDC.loop_status = _WAIT_CHECK;
-				}
-				break;	
 			case  _ERROR:
 				break;
 			default:BLDC.loop_status = _WAIT_CHECK;
 				break;
 		}
 	}
-}
-/*************************************************************
-	*
-	*Function Name() : void Test(void)
-	*Function : check reserves voltage BEMF
-	*Input Ref: NO
-	*Return: Ref : NO
-	*
-*************************************************************/
-void  Test(void)
-{
-	if(++BLDC.check_over_time<5000)
-	{
-		BLDC.duzhuan_time = 0;
-		BLDC.EMF_now = 0;
-		C1CON2 = 0x00; //比较控制寄存器2 --
-		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.EMF_now |= 0x01;} //U --BEMF
-		C1CON0 = 0x81;
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.EMF_now |= 0x02;} //V ---BEMF
-		C1CON0 = 0x82;
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.EMF_now |= 0x04;}//W  ---BEMF 
-
-		switch(BLDC.EMF_now)
-		{
-
-
-					case 0x06:{MOS_U_V;break;}  //A+ B- '6'
-					case 0x04:{MOS_W_V;break;}    //C+ B-  "4"
-					case 0x05:{MOS_W_U;break;}   //C+ A- "5"
-					case 0x01:{MOS_V_U;break;}     //B+ A-   "1"
-					case 0X03:{MOS_V_W;break;}       //B+ C - "3"
-					case 0X02:{MOS_U_W;break;}        // A+ C-  "2"
-					default :{MOS_OFF;break;}
-		}
-	}
 
 	
 }
+
 	
 void	confirm_phase(void)
 {
@@ -517,7 +801,7 @@ void  StartMotorRun(void)
 						{
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
-						PWMD0L   = 0x00;
+						PWMD0L   = 0xA0;  //
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -527,7 +811,7 @@ void  StartMotorRun(void)
 						{
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
+						PWMD1L   = 0xA0;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -537,7 +821,7 @@ void  StartMotorRun(void)
 						{
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
+						PWMD0L   = 0xA0;
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -547,7 +831,7 @@ void  StartMotorRun(void)
 						{
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
+						PWMD1L   = 0xA0;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -557,7 +841,7 @@ void  StartMotorRun(void)
 						{
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
+						PWMD0L   = 0xA0;
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -567,7 +851,7 @@ void  StartMotorRun(void)
 						{
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
+						PWMD1L   = 0xA0;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step=0; //WT.EDIT
@@ -580,6 +864,63 @@ void  StartMotorRun(void)
 
     
 }
+/**********************************************************************************
+	*
+	*Function Name: DutyRef(void)
+	*
+	*
+	*
+***********************************************************************************/
+void  DutyRef(void)
+{
+    
+						PWMD1L   = 0x90;
+						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
+						PWMD0L   = 0xA0;  //
+						PWMD0H   = 0x00;
+					    PWMLOADEN = 0x03;
+				
+				
+						PWMD0L   = 0x90;
+						PWMD0H   = 0x01;
+						PWMD1L   = 0xA0;
+						PWMD1H   = 0x00;
+						PWMLOADEN = 0x03;
+    
+						PWMD1L   = 0x90;
+						PWMD1H   = 0x01;
+						PWMD0L   = 0xA0;
+						PWMD0H   = 0x00;
+						PWMLOADEN = 0x03;
+					
+						PWMD0L   = 0x90;
+						PWMD0H   = 0x01;
+						PWMD1L   = 0xA0;
+						PWMD1H   = 0x00;
+						PWMLOADEN = 0x03;
+						
+						PWMD1L   = 0x90;
+						PWMD1H   = 0x01;
+						PWMD0L   = 0xA0;
+						PWMD0H   = 0x00;
+					PWMLOADEN = 0x03;
+                    
+						PWMD0L   = 0x90;
+						PWMD0H   = 0x01;
+						PWMD1L   = 0xA0;
+						PWMD1H   = 0x00;
+						PWMLOADEN = 0x03;
+	EPWM_ConfigChannelSymDuty(EPWM0, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM1, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM2, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM3, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM4, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM5, 0x0A0);
+					
+
+
+    
+}
 
 void	BREAK(void)
 {
@@ -588,7 +929,7 @@ void	BREAK(void)
 		BLDC.check_over_time--;
 		out_pwm(_break_pwm);
 		MOS_BREAK;
-		BLDC.duzhuan_time = 0;
+		BLDC.stem_time= 0;
 	}
 	else
 	{
@@ -605,11 +946,11 @@ void	check_FB(void)
 	{
 		case   _STOP:
 			break;
-		case  _CHECK:Test();
+		case  _CHECK:StartTest(); //CHECK();
 			break;
-		case  _OPEN: StartMotorRun();
+		case  _OPEN:StartMotorRun();//OPEN();
 			break;
-		case  _LOOP:MotorRun();
+		case  _LOOP:MotorRun();//LOOP();
 			break;
 		case  _BREAK:BREAK();
 			break;
@@ -619,15 +960,15 @@ void	check_FB(void)
 
 /********************************************************************
 	*
-	*Function Name:PreMotor_Condition();
+	*Function Name:void BLDC_start(void)
 	*Function:
 	*Inputr Ref:NO
 	*Return Ref:NO
 	*
 *********************************************************************/
-void  PreMotor_Condition()
+void	BLDC_start(void)
 {
-    BLDC.mode = _run;
+	BLDC.mode = _run;
 	bldc_value_init();
 	BLDC.status = _CHECK;
 	ON_BLDC_INTE;
@@ -640,30 +981,23 @@ void  PreMotor_Condition()
 	*Return Ref:NO
 	*
 *********************************************************************/
-void MotorStop(void)
+void	 MotorStop(void)
 {
 	BLDC.mode = _stop;
 	MOS_OFF;
 	BLDC.pwm_out = 0;
 	out_pwm(BLDC.pwm_out);
-	BLDC.status = _STOP; //_STOP =0 
+	BLDC.status = _STOP;
 	OFF_BLDC_INTE;
 	BLDC.reset_time = 0;
 }
-/********************************************************************
-	*
-	*Function Name:
-	*Function:
-	*Inputr Ref:NO
-	*Return Ref:NO
-	*
-*********************************************************************/
+
 void	set_error(void)
 {
-	if(++BLDC.duzhuan_time>_en_duzhuan_time)
+	if(++BLDC.stem_time>_en_duzhuan_time)
 	{
 		BLDC.error  |= _duzhuan_error;
-		BLDC.duzhuan_time = 0;
+		BLDC.stem_time= 0;
 	}
 	if(BLDC.pwm_set<(_pwm_min_set))
 	{
@@ -710,7 +1044,7 @@ void BLDC_main(void)
 {
 	if(BLDC.mode)
 	{
-		if(BLDC.status != _LOOP) //_lOOP =3
+		if(BLDC.status != _LOOP)
 		{
 			if(BLDC.pwm_out>_start_max_pwm)
 			{
@@ -733,7 +1067,7 @@ void BLDC_main(void)
 		reset_error();
 		if(BLDC.error == _no_error)
 		{
-			PreMotor_Condition();
+			BLDC_start();
 		}
 	}
 }
@@ -748,9 +1082,10 @@ void BLDC_main(void)
 
 void EPWM_IRQHandler(void)  interrupt 18
 {
-	//C1CON2 =0X13;
-    BLDC.EMI_flag = C1CON1;
-	if(BLDC.EMI_flag&0x80)
+   
+
+	BLDC.EMI_flag = C1CON1;
+   if(BLDC.EMI_flag&0x80)
 	{
 		_FG_L;
 	}

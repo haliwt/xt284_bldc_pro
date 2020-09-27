@@ -136,7 +136,7 @@ void  pwm_value_init(void)
 }
 
 
-#if 0
+
 
 unsigned int  pwm_handing(void)
 {
@@ -186,6 +186,6 @@ unsigned int  pwm_handing(void)
 	
 	return  pwm.out;
 }
-#endif 
+
 
 
