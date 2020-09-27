@@ -291,7 +291,7 @@ void MotorRun(void)
 *************************************************************/
 void  StartTest(void)
 {
-	#if 0
+	#if 1
 	if(++BLDC.check_over_time<5000)
 	{
 		BLDC.stem_time= 0;
@@ -321,7 +321,7 @@ void  StartTest(void)
 		}
 	}
   #endif 
-#if 1
+#if 0
   if(++BLDC.check_over_time<5000)
 	{
 		BLDC.stem_time = 0;
@@ -827,7 +827,7 @@ void  StartMotorRun(void)
 						{
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
-						PWMD0L   = 0x00;
+						PWMD0L   = 0xC8;  //
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -837,7 +837,7 @@ void  StartMotorRun(void)
 						{
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
+						PWMD1L   = 0xC8;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -847,7 +847,7 @@ void  StartMotorRun(void)
 						{
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
+						PWMD0L   = 0xC8;
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -857,7 +857,7 @@ void  StartMotorRun(void)
 						{
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
+						PWMD1L   = 0xC8;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -867,7 +867,7 @@ void  StartMotorRun(void)
 						{
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
+						PWMD0L   = 0xC8;
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -877,7 +877,7 @@ void  StartMotorRun(void)
 						{
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
+						PWMD1L   = 0xC8;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step=0; //WT.EDIT

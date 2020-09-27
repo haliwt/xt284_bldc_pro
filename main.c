@@ -45,6 +45,7 @@ void	main(void)
                     //MotorRun();
                     NormalMotorRun();
                     count =4000;
+                   
 				}
      
 			 
