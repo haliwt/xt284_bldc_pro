@@ -23,6 +23,7 @@ void com_charge(void);
 
 void NormalMotorRun(void);
 
+void  DutyRef(void);
 
 
 #endif

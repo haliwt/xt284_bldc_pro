@@ -33,27 +33,32 @@ void	main(void)
            if(pflg==1){
                poweronflg = poweronflg ^0x01;
                if(poweronflg ==1){
-                 LED0=1;
-                   LED1=1;
+                 
                    
-                  count++ ;
-				if(count < 2000){
+                 
+				if(count < 200){
+                     count++ ;
                     StartTest();//sound a little 
                     StartMotorRun();
+                    LED0=1;
+                   LED1=1;
                 }
-				else{
-                    //MotorRun();
-                    NormalMotorRun();
-                    count =4000;
+				
+                    LED0=0;
+                    LED1= 0;
+                 //   DutyRef();
+                 //   NormalMotorRun();
+                BLDC_start();
+                 
                    
-				}
+				
      
 			 
                }
                else{
-                LED0=0;
+                LED0=1;
                 LED1=0;
-              
+               count=0;
                 MotorStop();
                    hardware_init();
                     KEY_Init();

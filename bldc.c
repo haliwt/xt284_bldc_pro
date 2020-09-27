@@ -577,33 +577,7 @@ void  StartTest(void)
 *************************************************************/
 void  NormalMotorRun(void)
 {
-	#if 0
-		BLDC.stem_time= 0;
-		BLDC.BEMF_Number = 0;
-		C1CON2 = 0x00; //比较控制寄存器2 --
-		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x01;} //U --BEMF
-		C1CON0 = 0x81;
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x02;} //V ---BEMF
-		C1CON0 = 0x82;
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x04;}//W  ---BEMF 
-
-		switch(BLDC.BEMF_Number) //模拟有霍尔6步换向
-		{
-
-
-					case 0x06:{MOS_U_V;break;}  //A+ B- '6'
-					case 0x04:{MOS_W_V;break;}    //C+ B-  "4"
-					case 0x05:{MOS_W_U;break;}   //C+ A- "5"
-					case 0x01:{MOS_V_U;break;}     //B+ A-   "1"
-					case 0X03:{MOS_V_W;break;}       //B+ C - "3"
-					case 0X02:{MOS_U_W;break;}        // A+ C-  "2"
-				//	default :{MOS_OFF;break;}
-		}
-	#endif 
+	
 	unsigned char i;
 	for(i=0;i<8;i++)
 	{
@@ -827,7 +801,7 @@ void  StartMotorRun(void)
 						{
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
-						PWMD0L   = 0xC8;  //
+						PWMD0L   = 0xA0;  //
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -837,7 +811,7 @@ void  StartMotorRun(void)
 						{
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0xC8;
+						PWMD1L   = 0xA0;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -847,7 +821,7 @@ void  StartMotorRun(void)
 						{
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;
-						PWMD0L   = 0xC8;
+						PWMD0L   = 0xA0;
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -857,7 +831,7 @@ void  StartMotorRun(void)
 						{
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0xC8;
+						PWMD1L   = 0xA0;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -867,7 +841,7 @@ void  StartMotorRun(void)
 						{
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;
-						PWMD0L   = 0xC8;
+						PWMD0L   = 0xA0;
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -877,7 +851,7 @@ void  StartMotorRun(void)
 						{
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0xC8;
+						PWMD1L   = 0xA0;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
 						BLDC.motor_step=0; //WT.EDIT
@@ -886,6 +860,63 @@ void  StartMotorRun(void)
 					default :{MOS_OFF;break;}
 				}
 				com_charge();
+
+
+    
+}
+/**********************************************************************************
+	*
+	*Function Name: DutyRef(void)
+	*
+	*
+	*
+***********************************************************************************/
+void  DutyRef(void)
+{
+    
+						PWMD1L   = 0x90;
+						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
+						PWMD0L   = 0xA0;  //
+						PWMD0H   = 0x00;
+					    PWMLOADEN = 0x03;
+				
+				
+						PWMD0L   = 0x90;
+						PWMD0H   = 0x01;
+						PWMD1L   = 0xA0;
+						PWMD1H   = 0x00;
+						PWMLOADEN = 0x03;
+    
+						PWMD1L   = 0x90;
+						PWMD1H   = 0x01;
+						PWMD0L   = 0xA0;
+						PWMD0H   = 0x00;
+						PWMLOADEN = 0x03;
+					
+						PWMD0L   = 0x90;
+						PWMD0H   = 0x01;
+						PWMD1L   = 0xA0;
+						PWMD1H   = 0x00;
+						PWMLOADEN = 0x03;
+						
+						PWMD1L   = 0x90;
+						PWMD1H   = 0x01;
+						PWMD0L   = 0xA0;
+						PWMD0H   = 0x00;
+					PWMLOADEN = 0x03;
+                    
+						PWMD0L   = 0x90;
+						PWMD0H   = 0x01;
+						PWMD1L   = 0xA0;
+						PWMD1H   = 0x00;
+						PWMLOADEN = 0x03;
+	EPWM_ConfigChannelSymDuty(EPWM0, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM1, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM2, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM3, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM4, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM5, 0x0A0);
+					
 
 
     
