@@ -799,8 +799,8 @@ void  StartMotorRun(void)
 				{
 					case 0:
 						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
+						PWMD1L   = 0x90; //Õ¼¿Õ±È
+						PWMD1H   = 0x01;    //
 						PWMD0L   = 0xA0;  //
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
@@ -876,20 +876,20 @@ void  DutyRef(void)
     
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
-						PWMD0L   = 0xA0;  //
+						PWMD0L   = 0x00;  //
 						PWMD0H   = 0x00;
 					    PWMLOADEN = 0x03;
 				
 				
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
+						PWMD1L   = 0x00;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
     
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;
-						PWMD0L   = 0xA0;
+						PWMD0L   = 0x00;
 						PWMD0H   = 0x00;
 						PWMLOADEN = 0x03;
 					
@@ -901,21 +901,18 @@ void  DutyRef(void)
 						
 						PWMD1L   = 0x90;
 						PWMD1H   = 0x01;
-						PWMD0L   = 0xA0;
+						PWMD0L   = 0x00;
 						PWMD0H   = 0x00;
 					PWMLOADEN = 0x03;
                     
 						PWMD0L   = 0x90;
 						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
+						PWMD1L   = 0x00;
 						PWMD1H   = 0x00;
 						PWMLOADEN = 0x03;
-	EPWM_ConfigChannelSymDuty(EPWM0, 0x0A0);
-	EPWM_ConfigChannelSymDuty(EPWM1, 0x0A0);
-	EPWM_ConfigChannelSymDuty(EPWM2, 0x0A0);
-	EPWM_ConfigChannelSymDuty(EPWM3, 0x0A0);
-	EPWM_ConfigChannelSymDuty(EPWM4, 0x0A0);
-	EPWM_ConfigChannelSymDuty(EPWM5, 0x0A0);
+	EPWM_ConfigChannelSymDuty(EPWM0, 0x0190);
+	EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+	
 					
 
 

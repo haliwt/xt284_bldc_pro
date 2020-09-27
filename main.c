@@ -46,7 +46,7 @@ void	main(void)
 				
                     LED0=0;
                     LED1= 0;
-                 //   DutyRef();
+                    DutyRef();
                  //   NormalMotorRun();
                 BLDC_start();
                  
