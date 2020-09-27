@@ -116,13 +116,13 @@ void	pwm_init(void)
 	PWMCNTE =   0x3F;
 	PWMCNTCLR = 0x3F;
     
-    EPWM_ConfigChannelPeriod(EPWM0, 0x0190);  //Tpmw = 1/10(KHz) 16KHZ = PWMDn = 0x190
+    EPWM_ConfigChannelPeriod(EPWM0, 0x0190);  //Tpmw = 400 * 2 * 1/8 = 1/10(KHz) 16KHZ = PWMDn = 0x190
 	EPWM_ConfigChannelPeriod(EPWM1, 0x0190);
 	
 //	PWMP0L = 0x20; //ÖÜÆÚÖµ
 //	PWMP0H = 0x03;
-	PWMP1L = 0x20;
-	PWMP1H = 0x03;
+//	PWMP1L = 0x20;
+//	PWMP1H = 0x03;
 	PWMP2L = 0x00;
 	PWMP2H = 0x00;
 	PWMP3L = 0x00;

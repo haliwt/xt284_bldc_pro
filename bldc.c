@@ -554,11 +554,11 @@ void  StartMotorRun(void)
 				{
 					case 0:
 						{
-							EPWM_ConfigChannelPeriod(EPWM0, 0x0320); //T = 400 *2 *1/8 
-							EPWM_ConfigChannelPeriod(EPWM1, 0x0320); //t=10khz
+							EPWM_ConfigChannelPeriod(EPWM0, 0x320); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x320); //t=10khz
 							
 							EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
-							EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
 					
 						PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -566,11 +566,11 @@ void  StartMotorRun(void)
 						}
 					case 1:
 						{
-							EPWM_ConfigChannelPeriod(EPWM0, 0x0320); //T = 400 *2 *1/8 
-							EPWM_ConfigChannelPeriod(EPWM1, 0x0320); //t=10khz
+							EPWM_ConfigChannelPeriod(EPWM0, 0x320); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x320); //t=10khz
 							
 							EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
-							EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
 					
 						 PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -578,11 +578,11 @@ void  StartMotorRun(void)
 						}
 					case 2:
 						{
-								EPWM_ConfigChannelPeriod(EPWM0, 0x320); //T = 400 *2 *1/8 
-							EPWM_ConfigChannelPeriod(EPWM1, 0x0320); //t=10khz
+							EPWM_ConfigChannelPeriod(EPWM0, 0x320); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x320); //t=10khz
 							
 							EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
-							EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
 					
 						 PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -590,11 +590,11 @@ void  StartMotorRun(void)
 						}
 					case 3:
 						{
-						    EPWM_ConfigChannelPeriod(EPWM0, 0x0320); //T = 400 *2 *1/8 
-							EPWM_ConfigChannelPeriod(EPWM1, 0x0320); //t=10khz
+						    EPWM_ConfigChannelPeriod(EPWM0, 0x320); //T = 400 *2 *1/8 
+							EPWM_ConfigChannelPeriod(EPWM1, 0x320); //t=10khz
 							
 							EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
-							EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
 					
 						 PWMLOADEN = 0x03; 
 						BLDC.motor_step++;
@@ -606,7 +606,7 @@ void  StartMotorRun(void)
 							EPWM_ConfigChannelPeriod(EPWM1, 0x320); //t=10khz
 							
 							EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
-							EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+							EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
 						
 						 PWMLOADEN = 0x03;
 						BLDC.motor_step++;
@@ -618,7 +618,7 @@ void  StartMotorRun(void)
 						EPWM_ConfigChannelPeriod(EPWM1, 0x320); //t=10khz
 						
 						EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
-						EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+						EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
 						
 						 PWMLOADEN = 0x03;
 						BLDC.motor_step=0; //WT.EDIT
@@ -637,11 +637,11 @@ void  StartMotorRun(void)
 ***********************************************************************************/
 void  DutyRef(void)
 {
-    EPWM_ConfigChannelPeriod(EPWM0, 0x0320); //T = 400 *2 *1/8 
-	EPWM_ConfigChannelPeriod(EPWM1, 0x0320); //t=10khz
+   EPWM_ConfigChannelPeriod(EPWM0, 0x320); //T = 400 *2 *1/8 
+	EPWM_ConfigChannelPeriod(EPWM1, 0x320); //t=10khz
 	
     EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
-	EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
+	EPWM_ConfigChannelSymDuty(EPWM1, 0x00);
 	PWMLOADEN = 0x03;
 					
 	#if 0				
