@@ -36,6 +36,10 @@ int main(void)
 
 	while(1)
 	{	
+       
+         EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
+                    EPWM_ConfigChannelSymDuty(EPWM1, 0x190);
+                    EPWM_ConfigChannelSymDuty(EPWM2, 0x190);
         powerkey =HDKey_Scan(0);
 		if(powerkey == 1){
             
@@ -45,32 +49,31 @@ int main(void)
                     LED0 =1;
 			        
                 if(poweron==0){
-                    poweron ++ ;
-					startnum++;
-                   for(startnum=0;startnum<3000;startnum++){
-                      
-					  //  PowerOn_MotorRun();
-                       
+                   
+                   poweron++;
+					
+                     for(startnum=0;startnum< 500;startnum++){
+                     
+                 
                         OPEN3();
                         OPEN2();
                         
                          LED1=1;
                          
-					    
-                      }
-             
+					   }
+                   }
                  // state =  NoHall_PhaseValue() ;
                 
                    // InputValue_DectorPhase(state);
                 NoSense_InterruptPhase();
                  LED1=0;
-                }
+                
                   
               }
                else {
                        LED0 =0;
                        LED1=0;
-                       poweron =0;
+                     poweron=0;
                     EPWM_ConfigChannelSymDuty(EPWM0, 0);
                     EPWM_ConfigChannelSymDuty(EPWM1, 0);
                     EPWM_ConfigChannelSymDuty(EPWM2, 0);

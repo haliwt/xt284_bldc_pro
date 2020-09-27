@@ -26,6 +26,7 @@ void OPEN3(void)
 		delay_us(20);
 		if(C1CON1&0x80){state |= 0x04;}//W  ---BEMF 
         
+        if(state >6) state =4;
         switch(state){
 
 		  
@@ -97,7 +98,7 @@ void OPEN3(void)
 		break;
         
         default :
-            state = 5;
+            
         break;
 		
     }
@@ -830,12 +831,7 @@ void NoSense_InterruptPhase(void)
     static uint8_t tempzero=0;
     if(gPhase >6)gPhase =1;
     
-    zero_time=0;
-     while(zero[1] == zero_time) {
-			tempzero=1;
-              zero_time =0;
-	 }    
-   if(tempzero==1){
+ 
 	switch(gPhase){
      
         case 1:  
@@ -877,7 +873,7 @@ void NoSense_InterruptPhase(void)
 
 		case 4:
 				
-                MOS_C_L =0;
+                   MOS_C_L =0;
                   MOS_B_L =0;
 				   MOS_A_L =1	; //C+ A- "5"
                   MOS_C_H;  //C+ ;
@@ -902,13 +898,13 @@ void NoSense_InterruptPhase(void)
 		break;
 
 		case 6: 
-				   //   MOS_B_H; //B+ ;
-                      MOS_A_L=0;
-                    MOS_B_L =0;
-				    MOS_C_L=1	; //B+,C- "3"
+				   
+                  MOS_A_L=0;
+                  MOS_B_L =0;
+				  MOS_C_L=1	; //B+,C- "3"
                   MOS_B_H; //B+ ;
                     
-                  
+                  gPhase =0;
 
 					
 		
@@ -917,13 +913,6 @@ void NoSense_InterruptPhase(void)
      }
     }
    
-
-
-}
-
-
-
-
 void	com_charge(void)
 {
 	switch(gPhase)
