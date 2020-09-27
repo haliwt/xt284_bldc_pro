@@ -874,45 +874,11 @@ void  StartMotorRun(void)
 void  DutyRef(void)
 {
     
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
-						PWMD0L   = 0x00;  //
-						PWMD0H   = 0x00;
-					    PWMLOADEN = 0x03;
-				
-				
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-    
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
 					
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0x00;
-						PWMD0H   = 0x00;
-					PWMLOADEN = 0x03;
-                    
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0x00;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
+					
 	EPWM_ConfigChannelSymDuty(EPWM0, 0x0190);
 	EPWM_ConfigChannelSymDuty(EPWM1, 0x000);
-	
+		PWMLOADEN = 0x03;
 					
 
 
