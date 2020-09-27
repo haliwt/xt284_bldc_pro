@@ -172,10 +172,13 @@ void ACMP_IRQHandler(void)  interrupt ACMP_VECTOR
         }
         if(arr[0]!=arr[1]){
             j++;
-            if(j>5){
+            if(j>3){
                gPhase ++ ;
+               if(gPhase >6)gPhase =1;
+              
                j=0;
             }
+           
 		}
         
         

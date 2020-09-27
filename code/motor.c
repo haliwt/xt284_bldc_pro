@@ -2,6 +2,7 @@
 
 uint8_t gPhase;
 uint16_t zero[1];
+uint8_t motor_step;
 /*******************************************************************************
 	*
 	*Function Name: uint8_t NO_HallSensor_GetPinState(void)
@@ -12,11 +13,11 @@ uint16_t zero[1];
 *******************************************************************************/
 void OPEN3(void)
 {
-     
+
         static uint8_t state;
 		state = 0;
-		C1CON2 = 0x00; //比较控制寄存器2 --
-		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
+		C1CON2 = 0x00; //???????2 --
+		C1CON0 = 0x80; //???????0 --enable compare
 		delay_us(20);//delay_us(20);
 		if(C1CON1&0x80){state |= 0x01;} //U --BEMF
 		C1CON0 = 0x81;
@@ -55,7 +56,7 @@ void OPEN3(void)
 		case 3: 
 			   MOS_B_H;//B+ C-   "3"//MOS_W_V	;//C+ B-  "4"
                MOS_B_L =0;
-               MOS_A_L =0 ;//关闭 A 
+               MOS_A_L =0 ;//?? A 
                MOS_C_L =1;
                delay_us(40);
                  state =2;
@@ -76,8 +77,8 @@ void OPEN3(void)
 
 		case 6:
 			 MOS_A_H	;  //A+ B-  "6"//MOS_V_U	; //B+ A-  '1'
-             MOS_C_L =0; //关闭C
-             MOS_A_L = 0; //关闭A
+             MOS_C_L =0; //??C
+             MOS_A_L = 0; //??A
              MOS_B_L =1;
              delay_us(40);
               state =4;
@@ -88,8 +89,8 @@ void OPEN3(void)
 
 		case 4:
 			    MOS_C_H	;//C+ B-  "4"// MOS_V_W;//B+ C-   "3"
-                MOS_C_L =0; //关闭C
-                MOS_A_L = 0; //关闭A
+                MOS_C_L =0; //??C
+                MOS_A_L = 0; //??A
 			    MOS_B_L=1;
                 delay_us(40);
                  state =5;
@@ -173,20 +174,20 @@ uint8_t NO_HallSensor_GetPinState(void)
 uint8_t NoHall_PhaseValue(void) 
 {
      
-        static uint8_t state;
-		state = 0;
+     
+		
 		C1CON2 = 0x00; //比较控制寄存器2 --
 		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
 		//delay_us(20);
-		if(C1CON1&0x80){state |= 0x01;} //U --BEMF
+		if(C1CON1&0x80){motor_step |= 0x01;} //U --BEMF
 		C1CON0 = 0x81;
 		//delay_us(20);
-		if(C1CON1&0x80){state |= 0x02;} //V ---BEMF
+		if(C1CON1&0x80){motor_step  |= 0x02;} //V ---BEMF
 		//C1CON0 = 0x82;
 		delay_us(20);
-		if(C1CON1&0x80){state |= 0x04;}//W  ---BEMF 
+		if(C1CON1&0x80){motor_step  |= 0x04;}//W  ---BEMF 
         
-        return state;
+        return motor_step ;
       
     
 }
@@ -528,7 +529,7 @@ void NoSensor_Phase(uint8_t state)
 /*******************************************************************************
 	*
 	*Function Name: uint8_t NO_HallSensor_GetPinState(void)
-	*Function :Dector no hall senseor BEMF
+	*Function :Dector no hall senseor BEMF 5-1-3-2-6-4 -》
 	*Input Ref:NO
 	*Return Ref:No
 	*
@@ -536,32 +537,31 @@ void NoSensor_Phase(uint8_t state)
 void NO_HallSensor_DectorPhase(uint8_t state)
 {
  
-    static uint8_t sense;
-	C1CON2 = 0x00; //比较控制寄存器2 --
-    sense = intBEMF & 0x80;
-   
-	//if(SENSE) sense =1; 
-	//else sense =0; 
-    gPhase = state;
-	switch(gPhase){
+    static uint8_t phase=0;
+	
+    
+ 
+	switch(phase){
 
         case 0:  
-              MOS_A_H	; // A+ C- "5"
+              MOS_A_H	; // A+ C- "2"
              
-             if(!sense){  // BEMF "B"
-				MOS_A_L =0;
-                MOS_B_L =0 ;
-					
-                 MOS_C_L =1;   //下半周
-                    
-			        C1CON0 = 0x82;
+             if(!intBEMF){  // BEMF "B"  //换向到下一个位置
+                 delay_us(30);
+                 if(!intBEMF){
+                    MOS_A_L =0;
+                    MOS_C_L =0 ;
+                        
+                     MOS_B_L =1;   //换向到 位置 6  A+ B-
+                     phase ++ ; 
+                 }   
 		       
-					gPhase++;
+					
 			  }
 			  else{
                   MOS_A_L=0;
-                  MOS_C_L=0; //turn off.
-				  MOS_B_L =1; //B -
+                  MOS_B_L=0; //turn off.
+				  MOS_C_L =1; //C -   ""位置 2
                  
 			  }
 			 
@@ -574,18 +574,15 @@ void NO_HallSensor_DectorPhase(uint8_t state)
                    MOS_C_L =0; //turn off C.
                    MOS_B_L =1; //A+ ,B- '6'
                
-				if(!sense){ //BEMF "C"
-				    MOS_A_H; //A+ 
-                   
-				    C1CON0 = 0x80;
-		       
-				    gPhase ++;
-
-
+				if(intBEMF){ //BEMF "C"
+                     delay_us(30);
+                    if(intBEMF){
+                        MOS_C_H; //A+   // 换向到位置 4 C+ B-
+                          phase ++ ; 
+                    }
 				}
 				else{
-                      MOS_C_H;  //C+ ;
-                     
+                      MOS_A_H;  //A+ 位置 6 A+ B-
 
 				}
         break;
@@ -594,21 +591,20 @@ void NO_HallSensor_DectorPhase(uint8_t state)
 				
 				 MOS_C_H	; //C+,B- '4'
                
-			    if(!sense){  //BEMF "A"
-                   MOS_C_L =0;
-                   MOS_A_L =0;
-				   MOS_B_L=1; //B-
-                  
-		           C1CON0 = 0x81;
-		        
-				    gPhase ++;
-
-				}
+			    if(!intBEMF){  //BEMF "A"
+                    delay_us(30);
+                    if(!intBEMF){
+                       MOS_C_L =0;
+                       MOS_B_L =0;
+                       MOS_A_L=1; //B- //换向到 位置 5 C+ A-
+                          phase ++ ; 
+                    }
+		          }
 				else {
                    
-                    MOS_B_L=0;
-                    MOS_C_L =0;
-                     MOS_A_L=1 ; //A-
+                    MOS_C_L=0;
+                    MOS_A_L =0;
+                     MOS_B_L=1 ; //B-
                    
 				}
 
@@ -616,18 +612,18 @@ void NO_HallSensor_DectorPhase(uint8_t state)
 
 		case 3:
 				 MOS_C_L =0;
-                  MOS_B_L =0;
+                  MOS_B_L =0;//turn off
 				   MOS_A_L =1	; //C+ A- "5"
                    
-			   if(!sense){
-                    MOS_C_H;  //C+ ;
-                 
-                    C1CON0 = 0x21;
-		         
-					gPhase ++ ;
+			   if(intBEMF){
+                    delay_us(30);
+                   if(intBEMF){
+                        MOS_B_H;  //B+ ;  //换向到 1 B+ A- 
+                         phase ++ ; 
+                   }
                 }
 				else{
-                    MOS_B_H ; //B+
+                    MOS_C_H ; //C+
                   
                 }
 				
@@ -638,42 +634,44 @@ void NO_HallSensor_DectorPhase(uint8_t state)
 		case 4:
 			     MOS_B_H	;//B+ A- "1"
                 
-			    if(!sense){
-                    MOS_C_L=0;
-                    MOS_B_L=0;
-                    MOS_A_L=1; //A-
-                    C1CON0 = 0x09;
-		          
-                    gPhase ++ ;
-
-				}
+			    if(!intBEMF){
+                    delay_us(30);
+                    if(!intBEMF){
+                        MOS_A_L=0;
+                        MOS_B_L=0;
+                        MOS_C_L=1 ; //C- 换向到下一个位置“1 --3 ” B+ C- 
+                          phase ++ ; 
+                    }
+                
+		        }
 				else {
-                    MOS_A_L=0;
+                    MOS_C_L=0;
                     MOS_B_L =0 ;
-                    MOS_C_L=1 ; //C-
+                    MOS_A_L=1 ; //A- //停留在此位置 “1”
                     
                 }
 				
 
 		break;
 
-		case 5: 
-				    MOS_A_L=0;
+          case 5	:
+                    MOS_A_L=0;
                     MOS_B_L =0;
 				    MOS_C_L=1	; //B+,C- "3"
          
-                    if(!sense){
+                    if(intBEMF){
+                        delay_us(30);
+                        if(intBEMF){
 
-				      MOS_B_H; //B+ ;
-              
-				      C1CON0 = 0x81;
-		            
-					  gPhase =0;
+				           MOS_A_H;//换向到 “2”   位置   A+ C-
 
-				    }
+                          phase =0 ; 
+                        }
+				  
+		            }
 					else{
-                        MOS_A_H; // A+ ;
-                       
+                        MOS_B_H; // B+ ; 位置 3 
+                        
                     }
 
 					
@@ -701,11 +699,7 @@ void NO_HallSensor_DectorPhase(uint8_t state)
 void InputValue_DectorPhase(uint8_t state)
 {
  
-     zero_time =0;
-    
-    gPhase = state;
-    if(gPhase > 6)gPhase =2;
-	switch(gPhase){
+	switch(motor_step){
 
         case 2:  
               //  MOS_A_H	; // A+ C- "2"
@@ -716,10 +710,7 @@ void InputValue_DectorPhase(uint8_t state)
 					
                  MOS_C_L =1;   //下半周
                  MOS_A_H	; // A+ C- "2"
-                 if(zero[1] == zero_time)  {
-					gPhase =6;
-                    zero_time =0;
-				 } 
+            
 			
 			
 			 
@@ -728,47 +719,39 @@ void InputValue_DectorPhase(uint8_t state)
         break;
 
 		case 6:
-				 //  MOS_A_H; //A+ 
+				
                   MOS_A_L =0;
                    MOS_C_L =0; //turn off C.
                    MOS_B_L =1; //A+ ,B- '6'
-                     MOS_A_H; //A+ 
-                   if(zero[1] == zero_time)  {
-					gPhase =4;
-                    zero_time =0;
-				 } 
+                   MOS_A_H; //A+ 
+                 
+				  
                
 				
         break;
 
 		case 4:
 				
-				// MOS_C_H	; //C+,B- '4'
+			
                
 			   
                    MOS_C_L =0;
                    MOS_A_L =0;
 				   MOS_B_L=1; //B-
-				    MOS_C_H	; //C+,B- '4'
-				    if(zero[1] == zero_time)  {
-					gPhase =5;
-                    zero_time =0;
-				 } 
+				   MOS_C_H	; //C+,B- '4'
+				   
                   
 		         
 
 		break;
 
 		case 5:
-				// MOS_C_H;  //C+ ;
+				
                 MOS_C_L =0;
                   MOS_B_L =0;
 				   MOS_A_L =1	; //C+ A- "5"
 				   MOS_C_H;  //C+ ;
-                    if(zero[1] == zero_time)  {
-					gPhase =1;
-                    zero_time =0;
-				 } 
+                 
 			  
 				
 				
@@ -776,32 +759,26 @@ void InputValue_DectorPhase(uint8_t state)
 		break;
 
 		case 1:
-			  //   MOS_B_H	;//B+ A- "1"
+
                 
 			   
                     MOS_C_L=0;
                     MOS_B_L=0;
                     MOS_A_L=1; //A-
                     MOS_B_H	;//B+ A- "1"
-                     if(zero[1] == zero_time)  {
-					gPhase =3;
-                    zero_time =0;
-				 } 
+                 
                 
 				
 
 		break;
 
 		case 3: 
-				   //   MOS_B_H; //B+ ;
-                      MOS_A_L=0;
+				 
+                     MOS_A_L=0;
                     MOS_B_L =0;
 				    MOS_C_L=1	; //B+,C- "3"
-				      MOS_B_H; //B+ ;
-                   if(zero[1] == zero_time)  {
-					gPhase =2;
-                    zero_time =0;
-				 } 
+				    MOS_B_H; //B+ ;
+                 
                   
 
 					
@@ -828,11 +805,8 @@ void InputValue_DectorPhase(uint8_t state)
 *******************************************************************************/
 void NoSense_InterruptPhase(void)
 {
-    static uint8_t tempzero=0;
-    if(gPhase >6)gPhase =1;
-    
- 
-	switch(gPhase){
+  
+    switch(motor_step){
      
         case 1:  
               

@@ -49,23 +49,24 @@ int main(void)
                     LED0 =1;
 			        
                 if(poweron==0){
+                    
                    
-                   poweron++;
+                  poweron++;
 					
-                     for(startnum=0;startnum< 500;startnum++){
+                 for(startnum=0;startnum< 3000;startnum++){
                      
-                 
+                  
                         OPEN3();
                         OPEN2();
-                        
+                        NO_HallSensor_DectorPhase(0);
+
                          LED1=1;
                          
 					   }
                    }
-                 // state =  NoHall_PhaseValue() ;
-                
-                   // InputValue_DectorPhase(state);
-                NoSense_InterruptPhase();
+                  else 
+                     NO_HallSensor_DectorPhase(0);
+
                  LED1=0;
                 
                   
@@ -74,6 +75,7 @@ int main(void)
                        LED0 =0;
                        LED1=0;
                      poweron=0;
+                   startnum=0;
                     EPWM_ConfigChannelSymDuty(EPWM0, 0);
                     EPWM_ConfigChannelSymDuty(EPWM1, 0);
                     EPWM_ConfigChannelSymDuty(EPWM2, 0);
