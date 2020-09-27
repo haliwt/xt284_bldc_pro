@@ -1,7 +1,7 @@
 #include "motor.h"
 
 uint8_t gPhase;
-
+uint16_t zero[1];
 /*******************************************************************************
 	*
 	*Function Name: uint8_t NO_HallSensor_GetPinState(void)
@@ -176,12 +176,12 @@ uint8_t NoHall_PhaseValue(void)
 		state = 0;
 		C1CON2 = 0x00; //比较控制寄存器2 --
 		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
-		delay_us(20);
+		//delay_us(20);
 		if(C1CON1&0x80){state |= 0x01;} //U --BEMF
 		C1CON0 = 0x81;
-		delay_us(20);
+		//delay_us(20);
 		if(C1CON1&0x80){state |= 0x02;} //V ---BEMF
-		C1CON0 = 0x82;
+		//C1CON0 = 0x82;
 		delay_us(20);
 		if(C1CON1&0x80){state |= 0x04;}//W  ---BEMF 
         
@@ -199,7 +199,8 @@ uint8_t NoHall_PhaseValue(void)
 *******************************************************************************/
 void OPEN2(void)
 {
-    uint16_t over_time;
+    uint16_t over_time,temp,temp2;
+	uint8_t i;
     if(++over_time<5000)
 	{
         static uint8_t state,BEMF_last,CW=0,CCW;
@@ -222,8 +223,16 @@ void OPEN2(void)
 		if(BEMF_last != state)
 		{
 			
-			//BLDC.zero_check_time.all -= (BLDC.zero_check_time.all>>3);
-			
+			  temp = zero_time ;
+		   //BLDC.zero_check_time.all -= (BLDC.zero_check_time.all>>3);
+			if(state !=0 && state < 7){
+				i++;
+				temp2=temp;
+				temp2 = ++temp2;
+				
+				zero[0] =temp2 /i;
+				zero_time =0;
+			}
 			switch(state)//判断这次电机的相位
 			{
 				case 1:
@@ -691,20 +700,25 @@ void NO_HallSensor_DectorPhase(uint8_t state)
 void InputValue_DectorPhase(uint8_t state)
 {
  
-   
- 
+     zero_time =0;
+    
     gPhase = state;
+    if(gPhase > 6)gPhase =2;
 	switch(gPhase){
 
         case 2:  
-              MOS_A_H	; // A+ C- "2"
+              //  MOS_A_H	; // A+ C- "2"
              
            
 				MOS_A_L =0;
                 MOS_B_L =0 ;
 					
                  MOS_C_L =1;   //下半周
-                    
+                 MOS_A_H	; // A+ C- "2"
+                 if(zero[1] == zero_time)  {
+					gPhase =6;
+                    zero_time =0;
+				 } 
 			
 			
 			 
@@ -713,33 +727,47 @@ void InputValue_DectorPhase(uint8_t state)
         break;
 
 		case 6:
-				   MOS_A_H; //A+ 
+				 //  MOS_A_H; //A+ 
                   MOS_A_L =0;
                    MOS_C_L =0; //turn off C.
                    MOS_B_L =1; //A+ ,B- '6'
+                     MOS_A_H; //A+ 
+                   if(zero[1] == zero_time)  {
+					gPhase =4;
+                    zero_time =0;
+				 } 
                
 				
         break;
 
 		case 4:
 				
-				 MOS_C_H	; //C+,B- '4'
+				// MOS_C_H	; //C+,B- '4'
                
 			   
                    MOS_C_L =0;
                    MOS_A_L =0;
 				   MOS_B_L=1; //B-
+				    MOS_C_H	; //C+,B- '4'
+				    if(zero[1] == zero_time)  {
+					gPhase =5;
+                    zero_time =0;
+				 } 
                   
 		         
 
 		break;
 
 		case 5:
-				 MOS_C_H;  //C+ ;
+				// MOS_C_H;  //C+ ;
                 MOS_C_L =0;
                   MOS_B_L =0;
 				   MOS_A_L =1	; //C+ A- "5"
-                   
+				   MOS_C_H;  //C+ ;
+                    if(zero[1] == zero_time)  {
+					gPhase =1;
+                    zero_time =0;
+				 } 
 			  
 				
 				
@@ -747,23 +775,32 @@ void InputValue_DectorPhase(uint8_t state)
 		break;
 
 		case 1:
-			     MOS_B_H	;//B+ A- "1"
+			  //   MOS_B_H	;//B+ A- "1"
                 
 			   
                     MOS_C_L=0;
                     MOS_B_L=0;
                     MOS_A_L=1; //A-
+                    MOS_B_H	;//B+ A- "1"
+                     if(zero[1] == zero_time)  {
+					gPhase =3;
+                    zero_time =0;
+				 } 
                 
 				
 
 		break;
 
 		case 3: 
-				      MOS_B_H; //B+ ;
+				   //   MOS_B_H; //B+ ;
                       MOS_A_L=0;
                     MOS_B_L =0;
 				    MOS_C_L=1	; //B+,C- "3"
-         
+				      MOS_B_H; //B+ ;
+                   if(zero[1] == zero_time)  {
+					gPhase =2;
+                    zero_time =0;
+				 } 
                   
 
 					
@@ -790,20 +827,27 @@ void InputValue_DectorPhase(uint8_t state)
 *******************************************************************************/
 void NoSense_InterruptPhase(void)
 {
-   if(gPhase >6)gPhase =0;
-  
+    static uint8_t tempzero=0;
+    if(gPhase >6)gPhase =1;
+    
+    zero_time=0;
+     while(zero[1] == zero_time) {
+			tempzero=1;
+              zero_time =0;
+	 }    
+   if(tempzero==1){
 	switch(gPhase){
-
+     
         case 1:  
-              MOS_A_H	; // A+ C- "2"
+              
              
            
 				MOS_A_L =0;
                 MOS_B_L =0 ;
 					
                  MOS_C_L =1;   //下半周
-                    
-			
+               MOS_A_H	; // A+ C- "2"
+			      
 			
 			 
 			  
@@ -811,32 +855,32 @@ void NoSense_InterruptPhase(void)
         break;
 
 		case 2:
-				   MOS_A_H; //A+ 
+				 
                   MOS_A_L =0;
                    MOS_C_L =0; //turn off C.
                    MOS_B_L =1; //A+ ,B- '6'
-               
+                   MOS_A_H; //A+ 
+              
 				
         break;
 
 		case 3:
 				
-				 MOS_C_H	; //C+,B- '4'
-               
-			   
-                   MOS_C_L =0;
+				  MOS_C_L =0;
                    MOS_A_L =0;
 				   MOS_B_L=1; //B-
-                  
+                  MOS_C_H	; //C+,B- '4'
+                
 		         
 
 		break;
 
 		case 4:
-				 MOS_C_H;  //C+ ;
+				
                 MOS_C_L =0;
                   MOS_B_L =0;
 				   MOS_A_L =1	; //C+ A- "5"
+                  MOS_C_H;  //C+ ;
                    
 			  
 				
@@ -845,146 +889,39 @@ void NoSense_InterruptPhase(void)
 		break;
 
 		case 5:
-			     MOS_B_H	;//B+ A- "1"
+			
                 
 			   
                     MOS_C_L=0;
                     MOS_B_L=0;
                     MOS_A_L=1; //A-
+                     MOS_B_H	;//B+ A- "1"
                 
 				
 
 		break;
 
 		case 6: 
-				      MOS_B_H; //B+ ;
+				   //   MOS_B_H; //B+ ;
                       MOS_A_L=0;
                     MOS_B_L =0;
 				    MOS_C_L=1	; //B+,C- "3"
-                     gPhase =1;
+                  MOS_B_H; //B+ ;
+                    
                   
 
 					
 		
 
 		break;
-
-
-
-
-
-
-	}
+     }
+    }
+   
 
 
 }
 
-/*******************************************************************************
-	*
-	*Function Name: void PowerOn_MotorRun(void)
-	*Function :Dector no hall senseor BEMF
-	*Input Ref:NO
-	*Return Ref:No
-	*
-*******************************************************************************/
 
-void PowerOn_MotorRun(void)
-{
-
-	switch(gPhase){
-
-		  
-       case 0:
-			     
-	          MOS_C_H	;//C+ A -  '5'  //MOS_U_W	;//A+ C- "2"
-              MOS_C_L =0;
-              MOS_B_L = 0 ;
-              MOS_A_L = 1;
-              delay_us(40);
-	         
-			  gPhase=1;
-	          
-
-	    break;
-        
-        
-      #if 0  
-        case 5:
-			     
-	           MOS_C_H	;//C+ A -  '5'  //MOS_U_W	;//A+ C- "2"
-               MOS_C_L=0;
-               MOS_B_L =0; 
-               MOS_A_L=1;
-                delay_us(40);
-	        
-			  gPhase=1;
-	          
-
-	    break;
-#endif 
-		case 1:
-			    MOS_B_H	; //B+ A-  '1'//MOS_U_V	;  //A+ B-  "6"
-                MOS_B_L =0;
-                MOS_C_L =0;
-                MOS_A_L =1;
-                 delay_us(40);
-			 
-                 gPhase =3;
-		break;
-
-		case 3: 
-			   MOS_B_H;//B+ C-   "3"//MOS_W_V	;//C+ B-  "4"
-               MOS_B_L =0;
-               MOS_A_L =0 ;//关闭 A 
-               MOS_C_L =1;
-               delay_us(40);
-			  
-		      gPhase =2 ;
-
-		break ;
-
-		case 2:
-			   MOS_A_H;//A+ C- "2"//MOS_W_U	;//C+ A -  '5'
-               MOS_A_L=0;
-               MOS_B_L=0; //turn off B
-               MOS_C_L =1;
-               delay_us(40);
-		      gPhase =6 ;
-
-		break;
-
-		case 6:
-			 MOS_A_H	;  //A+ B-  "6"//MOS_V_U	; //B+ A-  '1'
-             MOS_C_L =0; //关闭C
-             MOS_A_L = 0; //关闭A
-             MOS_B_L =1;
-              delay_us(40);
-		
-			 gPhase =4 ;
-			
-
-		break;
-
-		case 4:
-			    MOS_C_H	;//C+ B-  "4"// MOS_V_W;//B+ C-   "3"
-                MOS_C_L =0; //关闭C
-                MOS_A_L = 0; //关闭A
-			    MOS_B_L=1;
-                  delay_us(40);
-				
-				gPhase =0;
-
-		break;
-		
-		
-
-
-
-	}
-
-
-
-}
 
 
 void	com_charge(void)

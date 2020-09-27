@@ -5,6 +5,7 @@
 #include "bemf.h"
 #include "pwm.h"
 #include "motor.h"
+#include "timer0.h"
 
 uint32_t Systemclock = 24000000;
 
@@ -24,6 +25,7 @@ int main(void)
 	volatile uint8_t hall=0 ;
     LED_Init();
 	BEMF_IOInit();
+    TMR0_Config();
 	
 
     KEY_Init();
@@ -58,9 +60,9 @@ int main(void)
                       }
              
                  // state =  NoHall_PhaseValue() ;
-                  //NO_HallSensor_DectorPhase(state);
+                
                    // InputValue_DectorPhase(state);
-                   NoSense_InterruptPhase();
+                NoSense_InterruptPhase();
                  LED1=0;
                 }
                   

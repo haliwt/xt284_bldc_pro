@@ -55,6 +55,7 @@
 #define   ON_PWM_IN_INTE     {T2IF = 0x00;ET2 = 1;} //ET2 =timer2 总中断允许位
 #define   OFF_PWM_IN_INTE    {T2IF = 0x00;ET2 = 0;}
 
+extern uint16_t zero_time;
 
 extern uint8_t gPhase;
 

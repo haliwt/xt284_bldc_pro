@@ -99,7 +99,8 @@ void EPWM_InDepend_Config(void)
 {
 	//设置EPWM运行模式
 	//EPWM_ConfigRunMode(EPWM_OC_INDEPENDENT|EPWM_OCU_SYMMETRIC|EPWM_COUNT_DOWN); //互补模式+输出独立模式+对称计数模式+向下计数(边沿对齐)模式
-	PWMCON = 0X20;
+	//PWMCON = 0X20;
+    PWMCON = 0x00;
     PWMOE  = 0x07;
     //设置EPWM运行时钟	
 	EPWM_ConfigChannelClk(EPWM0, EPWM_CLK_DIV_1);		
