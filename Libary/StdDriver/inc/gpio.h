@@ -169,7 +169,7 @@
 #define  GPIO_P24_MUX_C0P5	(0x01)
 #define  GPIO_P14_MUX_C0N	(0x01)
 
-#define  GPIO_P04_MUX_C1P0	(0x01)
+#define  GPIO_P04_MUX_C1P0	(0x01)  //模拟 IO 
 #define  GPIO_P03_MUX_C1P1	(0x01)
 #define  GPIO_P02_MUX_C1P2	(0x01)
 #define  GPIO_P30_MUX_C1P4	(0x01)

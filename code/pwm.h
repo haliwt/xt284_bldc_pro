@@ -14,11 +14,8 @@
 #define VL   P14  //=0;//VL
 #define WL   P00  //=0;//WL
 
-#define VH   P15
-#define VL   P14
 
-#define WH   P13
-#define WL   P00
+
 
 
 //void EPWM_Config(void);

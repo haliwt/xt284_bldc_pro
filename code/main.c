@@ -20,7 +20,7 @@ uint32_t Systemclock = 24000000;
 
 int main(void)
 {		
-	static uint8_t pwflg =0,powerkey,poweron=0,state=0;
+	static uint8_t pwflg =0,powerkey,poweron=0;
 	static uint16_t startnum=0;
 	volatile uint8_t hall=0 ;
     LED_Init();
@@ -38,39 +38,43 @@ int main(void)
 	{	
        
          EPWM_ConfigChannelSymDuty(EPWM0, 0x190);
-                    EPWM_ConfigChannelSymDuty(EPWM1, 0x190);
-                    EPWM_ConfigChannelSymDuty(EPWM2, 0x190);
+         EPWM_ConfigChannelSymDuty(EPWM1, 0x190);
+         EPWM_ConfigChannelSymDuty(EPWM2, 0x190);
         powerkey =HDKey_Scan(0);
 		if(powerkey == 1){
             
            pwflg = pwflg ^ 0x01;
             if(pwflg ==1){
                    
-                    LED0 =1;
-			        
-                if(poweron==0){
-                    
                    
-                  poweron++;
-					
-                 for(startnum=0;startnum< 3000;startnum++){
-                     
-                  
-                        OPEN3();
-                        OPEN2();
-                        NO_HallSensor_DectorPhase(0);
-
-                         LED1=1;
-                         
-					   }
+			        
+               
+				  if(poweron==0){
+                      poweron ++ ;
+                      for(startnum=0;startnum <10000;startnum++){
+                           
+                           if(startnum <500){
+                                OPEN3();
+                                OPEN2();
+                                LED1=1;
+                                LED0=1;
+                                //NO_HallSensor_DectorPhase();
+                           }
+                           else   {
+                              NO_HallSensor_DectorPhase();
+                            
+                               LED0=0;
+                               LED1=0;
+                           }
+                             
+                       }
                    }
-                  else 
-                     NO_HallSensor_DectorPhase(0);
+                    NO_HallSensor_DectorPhase();
+			
 
-                 LED1=0;
-                
                   
-              }
+              
+             }
                else {
                        LED0 =0;
                        LED1=0;

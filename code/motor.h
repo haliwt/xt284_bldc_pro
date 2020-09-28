@@ -69,7 +69,7 @@ void	com_charge(void);
 uint8_t No_HallSensor_Input(void);
 void NoSensor_Phase(uint8_t state);
 void BEMF_IOInit(void);
-void NO_HallSensor_DectorPhase(uint8_t state);
+void NO_HallSensor_DectorPhase(void);
 
 
 void OPEN(void);
@@ -79,6 +79,6 @@ uint8_t NoHall_PhaseValue(void) ;
 void InputValue_DectorPhase(uint8_t state);
 void OPEN3(void);
 void NoSense_InterruptPhase(void);
-
+void NOSense_CCW_DectorPhase(void);
 
 #endif 

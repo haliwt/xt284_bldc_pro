@@ -27,7 +27,7 @@ void OPEN3(void)
 		delay_us(20);
 		if(C1CON1&0x80){state |= 0x04;}//W  ---BEMF 
         
-        if(state >6) state =4;
+        if(state >6) state =0;
         switch(state){
 
 		  
@@ -174,16 +174,17 @@ uint8_t NO_HallSensor_GetPinState(void)
 uint8_t NoHall_PhaseValue(void) 
 {
      
-     
+        C1CON2 = 0x00; //比较控制寄存器2 --
+        
+		C1CON0 = 0x80; //P04 C1P0  数据手册查--BEMF"Ew"
+		delay_us(20); 
+		if(C1CON1&0x80){motor_step |= 0x01;} 
 		
-		C1CON2 = 0x00; //比较控制寄存器2 --
-		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
-		//delay_us(20);
-		if(C1CON1&0x80){motor_step |= 0x01;} //U --BEMF
-		C1CON0 = 0x81;
-		//delay_us(20);
-		if(C1CON1&0x80){motor_step  |= 0x02;} //V ---BEMF
-		//C1CON0 = 0x82;
+		C1CON0 = 0x81; //C1P1 P03 ="Ev"
+		delay_us(20);
+		if(C1CON1&0x80){motor_step  |= 0x02;} //P ---BEMF
+		
+		C1CON0 = 0x82;//C1P2 P02 ="Eu"
 		delay_us(20);
 		if(C1CON1&0x80){motor_step  |= 0x04;}//W  ---BEMF 
         
@@ -232,7 +233,7 @@ void OPEN2(void)
 				temp2=temp;
 				temp2 = ++temp2;
 				
-				zero[0] =temp2 /i;
+				zero[0] =temp2 /i; //换向时间
 				zero_time =0;
 			}
 			switch(state)//判断这次电机的相位
@@ -425,7 +426,7 @@ void OPEN2(void)
 					MOS_C_L =0;
 					MOS_B_L = 0 ;
 					MOS_A_L = 1;
-				    delay_us(30);
+				    delay_us(20);
 				
 					
 
@@ -436,7 +437,7 @@ void OPEN2(void)
 						MOS_B_L =0;
 						MOS_C_L =0;
 						MOS_A_L =1;
-					   delay_us(30);
+					   delay_us(20);
 						
 					
 				break;
@@ -446,7 +447,7 @@ void OPEN2(void)
 					MOS_B_L =0;
 					MOS_A_L =0 ;//关闭 A 
 					MOS_C_L =1;
-					  delay_us(30);
+					  delay_us(20);
 						
 
 				break ;
@@ -456,7 +457,7 @@ void OPEN2(void)
 					MOS_A_L=0;
 					MOS_B_L=0; //turn off B
 					MOS_C_L =1;
-					  delay_us(30);
+					  delay_us(20);
 					
 
 				break;
@@ -466,7 +467,7 @@ void OPEN2(void)
 					MOS_C_L =0; //关闭C
 					MOS_A_L = 0; //关闭A
 					MOS_B_L =1;
-				    delay_us(30);
+				    delay_us(20);
 					
 					
 					
@@ -478,7 +479,7 @@ void OPEN2(void)
 						MOS_C_L =0; //关闭C
 						MOS_A_L = 0; //关闭A
 						MOS_B_L=1;
-					     delay_us(30);
+					     delay_us(20);
 						
 						
 
@@ -496,36 +497,6 @@ void OPEN2(void)
 		}
     }
 }
-	
-	
-	
-			
-		
-    
-
-/*******************************************************************************
-	*
-	*Function Name: uint8_t NO_HallSensor_GetPinState(void)
-	*Function :Dector no hall senseor BEMF
-	*Input Ref:NO
-	*Return Ref:No
-	*
-*******************************************************************************/
-void NoSensor_Phase(uint8_t state)
-{
-		switch(state)
-				{
-
-					case 0x06:{MOS_U_V;break;}  //A+ B- '6'
-					case 0x04:{MOS_W_V;break;}    //C+ B-  "4"
-					case 0x05:{MOS_W_U;break;}   //C+ A- "5"
-					case 0x01:{MOS_V_U;break;}     //B+ A-   "1"
-					case 0X03:{MOS_V_W;break;}       //B+ C - "3"
-					case 0X02:{MOS_U_W;break;}        // A+ C-  "2"
-					//default :{MOS_OFF;break;}
-				}
-
-}
 /*******************************************************************************
 	*
 	*Function Name: uint8_t NO_HallSensor_GetPinState(void)
@@ -534,34 +505,33 @@ void NoSensor_Phase(uint8_t state)
 	*Return Ref:No
 	*
 *******************************************************************************/
-void NO_HallSensor_DectorPhase(uint8_t state)
+void NOSense_CCW_DectorPhase(void)
 {
  
-    static uint8_t phase=0;
+   if(gPhase >5)gPhase=0;
 	
-    
- 
-	switch(phase){
+    switch(gPhase){
 
         case 0:  
-              MOS_A_H	; // A+ C- "2"
+                // AB --查看“Ev”  AB ->AC->BC->BA->CA->CB(循环)
+              MOS_A_H;
              
-             if(!intBEMF){  // BEMF "B"  //换向到下一个位置
-                 delay_us(30);
-                 if(!intBEMF){
-                    MOS_A_L =0;
-                    MOS_C_L =0 ;
-                        
-                     MOS_B_L =1;   //换向到 位置 6  A+ B-
-                     phase ++ ; 
-                 }   
+             if(intBEMF & 0x80 ==0){  // BEMF "B"  //换向到下一个位置 Ev=C1P1
+              
+                      MOS_A_L =0;
+	                  MOS_B_L =0; 
+	                  MOS_C_L =1; // C-  
+                     C1CON2 =0x00;
+                     C1CON0 = 0x82;
+                   
+                     gPhase ++ ;  
 		       
 					
 			  }
 			  else{
-                  MOS_A_L=0;
-                  MOS_B_L=0; //turn off.
-				  MOS_C_L =1; //C -   ""位置 2
+                  MOS_A_L =0;
+	               MOS_C_L =0; 
+	               MOS_B_L =1; // B-  
                  
 			  }
 			 
@@ -569,109 +539,115 @@ void NO_HallSensor_DectorPhase(uint8_t state)
 			  
         break;
 
-		case 1:
-				   MOS_A_L =0;
-                   MOS_C_L =0; //turn off C.
-                   MOS_B_L =1; //A+ ,B- '6'
+		case 1:     //AC -> A+ ,B- '6' --查看“Ew”
+				      MOS_A_L =0;
+	                  MOS_B_L =0; 
+	                  MOS_C_L =1; // C-  
                
-				if(intBEMF){ //BEMF "C"
-                     delay_us(30);
-                    if(intBEMF){
-                        MOS_C_H; //A+   // 换向到位置 4 C+ B-
-                          phase ++ ; 
-                    }
+				if(intBEMF & 0x80 ==1){ //BEMF "C" Ew C1P0
+                   
+	                   MOS_B_H; //B+  //BC
+	                   
+	                 C1CON2 =0x00; 
+                     C1CON0 = 0x80;
+                         gPhase ++ ; 
+                    
 				}
 				else{
-                      MOS_A_H;  //A+ 位置 6 A+ B-
+                      
+                  MOS_A_H;
 
 				}
         break;
 
-		case 2:
-				
-				 MOS_C_H	; //C+,B- '4'
-               
-			    if(!intBEMF){  //BEMF "A"
-                    delay_us(30);
-                    if(!intBEMF){
-                       MOS_C_L =0;
-                       MOS_B_L =0;
-                       MOS_A_L=1; //B- //换向到 位置 5 C+ A-
-                          phase ++ ; 
-                    }
+		case 2:   // BC
+				 MOS_B_H;
+			
+                if(intBEMF & 0x80 ==0){  //查看 BEMF "Eu" C1P2
+                    
+                         MOS_C_L =0;
+                           MOS_B_L =0; 
+                          MOS_A_L =1; // A-
+                         C1CON2 =0x00;
+                         C1CON0 = 0x81;
+                          gPhase ++ ; 
+                    
 		          }
 				else {
                    
-                    MOS_C_L=0;
                     MOS_A_L =0;
-                     MOS_B_L=1 ; //B-
+	               MOS_B_L =0; 
+	               MOS_C_L =1; // C-
                    
 				}
 
 		break;
 
-		case 3:
-				 MOS_C_L =0;
-                  MOS_B_L =0;//turn off
-				   MOS_A_L =1	; //C+ A- "5"
+		case 3:   //BA
+				 MOS_B_L =0;
+	               MOS_C_L =0; 
+	               MOS_A_L =1; // A-   //当前通电C+ B-
                    
-			   if(intBEMF){
-                    delay_us(30);
-                   if(intBEMF){
-                        MOS_B_H;  //B+ ;  //换向到 1 B+ A- 
-                         phase ++ ; 
-                   }
+			   if(intBEMF & 0x80 ==1){  //查看反向电动势 "Ev"C1P1
+                  
+                    MOS_C_H; //C+
+	                C1CON2 =0x00;
+                    C1CON0 = 0x82;  //Eu
+                       gPhase ++ ; 
+                   
                 }
 				else{
-                    MOS_C_H ; //C+
-                  
+                   MOS_B_H ;
+	              
                 }
 				
 				
 
 		break;
 
-		case 4:
-			     MOS_B_H	;//B+ A- "1"
-                
-			    if(!intBEMF){
-                    delay_us(30);
-                    if(!intBEMF){
-                        MOS_A_L=0;
-                        MOS_B_L=0;
-                        MOS_C_L=1 ; //C- 换向到下一个位置“1 --3 ” B+ C- 
-                          phase ++ ; 
-                    }
+		case 4:   //CA 
+             MOS_C_H;  
+			     
+              if(intBEMF & 0x80 ==0){   //Ev
+                   
+                        MOS_B_L =0;
+                       MOS_A_L =0; 
+                       MOS_B_L =1; // B-  
+					     C1CON2 =0x00;
+                         C1CON0 = 0x80;  //Ew
+                          gPhase ++ ; 
+                    
                 
 		        }
 				else {
-                    MOS_C_L=0;
-                    MOS_B_L =0 ;
-                    MOS_A_L=1 ; //A- //停留在此位置 “1”
-                    
+                   
+                   MOS_B_L =0;
+	               MOS_C_L =0; 
+	               MOS_A_L =1; // A-  
                 }
 				
 
 		break;
 
-          case 5	:
-                    MOS_A_L=0;
-                    MOS_B_L =0;
-				    MOS_C_L=1	; //B+,C- "3"
-         
-                    if(intBEMF){
-                        delay_us(30);
-                        if(intBEMF){
+          case 5 :  //CB
+                    
+                      MOS_B_L =0;
+	                    MOS_A_L =0; 
+	                    MOS_B_L =1; 
+                    if(intBEMF & 0x80 ==1){  //查开 “Ew”
+                       
+                         MOS_A_H;
+				         
+	                     C1CON2 =0x00;
+                         C1CON0 = 0x81;  //Eu
 
-				           MOS_A_H;//换向到 “2”   位置   A+ C-
-
-                          phase =0 ; 
-                        }
+                         gPhase =0 ; 
+                        
 				  
 		            }
 					else{
-                        MOS_B_H; // B+ ; 位置 3 
-                        
+                      MOS_C_H;  
+                       
                     }
 
 					
@@ -686,6 +662,185 @@ void NO_HallSensor_DectorPhase(uint8_t state)
 
 	}
 
+
+}
+
+/*******************************************************************************
+	*
+	*Function Name: uint8_t NO_HallSensor_GetPinState(void)
+	*Function :Dector no hall senseor BEMF 5-1-3-2-6-4 -》
+	*Input Ref:NO
+	*Return Ref:No
+	*
+*******************************************************************************/
+void NO_HallSensor_DectorPhase(void)
+{
+
+   uint8_t sense =0 ;
+  
+   
+
+   do{
+
+    if(intBEMF)sense =1;
+      else sense =0;
+	
+    switch(gPhase){
+
+        case 0:  
+                // BC- "2" --查看“Ev”  AB ->CB->CA->BA->BC->AC->AB(循环)
+               MOS_A_L=0;
+               MOS_B_L=0; //turn off.
+			   MOS_C_L =1; //C -  当前是
+             
+             if(intBEMF & 0x80 ==1){  // BEMF "B"  //换向到下一个位置 Ev=C1P1
+              
+                     MOS_A_H;    //换向到 位置 6  A+ B-   from BC to AC
+                     delay_us(30);
+                     C1CON2 =0x00;
+                     C1CON0 = 0x81;
+                   
+                     gPhase ++ ;  
+		       
+					
+			  }
+			  else{
+                  MOS_B_H;    //当前通电是B+ C- 
+                 
+			  }
+			 
+			  
+			  
+        break;
+
+		case 1:     //AC -> A+ ,B- '6' --查看“Ew”
+				    MOS_A_H;
+               
+				if(intBEMF & 0x80 ==0){ //BEMF "C" Ew C1P0
+                   
+	                   MOS_A_L =0;
+	                   MOS_C_L =0; 
+	                   MOS_B_L =1; // B-  
+	                     delay_us(30);
+	                 C1CON2 =0x00;
+                     C1CON0 = 0x80;
+                         gPhase ++ ; 
+                    
+				}
+				else{
+                      
+                   MOS_A_L =0;
+                   MOS_B_L =0; 
+                   MOS_C_L =1; //当前通电是A+ C- 
+
+				}
+        break;
+
+		case 2:   // AB 
+				  MOS_A_L =0;
+	               MOS_C_L =0; 
+	               MOS_B_L =1; // B-  
+			
+                if(intBEMF & 0x80 ==1){  //查看 BEMF "Eu" C1P2
+                    
+                         MOS_C_H;  //C+  //换向到CB
+                           delay_us(30);
+                         C1CON2 =0x00;
+                         C1CON0 = 0x82;
+                          gPhase ++ ; 
+                    
+		          }
+				else {
+                   
+                     MOS_A_H;  //当前通电是 A+ B- 
+                   
+				}
+
+		break;
+
+		case 3:   //CB 
+				 MOS_C_H;  
+                   
+			   if(intBEMF & 0x80 ==0){  //查看反向电动势 "Ev"C1P1
+                  
+                    MOS_B_L =0;
+	               MOS_C_L =0; 
+	               MOS_A_L =1; // A- 
+	                 delay_us(30);
+	                C1CON2 =0x00;
+                    C1CON0 = 0x81;  //Eu
+                       gPhase ++ ; 
+                   
+                }
+				else{
+                   MOS_A_L =0;
+	               MOS_C_L =0; 
+	               MOS_B_L =1; // B-   //当前通电C+ B-
+                  
+                }
+				
+				
+
+		break;
+
+		case 4:   //CA 
+			      MOS_B_L =0;
+	               MOS_C_L =0; 
+	               MOS_A_L =1; // A-   //当前通电C+ B-
+                
+			    if(intBEMF & 0x80 ==1){   //Ev
+                   
+                        MOS_B_H ; //BA 
+                         delay_us(30);
+					     C1CON2 =0x00;
+                         C1CON0 = 0x80;  //Ew
+                          gPhase ++ ; 
+                    
+                
+		        }
+				else {
+                    MOS_C_H;  
+                    
+                }
+				
+
+		break;
+
+          case 5 :  //BA
+                     MOS_B_H ; //BA 
+         
+                    if(intBEMF & 0x80 ==0){  //查开 “Ew”
+                       
+
+				          MOS_B_L =0;
+	                      MOS_A_L =0; 
+	                      MOS_C_L =1; // BC
+	                        delay_us(30);
+	                     C1CON2 =0x00;
+                         C1CON0 = 0x82;  //Eu
+
+                         gPhase =0 ; 
+                        
+				  
+		            }
+					else{
+                        MOS_B_L =0;
+	                    MOS_C_L =0; 
+	                    MOS_A_L =1; // BA 当前通电是BA
+                    }
+
+					
+		
+
+		break;
+
+
+
+
+
+
+	}
+   	}while(( !intBEMF && sense)||(intBEMF && sense));
 
 }
 /*******************************************************************************
