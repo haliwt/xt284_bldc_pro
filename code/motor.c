@@ -27,7 +27,7 @@ void OPEN3(void)
 		delay_us(20);
 		if(C1CON1&0x80){state |= 0x04;}//W  ---BEMF 
         
-        if(state >6) state =0;
+        if(state >6) state =4;
         switch(state){
 
 		  
@@ -38,7 +38,7 @@ void OPEN3(void)
               MOS_B_L = 0 ;
               MOS_A_L = 1;
               delay_us(40);
-              state =1;
+             // state =1;
 	          
 
 	    break;
@@ -49,7 +49,7 @@ void OPEN3(void)
                 MOS_C_L =0;
                 MOS_A_L =1;
                delay_us(40);
-                 state =3;
+               //  state =3;
                
 		break;
 
@@ -59,7 +59,7 @@ void OPEN3(void)
                MOS_A_L =0 ;//?? A 
                MOS_C_L =1;
                delay_us(40);
-                 state =2;
+              //   state =2;
 		     
 
 		break ;
@@ -70,7 +70,7 @@ void OPEN3(void)
                MOS_B_L=0; //turn off B
                MOS_C_L =1;
                 delay_us(40);
-                state =6;
+             //   state =6;
 		    
 
 		break;
@@ -81,7 +81,7 @@ void OPEN3(void)
              MOS_A_L = 0; //??A
              MOS_B_L =1;
              delay_us(40);
-              state =4;
+            //  state =4;
 			
 			
 
@@ -93,7 +93,7 @@ void OPEN3(void)
                 MOS_A_L = 0; //??A
 			    MOS_B_L=1;
                 delay_us(40);
-                 state =5;
+              //   state =5;
 				
 
 		break;
@@ -147,7 +147,7 @@ uint8_t NO_HallSensor_GetPinState(void)
 		delay_us(20);
 		if(C1CON1&0x80){
 			State |= 0x01;
-		} //U --BEMF
+		} //W --BEMF
 		C1CON0 = 0x81;
 		delay_us(20);
 		if(C1CON1&0x80){
@@ -157,7 +157,7 @@ uint8_t NO_HallSensor_GetPinState(void)
 		delay_us(20);
 		if(C1CON1&0x80){
 			State |= 0x04;
-		}//W  ---BEMF 
+		}//U  ---BEMF 
 
 	  return State;
 		
@@ -680,7 +680,7 @@ void NO_HallSensor_DectorPhase(void)
   
    
 
-   do{
+  
 
     if(intBEMF)sense =1;
       else sense =0;
@@ -840,8 +840,7 @@ void NO_HallSensor_DectorPhase(void)
 
 
 	}
-   	}while(( !intBEMF && sense)||(intBEMF && sense));
-
+  
 }
 /*******************************************************************************
 	*
@@ -854,7 +853,19 @@ void NO_HallSensor_DectorPhase(void)
 void InputValue_DectorPhase(uint8_t state)
 {
  
-	switch(motor_step){
+	
+    	C1CON2 = 0x00; //比较控制寄存器2 --
+		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
+		delay_us(20);//delay_us(20);
+		if(C1CON1&0x80){motor_step |= 0x01;} //U --BEMF
+		C1CON0 = 0x81;
+		delay_us(20);
+		if(C1CON1&0x80){motor_step |= 0x02;} //V ---BEMF
+		C1CON0 = 0x82;
+		delay_us(20);
+		if(C1CON1&0x80){motor_step |= 0x04;}//W  ---BEMF 
+    if(motor_step >6)motor_step =2;
+    switch(motor_step){
 
         case 2:  
               //  MOS_A_H	; // A+ C- "2"

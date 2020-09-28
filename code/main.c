@@ -21,7 +21,7 @@ uint32_t Systemclock = 24000000;
 int main(void)
 {		
 	static uint8_t pwflg =0,powerkey,poweron=0;
-	static uint16_t startnum=0;
+	static uint16_t startnum=0,state=0;
 	volatile uint8_t hall=0 ;
     LED_Init();
 	BEMF_IOInit();
@@ -56,12 +56,19 @@ int main(void)
                            if(startnum <500){
                                 OPEN3();
                                 OPEN2();
-                                LED1=1;
+                                //state = NoHall_PhaseValue() ;
+                               // NO_HallSensor_DectorPhase();
+                                InputValue_DectorPhase(state);
+
+ 
+                                 LED1=1;
                                 LED0=1;
-                                //NO_HallSensor_DectorPhase();
                            }
-                           else   {
-                              NO_HallSensor_DectorPhase();
+                           else   
+                            {
+                             // NO_HallSensor_DectorPhase();
+                              //   state = NoHall_PhaseValue() ;
+                                InputValue_DectorPhase(state);
                             
                                LED0=0;
                                LED1=0;
@@ -69,7 +76,8 @@ int main(void)
                              
                        }
                    }
-                    NO_HallSensor_DectorPhase();
+                    // state = NoHall_PhaseValue() ;
+                     InputValue_DectorPhase(state);
 			
 
                   

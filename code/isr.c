@@ -161,17 +161,12 @@ void LSE_IRQHandler(void)  interrupt LSE_VECTOR
 void ACMP_IRQHandler(void)  interrupt ACMP_VECTOR 
 {
 
-	static uint8_t i,temp1 =0,temp2=0;
+
     if(ACMP_GetIntFlag(ACMP1))
 	{
         
-	     i++;
-        if(i==1)temp1=C1CON1 ;
-        else{
-          temp2= C1CON1;
-           i=0;
-        }
-        if(temp1 !=temp2)intBEMF =C1CON1;
+	   
+      intBEMF =C1CON1;
 
 		ACMP_ClearIntFlag(ACMP1);
 	}	
