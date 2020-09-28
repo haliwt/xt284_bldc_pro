@@ -54,11 +54,8 @@ int main(void)
                       for(startnum=0;startnum <10000;startnum++){
                            
                            if(startnum <500){
-                                OPEN3();
-                                OPEN2();
-                                //state = NoHall_PhaseValue() ;
-                               // NO_HallSensor_DectorPhase();
-                                InputValue_DectorPhase(state);
+                          
+                                InputValue_DectorPhase(0);
 
  
                                  LED1=1;
@@ -66,9 +63,8 @@ int main(void)
                            }
                            else   
                             {
-                             // NO_HallSensor_DectorPhase();
-                              //   state = NoHall_PhaseValue() ;
-                                InputValue_DectorPhase(state);
+                            //  NO_HallSensor_DectorPhase();
+                            InputValue_DectorPhase(0);
                             
                                LED0=0;
                                LED1=0;
@@ -76,8 +72,8 @@ int main(void)
                              
                        }
                    }
-                    // state = NoHall_PhaseValue() ;
-                     InputValue_DectorPhase(state);
+               //  NO_HallSensor_DectorPhase();
+                   InputValue_DectorPhase(0);  
 			
 
                   

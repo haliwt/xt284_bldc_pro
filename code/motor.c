@@ -857,18 +857,18 @@ void InputValue_DectorPhase(uint8_t state)
     	C1CON2 = 0x00; //比较控制寄存器2 --
 		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
 		delay_us(20);//delay_us(20);
-		if(C1CON1&0x80){motor_step |= 0x01;} //U --BEMF
+		if(C1CON1&0x80){motor_step |= 0x01;} //W --BEMF C
 		C1CON0 = 0x81;
 		delay_us(20);
-		if(C1CON1&0x80){motor_step |= 0x02;} //V ---BEMF
+		if(C1CON1&0x80){motor_step |= 0x02;} //V ---BEMF B
 		C1CON0 = 0x82;
 		delay_us(20);
-		if(C1CON1&0x80){motor_step |= 0x04;}//W  ---BEMF 
+		if(C1CON1&0x80){motor_step |= 0x04;}//U  ---BEMF A
     if(motor_step >6)motor_step =2;
     switch(motor_step){
 
         case 2:  
-              //  MOS_A_H	; // A+ C- "2"
+              // A+ C- "2"
              
            
 				MOS_A_L =0;
@@ -877,7 +877,7 @@ void InputValue_DectorPhase(uint8_t state)
                  MOS_C_L =1;   //下半周
                  MOS_A_H	; // A+ C- "2"
             
-			
+			delay_us(20);
 			
 			 
 			  
@@ -891,7 +891,7 @@ void InputValue_DectorPhase(uint8_t state)
                    MOS_B_L =1; //A+ ,B- '6'
                    MOS_A_H; //A+ 
                  
-				  
+				  delay_us(20);
                
 				
         break;
@@ -905,7 +905,7 @@ void InputValue_DectorPhase(uint8_t state)
                    MOS_A_L =0;
 				   MOS_B_L=1; //B-
 				   MOS_C_H	; //C+,B- '4'
-				   
+				   delay_us(20);
                   
 		         
 
@@ -918,7 +918,7 @@ void InputValue_DectorPhase(uint8_t state)
 				   MOS_A_L =1	; //C+ A- "5"
 				   MOS_C_H;  //C+ ;
                  
-			  
+			  delay_us(20);
 				
 				
 
@@ -933,7 +933,7 @@ void InputValue_DectorPhase(uint8_t state)
                     MOS_A_L=1; //A-
                     MOS_B_H	;//B+ A- "1"
                  
-                
+                delay_us(20);
 				
 
 		break;
@@ -945,7 +945,7 @@ void InputValue_DectorPhase(uint8_t state)
 				    MOS_C_L=1	; //B+,C- "3"
 				    MOS_B_H; //B+ ;
                  
-                  
+                  delay_us(20);
 
 					
 		
