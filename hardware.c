@@ -29,16 +29,16 @@ void	gpio_init(void)
 	P1DS   = 0x00;  //输入模式
 	P1     = 0x00;  //输出
 	
-	P2TRIS = 0x1C;  //方向
-	P2OD   = 0x0C;  //开漏
+	P2TRIS = 0x0C;  //方向
+	P2OD   = 0x04;  //开漏
 	P2RD   = 0x00;  //下拉
-	P2UP   = 0x00;  //上拉
+	P2UP   = 0x08;  //上拉
 	P2DR   = 0x00;  //驱动
 	P2SR   = 0x00;  //斜率
 	P2DS   = 0x0C;  //输入模式
 	P2     = 0x7C;  //输出
 	
-	P3TRIS = 0x40;  //方向  0B0100 0000
+	P3TRIS = 0x00;  //方向
 	P3OD   = 0x00;  //开漏
 	P3RD   = 0x00;  //下拉
 	P3UP   = 0x00;  //上拉
@@ -52,27 +52,26 @@ void	gpio_init(void)
 	P36EICFG = 0x00;
 
 	//复用选择
-	P00CFG = 0x12;  //WL PWM_W_L
-	P01CFG = 0x00;  
-	P02CFG = 0x01;//Ew  反向电动势
+	P00CFG = 0x12;
+	P01CFG = 0x00;
+	P02CFG = 0x01;//Ew
 	P03CFG = 0x01;//Ev
 	P04CFG = 0x01;//Eu
 	P05CFG = 0x01;//COM
 	
-	P13CFG = 0x13; //WH  PWM_W_H
-	P14CFG = 0x14; //VL
-	P15CFG = 0x15;// VH
-	P16CFG = 0x16;// UL
-	P17CFG = 0x17;// UH
+	P13CFG = 0x13;
+	P14CFG = 0x14;
+	P15CFG = 0x15;//
+	P16CFG = 0x16;//
+	P17CFG = 0x17;//
 	
-	P21CFG = 0x00; 
+	P21CFG = 0x00;
 	P22CFG = 0x00;//
 	P23CFG = 0x00;//
 	P24CFG = 0x00;//
 	P25CFG = 0x00;//
-	//P26CFG = 0x01;//Vin
-	P26CFG = 0x00;//Vin
-    
+	P26CFG = 0x01;//Vin
+	
 	P30CFG = 0x01;//OP_OUT
 	P31CFG = 0x01;//OP_N
 	P32CFG = 0x01;//OP_P
@@ -95,10 +94,10 @@ void	gpio_init(void)
 	PS_ADET  = 0x3f;
 	PS_FB    = 0x3f;
 }
-#if 1
+
 void	pwm_init(void)
 {
-	PWMCON = 0x0A;//
+	PWMCON = 0x0A;
 	PWMOE  = 0x3F;
 	
 	PWM01PSC = 0x01;//分频
@@ -115,14 +114,18 @@ void	pwm_init(void)
 	PWMCNTM =   0x3F;
 	PWMCNTE =   0x3F;
 	PWMCNTCLR = 0x3F;
-    
-    EPWM_ConfigChannelPeriod(EPWM0, 0x0190);  //Tpmw = 400 * 2 * 1/8 = 1/10(KHz) 16KHZ = PWMDn = 0x190
-	EPWM_ConfigChannelPeriod(EPWM1, 0x0190);
 	
-//	PWMP0L = 0x20; //周期值
-//	PWMP0H = 0x03;
-//	PWMP1L = 0x20;
-//	PWMP1H = 0x03;
+	PWMP0L = 0x20; //周期值
+	PWMP0H = 0x03;
+	PWMP1L = 0x20;
+	PWMP1H = 0x03;
+
+	//PWMP0L = 0x60; //周期值 T =0X960 * 2 * 1/48(us)
+	//PWMP0H = 0x09;
+	//PWMP1L = 0x60;
+	//PWMP1H = 0x09;
+	
+	
 	PWMP2L = 0x00;
 	PWMP2H = 0x00;
 	PWMP3L = 0x00;
@@ -131,14 +134,13 @@ void	pwm_init(void)
 	PWMP4H = 0x00;
 	PWMP5L = 0x00;
 	PWMP5H = 0x00;
-    
-    EPWM_ConfigChannelSymDuty(EPWM0, 0x00c8); // 50%
-	EPWM_ConfigChannelSymDuty(EPWM1, 0x00c8);
 	
-	//PWMD0L = 0x00;//比较值
-	//PWMD0H = 0x00;
-	//PWMD1L = 0x20;
-	//PWMD1H = 0x03;
+	PWMD0L = 0x00;//比较值 占空比
+	PWMD0H = 0x00;
+	PWMD1L = 0x20;
+	PWMD1H = 0x03;
+	//PWMD1L = 0x60;
+	//PWMD1H = 0x09;
 	
 	PWMD2L = 0x00;
 	PWMD2H = 0x00;
@@ -185,7 +187,7 @@ void	pwm_init(void)
 	PWMUIF = 0x00;
 	PWMDIF = 0x00;
 }
-#endif 
+
 static void ACMP_Dealy(void)
 {
 	volatile uint8_t i;
@@ -253,8 +255,8 @@ void	op_init(void)
 
 void	adc_init(void)
 {
-	ADCON0 = 0x48;
-	ADCON1 = 0x5B;
+	ADCON0 = 0x48; //0B0100 1000  //OP0_O
+	ADCON1 = 0x5B; //
 	ADCON2 = 0x00;
 	ADCMPC = 0x00;
 	ADDLYL = 0x00;

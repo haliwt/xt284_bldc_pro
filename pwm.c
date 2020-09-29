@@ -17,7 +17,7 @@ CHANGE_TYPES  CH;
  **
  ** \return none
 ******************************************************************************/
-static void  delay_pwm_us(void)
+static  void  delay_us(void)
 {
 	_nop_();
 	_nop_();
@@ -76,7 +76,7 @@ void Timer2_IRQHandler(void)  interrupt 5
 		
 		if(pwm.H_time>=pwm.T_time)
 		{
-			if(P24)
+			if(P23)
 			{
 				pwm.H_time = pwm.T_time;
 			}
@@ -143,13 +143,13 @@ unsigned int  pwm_handing(void)
 	if(++pwm.always_count>10)
 	{
 		pwm.always_count = 100;
-		if(P24)  //继电器控制位，电机电压输出
+		if(P23)
 		{
-			delay_pwm_us();
-			if(P24)
+			delay_us();
+			if(P23)
 			{
-				delay_pwm_us();
-				if(P24)
+				delay_us();
+				if(P23)
 				{
 					pwm.read = _pwm_max;
 					pwm.flag = FINISH;
@@ -158,11 +158,11 @@ unsigned int  pwm_handing(void)
 		}
 		else
 		{
-			delay_pwm_us();
-			if(!P24)
+			delay_us();
+			if(!P23)
 			{
-				delay_pwm_us();
-				if(!P24)
+				delay_us();
+				if(!P23)
 				{
 					pwm.read = 0;
 					pwm.flag = FINISH;

@@ -1,81 +1,56 @@
 #include<include.h>
 #include "my_type.h"
-#include "epwm.h"
+
 
 SYS_TYPES sys;
 CHANGE_TYPES  temp1;
 extern  BLDC_TYPES    BLDC;
-uint16_t count ;
-
+extern unsigned int change_voltage;
 void	main(void)
 {
-
-    static uint8_t poweronflg =0,pflg;
 	hardware_init();
-	KEY_Init();
-    LED_Init();
+	//TM1650_init();
 	bldc_value_init();
 	adc_value_init();
 	pwm_value_init();
+	//led_value_init();
+	//key_value_init();
 	check_current_offset();
 	MOS_OFF;
 	BLDC.status = 1;
 	BLDC.error = _pwm_limit_error; 
-	//BLDC.pwm_set = 1000;
-
-	BLDC.pwm_set = 5000;
+	BLDC.pwm_set = 1000;
+	while(BLDC.pwm_set)
+	{
+		if(EIF2&0x01)//Timer3¼ÆÊýÆ÷Òç³ö
+		{
+			EIF2 &= ~0x01;
+			temp1.change.math = ~4000;
+			TL3   = temp1.change.count[1];
+			TH3   = temp1.change.count[0];
+			BLDC.pwm_set --;
+		}
+	}
+	BLDC.pwm_set = 0;
+	
 	while(1)
 	{
-         
-		    BLDC_start();
+		//BLDC.pwm_set = change_voltage;
+		BLDC.pwm_set = 800;
         
-           pflg =  HDKey_Scan(0);
-           if(pflg==1){
-               poweronflg = poweronflg ^0x01;
-               if(poweronflg ==1){
-                 
-                   
-                 
-				if(count < 600){
-                     count++ ;
-                    StartTest();//sound a little 
-                    StartMotorRun();
-                    LED0=0;
-                   LED1=0;
-                }
-				
-                    LED0=1;
-                    LED1= 1;
-                   
-                    NormalMotorRun();
-              //  BLDC_start();
-                 
-                   
-				
-     
-			 
-               }
-               else{
-                LED0=1;
-                LED1=0;
-               count=0;
-                MotorStop();
-                   hardware_init();
-                    KEY_Init();
-                    LED_Init();
-                    bldc_value_init();
-                    adc_value_init();
-                    pwm_value_init();
-                    check_current_offset();
-                    MOS_OFF;
-                    BLDC.status = 1;
-                    BLDC.error = _pwm_limit_error; 
-                    BLDC.pwm_set = 1000;
-               
-               }
-           }
-              
-	
+		if(EIF2&0x01)
+		{
+			EIF2 &= ~0x01;
+			temp1.change.math = ~4000;
+			TL3   = temp1.change.count[1];
+			TH3   = temp1.change.count[0];
+			scan_adc_channal();
+			read_change_voltage();
+			BLDC_main();
+			//key_handing();
+			//display();
+		}
+		
 	}
 }
 

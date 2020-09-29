@@ -133,8 +133,8 @@
 /*----BEEP通道---------------------------------------------------------------*/
 #define  GPIO_MUX_BEEP		(0x18)
 /*----ACMP通道---------------------------------------------------------------*/
-#define  GPIO_MUX_C0O		(0x1A)
-#define  GPIO_MUX_C1O		(0x1B)
+#define  GPIO_MUX_C0O		(0x1A)   //比较器输出
+#define  GPIO_MUX_C1O		(0x1B)   //比较输出配置通道
 
 /*--ANALOG功能--------------------------------------------------------------*/
 #define  GPIO_MUX_ANALOG	(0x01)			/*模拟功能(GPIO功能关闭)*/
@@ -169,7 +169,7 @@
 #define  GPIO_P24_MUX_C0P5	(0x01)
 #define  GPIO_P14_MUX_C0N	(0x01)
 
-#define  GPIO_P04_MUX_C1P0	(0x01)
+#define  GPIO_P04_MUX_C1P0	(0x01)  //妯℃嫙 IO 
 #define  GPIO_P03_MUX_C1P1	(0x01)
 #define  GPIO_P02_MUX_C1P2	(0x01)
 #define  GPIO_P30_MUX_C1P4	(0x01)

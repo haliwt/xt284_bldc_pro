@@ -2,20 +2,19 @@
 #define _INCLUDE_H_
 
 
-#include <CMS8S6990.H>
+#include <CMS8S6990.h>
 #include <hardware.H>
 #include <bldc.H>
 #include <pwm.H>
 #include <adc.H>
 #include <key.H>
-#include <led.H>
+
 #include <flash.H>
 #include "intrins.h" 
-#include <epwm.h>
 
 
-#define		MOS_U_V			{PWMMASKE = 0x39;C1CON0 = 0x82;C1CON2 = 0x00;} //C1COCN2 = Bit5 0正常输出
-#define		MOS_U_W			{PWMMASKE = 0x2D;C1CON0 = 0x81;C1CON2 = 0x20;} //C1COCN2 -Bit5 =1 inversion 
+#define		MOS_U_V			{PWMMASKE = 0x39;C1CON0 = 0x82;C1CON2 = 0x00;}
+#define		MOS_U_W			{PWMMASKE = 0x2D;C1CON0 = 0x81;C1CON2 = 0x20;}
 #define		MOS_V_W			{PWMMASKE = 0x27;C1CON0 = 0x80;C1CON2 = 0x00;}
 #define		MOS_V_U			{PWMMASKE = 0x36;C1CON0 = 0x82;C1CON2 = 0x20;}
 #define		MOS_W_U			{PWMMASKE = 0x1E;C1CON0 = 0x81;C1CON2 = 0x00;}
@@ -23,8 +22,8 @@
 #define		MOS_BREAK		{PWMMASKE = 0x3F;}//PWMFBKC = 0x10;}
 #define		MOS_OFF			{PWMMASKE = 0x3f;}//PWMFBKC = 0x00;}
 
-#define   _FG_H              P36=1 //P2_4 = 0;
-#define   _FG_L              P36= 0// P2_4 = 1;
+#define   _FG_H               P0_1 = 0;
+#define   _FG_L               P0_1 = 1;
 
 
 #define   hall_1	 5
@@ -43,10 +42,12 @@
 //#define   current_channal        0x5E
 #define   voltage_channal        0x5C
 #define   pwm_adc_channal        0x5B
+#define   change_voltage_channal        0x58	
+
 
 #define   _set_over_voltage     28
 #define   _set_min_voltage      8
-#define   _set_over_current     8
+#define   _set_over_current     5
 #define   _en_duzhuan_time      500
 #define   _soft_step_time       5
 
@@ -55,16 +56,16 @@
 #define   _set_reset_time       2000
  
 #define   _pwm_max							800
-#define   _start_pwm_set        100
+#define   _start_pwm_set        50
 #define   _start_max_pwm        300
-#define   _pwm_min_set          80
+#define   _pwm_min_set          50
 #define   _break_pwm						800
 
 
 #define   _open_min_time					20      //(x/20000)
 #define   _open_max_time					2000     //(x/20000)
 #define   _break_time							10000    //(x/20000)
-#define  _DEGAUSS_TIME         250     //退磁时间
+
 
 #define   _no_error               0x00
 #define   _voltage_over_error     0x01
@@ -77,10 +78,10 @@
 
 
 
-#define   ON_BLDC_INTE     {PWMPIF = 0x00;PWMZIF = 0x00;PWMUIF = 0x00;PWMDIF = 0x00;EIE2 |= 0x08;} // enable PWM interrupter
-#define   OFF_BLDC_INTE    {PWMPIF = 0x00;PWMZIF = 0x00;PWMUIF = 0x00;PWMDIF = 0x00;EIE2 &=~0x08;} //disable PWM interrupter
+#define   ON_BLDC_INTE     {PWMPIF = 0x00;PWMZIF = 0x00;PWMUIF = 0x00;PWMDIF = 0x00;EIE2 |= 0x08;}
+#define   OFF_BLDC_INTE    {PWMPIF = 0x00;PWMZIF = 0x00;PWMUIF = 0x00;PWMDIF = 0x00;EIE2 &=~0x08;}
 
-#define   ON_PWM_IN_INTE     {T2IF = 0x00;ET2 = 1;} //ET2 =timer2 鎬讳腑鏂?鍏佽?镐綅
+#define   ON_PWM_IN_INTE     {T2IF = 0x00;ET2 = 1;}
 #define   OFF_PWM_IN_INTE    {T2IF = 0x00;ET2 = 0;}
 
 //#define   ON_HALL_INTE       {P3EXTIF = 0x00;P3EXTIE = 0x46;}

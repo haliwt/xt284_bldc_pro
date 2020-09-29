@@ -636,7 +636,7 @@ void  EPWM_AllIntDisable(void);
 /*****************************************************************************/
 /* Global function prototypes ('extern', definition in C source) */
 /*****************************************************************************/
-void EPWM_Config(void);
+
 #endif /* __EPWM_H__ */
 
 

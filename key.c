@@ -1,6 +1,25 @@
-#include<include.h>
-#include "my_type.h"
+#include "key.h"
+#include "intrins.h"
 
+#if 0
+void delay_us(uint8_t n)
+{
+   do
+	{
+		_nop_();
+		_nop_();
+		_nop_();
+		_nop_();
+		_nop_();
+		_nop_();
+		_nop_();
+		_nop_();
+	}
+	while(--n);
+
+
+}
+#endif
 /******************************************************************************
  **
  ** Function Name:	void delay_10us(uint16_t n) 
@@ -48,10 +67,6 @@ void KEY_Init(void)
 	GPIO_ENABLE_INPUT(P2TRIS, GPIO_PIN_4);			//设置为输入模式
 	GPIO_ENABLE_RD(P2RD, GPIO_PIN_4);	//开启下拉
 
-
-	
-	
-
 	#if 0
 	/*
 	(2)设置中断方式
@@ -92,5 +107,6 @@ uint8_t HDKey_Scan(uint8_t mode)
 		}else if(POWER_KEY==0)key_up=1;
 		return 0;	//娌℃湁鎸夐敭鎸変笅
 }
+
 
 

@@ -30,42 +30,42 @@ typedef  struct
 }FLASH_TYPES;
 
 
-typedef  struct  
-{
-	uint8_t         power_on_off;
-	uint8_t         power_set;
-	uint8_t         ms_count;
-	uint8_t         ms_rpm_count;
-	uint8_t         state;
-	uint8_t         pole;
-	uint16_t        pwm_hand;
-	uint32_t        rpm_sum;
-	uint8_t         rpm_sum_count;
-	uint16_t        rpm;
-	uint8_t         dis_ram[4];
-	
-	
-	
-}DISPLAY_TYPES;
+//typedef  struct  
+//{
+//	uint8_t         power_on_off;
+//	uint8_t         power_set;
+//	uint8_t         ms_count;
+//	uint8_t         ms_rpm_count;
+//	uint8_t         state;
+//	uint8_t         pole;
+//	uint16_t        pwm_hand;
+//	uint32_t        rpm_sum;
+//	uint8_t         rpm_sum_count;
+//	uint16_t        rpm;
+//	uint8_t         dis_ram[4];
+//	
+//	
+//	
+//}DISPLAY_TYPES;
 
 
-typedef  struct  
-{
-	uint8_t         read;
-	uint8_t         buffer;
-	uint8_t         value;
-	uint8_t         inc_delay;
-	uint16_t    		on_time;
-	uint16_t    		off_time;
-	enum{
-		start  = 0,
-		first  = 1,
-		second = 2,
-		cont   = 3,
-		end    = 4,
-		finish = 5,
-	}state;
-}KEY_TYPES;
+//typedef  struct  
+//{
+//	uint8_t         read;
+//	uint8_t         buffer;
+//	uint8_t         value;
+//	uint8_t         inc_delay;
+//	uint16_t    		on_time;
+//	uint16_t    		off_time;
+//	enum{
+//		start  = 0,
+//		first  = 1,
+//		second = 2,
+//		cont   = 3,
+//		end    = 4,
+//		finish = 5,
+//	}state;
+//}KEY_TYPES;
 
 
 typedef  struct                     
@@ -77,16 +77,17 @@ typedef  struct
 	uint16_t   voltage_sum;    
 	uint16_t   current_sum;   
 	uint16_t   pwm_adc_sum; 
-	
+	uint16_t   change_voltage_sum;   
 	
 	uint16_t   voltage;    
 	uint16_t   current;   
 	uint16_t   pwm_adc;
+	uint16_t   change_voltage;  
 	
 	uint8_t    voltage_count;
 	uint8_t    current_count;
 	uint8_t    pwm_adc_count;
-	
+	uint8_t    change_voltage_count;
 }ADC_TYPES;
 
 typedef  struct                     
@@ -130,15 +131,15 @@ typedef  struct
 							
 	uint8_t    bemf_filter;
 	uint8_t 	 EMI_flag;
-	uint8_t    EMI_count;
-	uint8_t    motor_step;
+	uint8_t    EMI_count;//用来记录电机启动时位置检测的次数
+	uint8_t    motor_step;//电机当前相位，也就是当前的霍尔值
 	
 	uint8_t    start_times;
 	uint8_t    EMI_OK_count;
 	uint8_t    EMI_NG_count;
 	uint8_t    turn_OK_count;
 	
-	uint16_t   stem_time;
+	uint16_t   duzhuan_time;
 	
 	uint16_t   open_period;
 	uint16_t   check_over_time;
@@ -147,7 +148,7 @@ typedef  struct
 	union data32  zero_period;
 	
 	uint8_t    read_EMF;    
-	uint8_t    BEMF_Number;   
+	uint8_t    EMF_now;   
 	uint8_t    EMF_last;
 	
 	union data16   output_time;

@@ -141,8 +141,8 @@ void EPWM_ConfigChannelPeriod(uint8_t ChannelNum,uint16_t Period)
 	switch(ChannelNum)
 	{
 		case EPWM0:
-			PWMP0H = Period>>8;
-			PWMP0L = Period;
+			PWMP0H = Period>>8; //周期数据寄存器0 高8位
+			PWMP0L = Period;    //周期数据寄存器0         低8位
 			PWMLOADEN |= EPWM_CH_0_MSK;
 			break;
 		case EPWM1:
