@@ -80,5 +80,7 @@ void InputValue_DectorPhase(uint8_t state);
 void OPEN3(void);
 void NoSense_InterruptPhase(void);
 void NOSense_CCW_DectorPhase(void);
+void CCW_MotorRun(void);
+
 
 #endif 

@@ -33,7 +33,7 @@ int main(void)
 	EPWM_InDepend_Config();
 	CMP_InputSignal();
     EPWM_InDepend_Init();
-
+    gPhase =0;
 	while(1)
 	{	
        
@@ -63,8 +63,9 @@ int main(void)
                            }
                            else   
                             {
-                            //  NO_HallSensor_DectorPhase();
-                            InputValue_DectorPhase(0);
+                              NO_HallSensor_DectorPhase();
+                            //InputValue_DectorPhase(0);
+                           
                             
                                LED0=0;
                                LED1=0;
@@ -72,8 +73,9 @@ int main(void)
                              
                        }
                    }
-               //  NO_HallSensor_DectorPhase();
-                   InputValue_DectorPhase(0);  
+                 NO_HallSensor_DectorPhase();
+                  // InputValue_DectorPhase(0);  
+               
 			
 
                   
