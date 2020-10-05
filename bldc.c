@@ -2,19 +2,14 @@
 #include "my_type.h"
 
 
-#define  _STOP           0
-#define  _CHECK          1
-#define  _OPEN           2
-#define  _LOOP           3
-#define  _BREAK          4
+
 
 #define  OPEN_CONF_COM       0
 #define  OPEN_WAIT_CHECK     1
 #define  OPEN_CHECK_B        2
 #define  OPEN_CHECK_ZERO     3
 #define  OPEN_COM_CHARGE     4
-#define  OPEN_DEGAUSS       5
-#define  OPEN_ERROR          6
+#define  OPEN_ERROR          5
 
 
 
@@ -23,10 +18,9 @@
 #define  _CHECK_ZERO     2
 #define  _WAIT_COM       3
 #define  _COM_CHARGE     4
-#define  _DEGAUSS        5
-#define  _ERROR          6
+#define  _ERROR          5
 
-
+#define  FG         P0_1
 
 
 
@@ -38,7 +32,7 @@ code unsigned char cBEMF_FILTER[64] = {  0,2,4,6,8,10,12,14,16,18,20,22,24,26,28
 																				  32,34,36,38,1,42,44,46,1,1,1,54,56,58,60,62};		
 */
 
-CHANGE_TYPES  pwm_now;
+CHANGE_TYPES  temp2;
 BLDC_TYPES    BLDC;
 extern  idata  ADC_TYPES  ADC;				
 																					
@@ -61,7 +55,7 @@ static  void	delay_us(uint8_t  in)
 
 void	bldc_value_init(void)
 {
-		BLDC.cw_ccw_in = 0;
+	BLDC.cw_ccw_in = 0;
 	BLDC.cw_ccw_now = 0;
 	BLDC.EMI_flag = 0;
 	BLDC.EMI_count = 0;
@@ -71,7 +65,7 @@ void	bldc_value_init(void)
 	BLDC.EMI_NG_count = 0;
 	BLDC.turn_OK_count = 0;
 	
-	BLDC.stem_time = 0;
+	BLDC.duzhuan_time = 0;
 	
 	BLDC.open_period = _open_max_time;
 	BLDC.check_over_time = 0;
@@ -80,13 +74,13 @@ void	bldc_value_init(void)
 	BLDC.zero_period.all = 0xffff;
 	
 	BLDC.read_EMF = 0;    
-	BLDC.BEMF_Number = 0;   
+	BLDC.EMF_now = 0;   
 	BLDC.EMF_last = 0;
 	
 	BLDC.output_time.all = 0xffff;
 	BLDC.zero_check_time.all = 0xffff;
 	
-	BLDC.pwm_out = _start_pwm_set; //频率
+	BLDC.pwm_out = _start_pwm_set;
 	BLDC.reset_time = 0;
 	
 	BLDC.loop_status = 0;
@@ -99,10 +93,10 @@ void	com_charge(void)
 {
 	switch(BLDC.motor_step)
 	{
-		case 0:{MOS_U_V;break;}
+		case 0:{MOS_U_V;FG=1;break;}
 		case 1:{MOS_W_V;break;}
 		case 2:{MOS_W_U;break;}
-		case 3:{MOS_V_U;break;}
+		case 3:{MOS_V_U;FG=0;break;}
 		case 4:{MOS_V_W;break;}
 		case 5:{MOS_U_W;break;}
 		default :{MOS_OFF;break;}
@@ -127,12 +121,19 @@ unsigned int  soft_pwm(unsigned int in,unsigned int out)
 	}
 	return  out;
 }
-
-void  out_pwm(unsigned int    in)
+/*******************************************************************
+	*
+	*Function Name: void out_pwm(unsigned int in )
+	*Function :
+	*
+	*
+	*
+*******************************************************************/
+void  out_pwm(unsigned int  in)
 {
 	if(in>_pwm_max){in = _pwm_max;}
 	
-	pwm_now.change.math = _pwm_max-in;
+	temp2.change.math = _pwm_max-in;
 	
 	if(in<350)
 	{
@@ -149,6 +150,10 @@ void  out_pwm(unsigned int    in)
 	{
 		PWMPIE = 0x01;  //周期中断
 		PWMZIE = 0x00;  //零点中断
+
+//  		PWMPIE = 0x00;  //周期中断 //WT.EDIT
+//		PWMZIE = 0x01;  //零点中断 //WT.EDIT 2020.10.04
+
 		PWMUIE = 0x00;  //向上比较中断
 		PWMDIE = 0x00;  //向下比较中断
 		PWMPIF = 0x00;  //中断标志
@@ -156,190 +161,224 @@ void  out_pwm(unsigned int    in)
 		PWMUIF = 0x00;
 		PWMDIF = 0x00;
 	}
-	if(BLDC.loop_status != _DEGAUSS)
-	{
-		PWMD1L   = pwm_now.change.count[1];
-		PWMD1H   = pwm_now.change.count[0];
-		PWMD0L   = 0x00;
-		PWMD0H   = 0x00;
-		PWMLOADEN = 0x03;
-	}
+	PWMD1L   = temp2.change.count[1];
+	PWMD1H   = temp2.change.count[0];
+	PWMLOADEN = 0x02;
 }
 
-/********************************************************************
+/*******************************************************************
 	*
-	*Function Name:void MotoRun(void)
-	*Function:open
-	*Inputr Ref:NO
-	*Return Ref:NO
+	*Function Name: void LOOP(void)
+	*Function :
 	*
-*********************************************************************/
-void MotorRun(void)
+	*
+	*
+*******************************************************************/
+
+void	LOOP(void)
 {
-	switch(BLDC.open_status)
+	unsigned char i;
+	if(BLDC.pwm_set==800){
+
+	    switch(BLDC.loop_status)
 		{
-			case   OPEN_CONF_COM:
-				BLDC.zero_check_time.all =  BLDC.open_period;
-				confirm_phase();
-				com_charge();
-				BLDC.stem_time = 0;
-				BLDC.check_over_time = 0;
-			  BLDC.open_period = _open_max_time;
-				BLDC.zero_check_time.all =  BLDC.open_period;
-				TH1 = 0;
-				TL1 = 0;
-				TF1 = 0;
-				BLDC.open_status = OPEN_WAIT_CHECK;
-				break;
-			case   OPEN_WAIT_CHECK:
-				if(TF1)
+			case   _WAIT_CHECK:
+				if(TF1)//这里其实才是等待消磁,定时器溢出中断标志位
 				{
 					TF1 = 0;
-					BLDC.open_status = OPEN_CHECK_ZERO;
+					BLDC.loop_status = _CHECK_ZERO;
 				}
 				break;
-			case   OPEN_CHECK_B:
-				if((BLDC.EMI_flag&0x80)==0x00)
+			case   _CHECK_ZERO_B:
+				if(!(BLDC.EMI_flag&0x80))
 				{
-					BLDC.open_status = OPEN_CHECK_ZERO;
+					BLDC.loop_status = _CHECK_ZERO;
 				}
-				if((--BLDC.zero_check_time.all) == 0)
+				/*if(TF1)
 				{
-					BLDC.open_status = OPEN_COM_CHARGE;
-					BLDC.EMI_OK_count = 0;
-					BLDC.turn_OK_count = 0;
-				}
+					TF1 = 0;
+					BLDC.error  |= _emf_Error;
+				}*/
 				break;
-			case  OPEN_CHECK_ZERO:
+			case  _CHECK_ZERO://消磁完了之后等待过零点
 				BLDC.zero_now_time.one.h  = TH0;
-				BLDC.zero_now_time.one.l  = TL0;
-				if(BLDC.EMI_flag&0x80)
+				BLDC.zero_now_time.one.l  = TL0;//这个值不停的跟新，直到比较器发生跳变
+				if(BLDC.EMI_flag&0x80)					//此时记录的就是上次过零点和下次过零点之间的时间，也就是60度的时间
 				{
-					if(++BLDC.EMI_OK_count>=10)
-					{
-						BLDC.EMI_OK_count = 0;
-						TH0 = 0;
-						TL0 = 0;
-						TF0 = 0;
-						BLDC.zero_period.all =  (BLDC.zero_now_time.all<<2);//240
-						if(++BLDC.turn_OK_count>5)
-						{
-							BLDC.turn_OK_count = 0;
-							MOS_OFF;
-							BLDC.output_time.all = BLDC.zero_now_time.all >>1;//30
-							BLDC.output_time.all -= (BLDC.zero_now_time.all >>2);//30
-							BLDC.zero_check_time.all = BLDC.output_time.all >>1;
-							BLDC.status = _LOOP;
-							TL1 = ~BLDC.zero_check_time.one.l;					
-							TH1 = ~BLDC.zero_check_time.one.h; 
-							TF1 = 0;
-							BLDC.loop_status = _WAIT_CHECK;
-						}
-						else
-						{
-							BLDC.open_status = OPEN_COM_CHARGE;
-						}
-					}
-				}
-				else
-				{
-					BLDC.EMI_OK_count = 0;
-				}
-				if((--BLDC.zero_check_time.all) == 0)
-				{
-					BLDC.open_status = OPEN_COM_CHARGE;
-					BLDC.EMI_OK_count = 0;
-					BLDC.turn_OK_count = 0;
-				}
-				break;
-			case  OPEN_COM_CHARGE:
-				BLDC.open_period -= (BLDC.open_period/15+1);
-				if(BLDC.open_period<_open_min_time)
-				{
-					BLDC.open_period = _open_max_time;
-					if(++BLDC.start_times>3)
-					{
-						BLDC.error  |= _emf_Error;
-						BLDC.start_times = 0;
-					}
-				}
-				BLDC.zero_check_time.all =  BLDC.open_period;
-				//confirm_phase();
-				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
+					TH0 = 0;
+					TL0 = 0;
+					TF0 = 0;
+					BLDC.zero_period.all = BLDC.zero_period.all - (BLDC.zero_period.all >>2) + BLDC.zero_now_time.all;//240   这一句的作用是将60度的
+					BLDC.output_time.all = BLDC.zero_period.all >>3;//30	除以8，也就是三十度的时间					              	时间扩大4倍，也就是240度的时间
+					
+					BLDC.step_read = BLDC.output_time.all;
+					
+					BLDC.output_time.all -= (BLDC.output_time.all>>2);//24度的时间
+					BLDC.zero_check_time.all = BLDC.output_time.all >>1;//12度的时间
+				  BLDC.zero_check_time.all += (BLDC.zero_check_time.all>>3);//12度的时间在加上一个值，这个值作为微调用
+					BLDC.duzhuan_time = 0;
+					TL1 = ~BLDC.output_time.one.l;					
+					TH1 = ~BLDC.output_time.one.h; 
+					TF1 = 0;
+					
+					BLDC.step_time_sum += BLDC.step_read;
 				
-				com_charge();
-				BLDC.stem_time = 0;
-				BLDC.check_over_time = 0;
-				TH1 = 0x7f;
-				TL1 = 0;
+							if(++BLDC.step_time_count>=64)
+							{
+								BLDC.step_time = BLDC.step_time_sum>>5;
+								BLDC.step_time_count = 0;
+								BLDC.step_time_sum = 0;
+								BLDC.step_updata_flag = 1;
+							}
+						
+					BLDC.loop_status = _WAIT_COM;
+				}
+				/*if(TF1)
+				{
+					TF1 = 0;
+					BLDC.error  |= _emf_Error;
+				}*/
+				break;
+			case  _WAIT_COM://这里是等待延时30时间，但是这个延时时间并不一定是30度，根据实际情况调整
+				if(TF1)//
+				{
+					TF1 = 0;
+					BLDC.loop_status = _COM_CHARGE;
+				}
+				break;
+			case  _COM_CHARGE:
+				TL1 = ~BLDC.zero_check_time.one.l;	//这里是将消磁的时间加入定时器，随后立马换向				
+				TH1 = ~BLDC.zero_check_time.one.h; 
 				TF1 = 0;
-				BLDC.open_status = OPEN_WAIT_CHECK;
+				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
+				com_charge();
+				BLDC.loop_status = _WAIT_CHECK;
 				break;
-			case  OPEN_ERROR:
+			case  _ERROR:
 				break;
-			default:BLDC.loop_status = OPEN_CONF_COM;
+			default:BLDC.loop_status = _WAIT_CHECK;
 				break;
 		}
-}
-/*************************************************************
-	*
-	*Function Name() : void StartTest(void)
-	*Function : check reserves voltage BEMF
-	*Input Ref: NO
-	*Return: Ref : NO
-	*
-*************************************************************/
-void  StartTest(void)
-{
-	#if 1
-	if(++BLDC.check_over_time<5000)
+
+
+	}
+	else{
+	for(i=0;i<8;i++)
 	{
-		BLDC.stem_time= 0;
-		BLDC.BEMF_Number = 0;
-		C1CON2 = 0x00; //比较控制寄存器2 --
-		C1CON0 = 0x80; //比较控制寄存器0 --enable compare
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x01;} //U --BEMF
-		C1CON0 = 0x81;
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x02;} //V ---BEMF
-		C1CON0 = 0x82;
-		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x04;}//W  ---BEMF 
-
-		switch(BLDC.BEMF_Number)
+		switch(BLDC.loop_status)
 		{
-
-
-					case 0x06:{MOS_U_V;break;}  //A+ B- '6'
-					case 0x04:{MOS_W_V;break;}    //C+ B-  "4"
-					case 0x05:{MOS_W_U;break;}   //C+ A- "5"
-					case 0x01:{MOS_V_U;break;}     //B+ A-   "1"
-					case 0X03:{MOS_V_W;break;}       //B+ C - "3"
-					case 0X02:{MOS_U_W;break;}        // A+ C-  "2"
-					default :{MOS_OFF;break;}
+			case   _WAIT_CHECK:
+				if(TF1)//这里其实才是等待消磁,定时器溢出中断标志位
+				{
+					TF1 = 0;
+					BLDC.loop_status = _CHECK_ZERO;
+				}
+				break;
+			case   _CHECK_ZERO_B:
+				if(!(BLDC.EMI_flag&0x80))
+				{
+					BLDC.loop_status = _CHECK_ZERO;
+				}
+				/*if(TF1)
+				{
+					TF1 = 0;
+					BLDC.error  |= _emf_Error;
+				}*/
+				break;
+			case  _CHECK_ZERO://消磁完了之后等待过零点
+				BLDC.zero_now_time.one.h  = TH0;
+				BLDC.zero_now_time.one.l  = TL0;//这个值不停的跟新，直到比较器发生跳变
+				if(BLDC.EMI_flag&0x80)					//此时记录的就是上次过零点和下次过零点之间的时间，也就是60度的时间
+				{
+					TH0 = 0;
+					TL0 = 0;
+					TF0 = 0;
+					BLDC.zero_period.all = BLDC.zero_period.all - (BLDC.zero_period.all >>2) + BLDC.zero_now_time.all;//240   这一句的作用是将60度的
+					BLDC.output_time.all = BLDC.zero_period.all >>3;//30	除以8，也就是三十度的时间					              	时间扩大4倍，也就是240度的时间
+					
+					BLDC.step_read = BLDC.output_time.all;
+					
+					BLDC.output_time.all -= (BLDC.output_time.all>>2);//24度的时间
+					BLDC.zero_check_time.all = BLDC.output_time.all >>1;//12度的时间
+				  BLDC.zero_check_time.all += (BLDC.zero_check_time.all>>3);//12度的时间在加上一个值，这个值作为微调用
+					BLDC.duzhuan_time = 0;
+					TL1 = ~BLDC.output_time.one.l;					
+					TH1 = ~BLDC.output_time.one.h; 
+					TF1 = 0;
+					
+					BLDC.step_time_sum += BLDC.step_read;
+				
+							if(++BLDC.step_time_count>=64)
+							{
+								BLDC.step_time = BLDC.step_time_sum>>5;
+								BLDC.step_time_count = 0;
+								BLDC.step_time_sum = 0;
+								BLDC.step_updata_flag = 1;
+							}
+						
+					BLDC.loop_status = _WAIT_COM;
+				}
+				/*if(TF1)
+				{
+					TF1 = 0;
+					BLDC.error  |= _emf_Error;
+				}*/
+				break;
+			case  _WAIT_COM://这里是等待延时30时间，但是这个延时时间并不一定是30度，根据实际情况调整
+				if(TF1)//
+				{
+					TF1 = 0;
+					BLDC.loop_status = _COM_CHARGE;
+				}
+				break;
+			case  _COM_CHARGE:
+				TL1 = ~BLDC.zero_check_time.one.l;	//这里是将消磁的时间加入定时器，随后立马换向				
+				TH1 = ~BLDC.zero_check_time.one.h; 
+				TF1 = 0;
+				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
+				com_charge();
+				BLDC.loop_status = _WAIT_CHECK;
+				break;
+			case  _ERROR:
+				break;
+			default:BLDC.loop_status = _WAIT_CHECK;
+				break;
 		}
 	}
-  #endif 
-#if 0
-  if(++BLDC.check_over_time<5000)
+		}
+}
+/*******************************************************************
+	*
+	*Function Name: void CHECK(void)
+	*Function :
+	*
+	*
+	*
+*******************************************************************/
+void  CHECK(void)
+{
+	if(++BLDC.check_over_time<5000)
 	{
-		BLDC.stem_time = 0;
-		BLDC.BEMF_Number = 0;
-		C1CON2 = 0x00;
-		C1CON0 = 0x80;
+		if(BLDC.pwm_set ==800){ //WT.EDIT 
+			if(BLDC.check_over_time ==4980)
+				BLDC.check_over_time=5500;
+		}
+		BLDC.duzhuan_time = 0;
+		BLDC.EMF_now = 0;
+		C1CON2 = 0x00;//配置比较器1
+		C1CON0 = 0x80;//比较器1使能--输入是C1P0 
 		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x01;}
-		C1CON0 = 0x81;
+		if(C1CON1&0x80){BLDC.EMF_now |= 0x01;}//如果比较器1的输出位为高，则
+		C1CON0 = 0x81;//这句不知干嘛的，猜测是配置比较器，去采集三个过零点信号
 		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x02;}
+		if(C1CON1&0x80){BLDC.EMF_now |= 0x02;}
 		C1CON0 = 0x82;
 		delay_us(20);
-		if(C1CON1&0x80){BLDC.BEMF_Number |= 0x04;}
+		if(C1CON1&0x80){BLDC.EMF_now |= 0x04;}
 		
-		if(BLDC.EMF_last != BLDC.BEMF_Number)
+		if(BLDC.EMF_last != BLDC.EMF_now)
 		{
-			BLDC.start_times = 0;
+			BLDC.duzhuan_time = 0;
 			BLDC.zero_now_time.one.h  = TH0;
 			BLDC.zero_now_time.one.l  = TL0;
 			TH0 = 0;
@@ -351,22 +390,22 @@ void  StartTest(void)
 			BLDC.zero_check_time.all = BLDC.output_time.all >>2;
 			//BLDC.zero_check_time.all -= (BLDC.zero_check_time.all>>3);
 			
-			switch(BLDC.BEMF_Number)
+			switch(BLDC.EMF_now)//判断这次电机的相位
 			{
 				case 1:
-					if(BLDC.EMF_last == 3)
+					if(BLDC.EMF_last == 3)//判断这次电机相位的前一个相位，前一个相位是3，说明是CW方向
 					{
-						if(BLDC.check_cw_ccw_flag == _CW)
-						{
-							BLDC.EMI_count++;
+						if(BLDC.check_cw_ccw_flag == _CW)//通过前后两次的相位，就可以确定电机的转动方向，
+						{																	//在这里通过判断当前的方向与电机的实际方向是否一致
+							BLDC.EMI_count++;								//从而就知道电机位置检测是否正确
 						}
-						else
+						else//说明不正确
 						{
-							BLDC.EMI_count = 0;
+							BLDC.EMI_count = 0;//计数清零
 							BLDC.check_cw_ccw_flag = _CW;
 						}
 					}
-					if(BLDC.EMF_last == 5)
+					if(BLDC.EMF_last == 5)//如果前一个相位是5，说明是CCW方向
 					{
 						if(BLDC.check_cw_ccw_flag == _CCW)
 						{
@@ -526,14 +565,15 @@ void  StartTest(void)
 				default:
 					break;
 			}
-			BLDC.EMF_last = BLDC.BEMF_Number;
+			BLDC.EMF_last = BLDC.EMF_now;
 		}
-		if(BLDC.EMI_count>=5)
+		
+		if(BLDC.EMI_count>=5)//连续5次检测位置正确
 		{
 			BLDC.EMI_count = 0;
-			if(BLDC.check_cw_ccw_flag == BLDC.cw_ccw_now)
+			if(BLDC.check_cw_ccw_flag == BLDC.cw_ccw_now)//通过位置检测判断出来的方向与电机实际转动方向一致
 			{
-				switch(BLDC.motor_step)
+				switch(BLDC.motor_step)//换向
 				{
 					case 0:{MOS_U_V;break;}
 					case 1:{MOS_W_V;break;}
@@ -547,7 +587,7 @@ void  StartTest(void)
 				TH1 = ~BLDC.zero_check_time.one.h; 
 				TF1 = 0;
 				BLDC.loop_status = _WAIT_CHECK;
-				BLDC.status = _LOOP;
+				BLDC.status = _LOOP;//切入闭环
 				BLDC.EMI_NG_count = 0;
 			}
 			else
@@ -559,111 +599,22 @@ void  StartTest(void)
 			}
 		}
 	}
+	
+	
 	else
 	{
 		BLDC.status = _OPEN;
 		BLDC.open_status = OPEN_CONF_COM;
 	}
-  #endif 
-	
 }
-/*************************************************************
+/*******************************************************************
 	*
-	*Function Name() : NormalMotorRun(void)
-	*Function : motor normal works
-	*Input Ref: NO
-	*Return: Ref : NO
+	*Function Name: void confirm_phase(void)
+	*Function :
 	*
-*************************************************************/
-void  NormalMotorRun(void)
-{
-	
-	unsigned char i;
-	for(i=0;i<8;i++)
-	{
-		switch(BLDC.loop_status)
-		{
-			case   _WAIT_CHECK:
-				if(TF1)//这里其实才是等待消磁
-				{
-					TF1 = 0;
-					BLDC.loop_status = _CHECK_ZERO;
-				}
-				break;
-			case   _CHECK_ZERO_B:
-				if(!(BLDC.EMI_flag&0x80))
-				{
-					BLDC.loop_status = _CHECK_ZERO;
-				}
-				/*if(TF1)
-				{
-					TF1 = 0;
-					BLDC.error  |= _emf_Error;
-				}*/
-				break;
-			case  _CHECK_ZERO://消磁完了之后等待过零点
-				BLDC.zero_now_time.one.h  = TH0;
-				BLDC.zero_now_time.one.l  = TL0;//这个值不停的跟新，直到比较器发生跳变
-				if(BLDC.EMI_flag&0x80)					//此时记录的就是上次过零点和下次过零点之间的时间，也就是60度的时间
-				{
-					TH0 = 0;
-					TL0 = 0;
-					TF0 = 0;
-					BLDC.zero_period.all = BLDC.zero_period.all - (BLDC.zero_period.all >>2) + BLDC.zero_now_time.all;//240   这一句的作用是将60度的
-					BLDC.output_time.all = BLDC.zero_period.all >>3;//30	除以8，也就是三十度的时间					              	时间扩大4倍，也就是240度的时间
-					
-					BLDC.step_read = BLDC.output_time.all;
-					
-					BLDC.output_time.all -= (BLDC.output_time.all>>2);//24度的时间
-					BLDC.zero_check_time.all = BLDC.output_time.all >>1;//12度的时间
-				  BLDC.zero_check_time.all += (BLDC.zero_check_time.all>>3);//12度的时间在加上一个值，这个值作为微调用
-					BLDC.stem_time = 0;
-					TL1 = ~BLDC.output_time.one.l;					
-					TH1 = ~BLDC.output_time.one.h; 
-					TF1 = 0;
-					
-					BLDC.step_time_sum += BLDC.step_read;
-					if(++BLDC.step_time_count>=64)
-					{
-						BLDC.step_time = BLDC.step_time_sum>>5;
-						BLDC.step_time_count = 0;
-						BLDC.step_time_sum = 0;
-						BLDC.step_updata_flag = 1;
-					}
-					BLDC.loop_status = _WAIT_COM;
-				}
-				/*if(TF1)
-				{
-					TF1 = 0;
-					BLDC.error  |= _emf_Error;
-				}*/
-				break;
-			case  _WAIT_COM://这里是等待延时30时间，但是这个延时时间并不一定是30度，根据实际情况调整
-				if(TF1)//
-				{
-					TF1 = 0;
-					BLDC.loop_status = _COM_CHARGE;
-				}
-				break;
-			case  _COM_CHARGE:
-				TL1 = ~BLDC.zero_check_time.one.l;	//这里是将消磁的时间加入定时器，随后立马换向				
-				TH1 = ~BLDC.zero_check_time.one.h; 
-				TF1 = 0;
-				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
-				com_charge();
-				BLDC.loop_status = _WAIT_CHECK;
-				break;
-			case  _ERROR:
-				break;
-			default:BLDC.loop_status = _WAIT_CHECK;
-				break;
-		}
-	}
-
-	
-}
-
-	
+	*
+	*
+*******************************************************************/	
 void	confirm_phase(void)
 {
 	uint16_t   i,k,j;
@@ -784,144 +735,130 @@ void	confirm_phase(void)
 		default :{BLDC.motor_step=0;break;}
 	}
 }
-
-/********************************************************************
+/*******************************************************************
 	*
-	*Function Name:void MotorStop(void)
-	*Function:
-	*Inputr Ref:NO
-	*Return Ref:NO
+	*Function Name: void OPEN(void)
+	*Function :
 	*
-*********************************************************************/				
-void  StartMotorRun(void)
+	*
+	*
+*******************************************************************/
+void  OPEN(void)
 {
-       switch(BLDC.motor_step)
-				{
-					case 0:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
-						PWMD0L   = 0xA0;  //
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						BLDC.motor_step++;
-						break;
-						}
-					case 1:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						BLDC.motor_step++;
-						break;
-						}
-					case 2:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0xA0;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						BLDC.motor_step++;
-						break;
-						}
-					case 3:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						BLDC.motor_step++;
-						break;
-						}
-					case 4:
-						{
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0xA0;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-						BLDC.motor_step++;
-						break;
-						}
-					case 5:
-						{
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						BLDC.motor_step=0; //WT.EDIT
-						break;
-						}
-					default :{MOS_OFF;break;}
-				}
+		switch(BLDC.open_status)
+		{
+			case   OPEN_CONF_COM:
+				BLDC.zero_check_time.all =  BLDC.open_period;
+				confirm_phase();
 				com_charge();
-
-
-    
-}
-/**********************************************************************************
-	*
-	*Function Name: DutyRef(void)
-	*
-	*
-	*
-***********************************************************************************/
-void  DutyRef(void)
-{
-    
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;    //Tpwm = 0x190 * 2* 1/8(us) = 400*2 *1/8 = 100us F =10KHz
-						PWMD0L   = 0xA0;  //
-						PWMD0H   = 0x00;
-					    PWMLOADEN = 0x03;
+				BLDC.duzhuan_time = 0;
+				BLDC.check_over_time = 0;
+			  BLDC.open_period = _open_max_time;
+				BLDC.zero_check_time.all =  BLDC.open_period;
+				TH1 = 0;
+				TL1 = 0;
+				TF1 = 0;
+				BLDC.open_status = OPEN_WAIT_CHECK;
+				break;
+			case   OPEN_WAIT_CHECK:
+				if(TF1)
+				{
+					TF1 = 0;
+					BLDC.open_status = OPEN_CHECK_ZERO;
+				}
+				break;
+			case   OPEN_CHECK_B:
+				if((BLDC.EMI_flag&0x80)==0x00)
+				{
+					BLDC.open_status = OPEN_CHECK_ZERO;
+				}
+				if((--BLDC.zero_check_time.all) == 0)
+				{
+					BLDC.open_status = OPEN_COM_CHARGE;
+					BLDC.EMI_OK_count = 0;
+					BLDC.turn_OK_count = 0;
+				}
+				break;
+			case  OPEN_CHECK_ZERO:
+				BLDC.zero_now_time.one.h  = TH0;
+				BLDC.zero_now_time.one.l  = TL0;
+				if(BLDC.EMI_flag&0x80)
+				{
+					if(++BLDC.EMI_OK_count>=10)
+					{
+						BLDC.EMI_OK_count = 0;
+						TH0 = 0;
+						TL0 = 0;
+						TF0 = 0;
+						BLDC.zero_period.all =  (BLDC.zero_now_time.all<<2);//240
+						if(++BLDC.turn_OK_count>5)
+						{
+							BLDC.turn_OK_count = 0;
+							MOS_OFF;
+							BLDC.output_time.all = BLDC.zero_now_time.all >>1;//30
+							BLDC.output_time.all -= (BLDC.zero_now_time.all >>2);//30
+							BLDC.zero_check_time.all = BLDC.output_time.all >>1;
+							BLDC.status = _LOOP;
+							TL1 = ~BLDC.zero_check_time.one.l;					
+							TH1 = ~BLDC.zero_check_time.one.h; 
+							TF1 = 0;
+							BLDC.loop_status = _WAIT_CHECK;
+						}
+						else
+						{
+							BLDC.open_status = OPEN_COM_CHARGE;
+						}
+					}
+				}
+				else
+				{
+					BLDC.EMI_OK_count = 0;
+				}
+				if((--BLDC.zero_check_time.all) == 0)
+				{
+					BLDC.open_status = OPEN_COM_CHARGE;
+					BLDC.EMI_OK_count = 0;
+					BLDC.turn_OK_count = 0;
+				}
+				break;
+			case  OPEN_COM_CHARGE:
+				BLDC.open_period -= (BLDC.open_period/15+1);
+				if(BLDC.open_period<_open_min_time)
+				{
+					BLDC.open_period = _open_max_time;
+					if(++BLDC.start_times>3)
+					{
+						BLDC.error  |= _emf_Error;
+						BLDC.start_times = 0;
+					}
+				}
+				BLDC.zero_check_time.all =  BLDC.open_period;
+				//confirm_phase();
+				if(++BLDC.motor_step>=6){BLDC.motor_step = 0;}
 				
-				
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-    
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0xA0;
-						PWMD0H   = 0x00;
-						PWMLOADEN = 0x03;
-					
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-						
-						PWMD1L   = 0x90;
-						PWMD1H   = 0x01;
-						PWMD0L   = 0xA0;
-						PWMD0H   = 0x00;
-					PWMLOADEN = 0x03;
-                    
-						PWMD0L   = 0x90;
-						PWMD0H   = 0x01;
-						PWMD1L   = 0xA0;
-						PWMD1H   = 0x00;
-						PWMLOADEN = 0x03;
-	EPWM_ConfigChannelSymDuty(EPWM0, 0x0A0);
-	EPWM_ConfigChannelSymDuty(EPWM1, 0x0A0);
-	EPWM_ConfigChannelSymDuty(EPWM2, 0x0A0);
-	EPWM_ConfigChannelSymDuty(EPWM3, 0x0A0);
-	EPWM_ConfigChannelSymDuty(EPWM4, 0x0A0);
-	EPWM_ConfigChannelSymDuty(EPWM5, 0x0A0);
-					
-
-
-    
+				com_charge();
+				BLDC.duzhuan_time = 0;
+				BLDC.check_over_time = 0;
+				TH1 = 0x7f;
+				TL1 = 0;
+				TF1 = 0;
+				BLDC.open_status = OPEN_WAIT_CHECK;
+				break;
+			case  OPEN_ERROR:
+				break;
+			default:BLDC.loop_status = OPEN_CONF_COM;
+				break;
+		}
 }
 
+/*******************************************************************
+	*
+	*Function Name: void BREAK(void)
+	*Function :
+	*
+	*
+	*
+*******************************************************************/
 void	BREAK(void)
 {
 	if(BLDC.check_over_time)
@@ -929,7 +866,7 @@ void	BREAK(void)
 		BLDC.check_over_time--;
 		out_pwm(_break_pwm);
 		MOS_BREAK;
-		BLDC.stem_time= 0;
+		BLDC.duzhuan_time = 0;
 	}
 	else
 	{
@@ -939,18 +876,25 @@ void	BREAK(void)
 		BLDC.open_status = OPEN_CONF_COM;
 	}
 }
-
+/*******************************************************************
+	*
+	*Function Name: void check_FB(void)
+	*Function :
+	*
+	*
+	*
+*******************************************************************/
 void	check_FB(void)
 {
 	switch(BLDC.status)
 	{
 		case   _STOP:
 			break;
-		case  _CHECK:StartTest(); //CHECK();
+		case  _CHECK:CHECK();//预定位，预定位成功后将状态切换到open
 			break;
-		case  _OPEN:StartMotorRun();//OPEN();
+		case  _OPEN:OPEN();
 			break;
-		case  _LOOP:MotorRun();//LOOP();
+		case  _LOOP:LOOP();
 			break;
 		case  _BREAK:BREAK();
 			break;
@@ -958,30 +902,30 @@ void	check_FB(void)
 	}
 }
 
-/********************************************************************
+/*******************************************************************
 	*
-	*Function Name:void BLDC_start(void)
-	*Function:
-	*Inputr Ref:NO
-	*Return Ref:NO
+	*Function Name: void BLDC_start(void)
+	*Function :
 	*
-*********************************************************************/
+	*
+	*
+*******************************************************************/
 void	BLDC_start(void)
 {
 	BLDC.mode = _run;
-	bldc_value_init();
+	bldc_value_init();//电机的各个状态值初始化
 	BLDC.status = _CHECK;
 	ON_BLDC_INTE;
 }
-/********************************************************************
+/*******************************************************************
 	*
-	*Function Name:void MotorStop(void)
-	*Function:
-	*Inputr Ref:NO
-	*Return Ref:NO
+	*Function Name: void BLDC_stop(void)
+	*Function :
 	*
-*********************************************************************/
-void	 MotorStop(void)
+	*
+	*
+*******************************************************************/
+void	BLDC_stop(void)
 {
 	BLDC.mode = _stop;
 	MOS_OFF;
@@ -991,13 +935,21 @@ void	 MotorStop(void)
 	OFF_BLDC_INTE;
 	BLDC.reset_time = 0;
 }
+/*******************************************************************
+	*
+	*Function Name: void set_error(void)
+	*Function :
+	*
+	*
+	*
+*******************************************************************/
 
 void	set_error(void)
 {
-	if(++BLDC.stem_time>_en_duzhuan_time)
+	if(++BLDC.duzhuan_time>_en_duzhuan_time)
 	{
 		BLDC.error  |= _duzhuan_error;
-		BLDC.stem_time= 0;
+		BLDC.duzhuan_time = 0;
 	}
 	if(BLDC.pwm_set<(_pwm_min_set))
 	{
@@ -1040,11 +992,11 @@ void	reset_error(void)
 	}
 }
 
-void BLDC_main(void)
+void	BLDC_main(void)
 {
-	if(BLDC.mode)
+	if(BLDC.mode)//上电执行完启动后执行这个，此时电机状态已经切换到run状态
 	{
-		if(BLDC.status != _LOOP)
+		if(BLDC.status != _LOOP)//开环启动
 		{
 			if(BLDC.pwm_out>_start_max_pwm)
 			{
@@ -1059,10 +1011,10 @@ void BLDC_main(void)
 		set_error();
 		if(BLDC.error != _no_error)
 		{
-			MotorStop();
+			BLDC_stop();
 		}
 	}
-	else  
+	else  //上电默认先执行这个
 	{
 		reset_error();
 		if(BLDC.error == _no_error)
@@ -1071,28 +1023,11 @@ void BLDC_main(void)
 		}
 	}
 }
-/********************************************************************
-	*
-	*Function Name:void MotorStop(void)
-	*Function:INTERRUPT
-	*Inputr Ref:NO
-	*Return Ref:NO
-	*
-*********************************************************************/
 
-void EPWM_IRQHandler(void)  interrupt 18
+void EPWM_IRQHandler(void)  interrupt 18//PWM中断
 {
-   
+	BLDC.EMI_flag = C1CON1; //read  ACMP1 interrupt 
 
-	BLDC.EMI_flag = C1CON1;
-   if(BLDC.EMI_flag&0x80)
-	{
-		_FG_L;
-	}
-	else
-	{
-		_FG_H;
-	}
 	check_FB();
 	
 	PWMPIF = 0x00;  //中断标志
@@ -1102,5 +1037,26 @@ void EPWM_IRQHandler(void)  interrupt 18
 }
 
 
+/********************************************************************************
+ ** \brief	 ACMP interrupt service function
+ **			
+ ** \param [in]  none   
+ **
+ ** \return none
+ ******************************************************************************/
+ #if 0
+void ACMP_IRQHandler(void)  interrupt 14
+{
+   if (CNIF & (1<< ACMP1)){
+	  BLDC.EMI_flag = C1CON1; //read  ACMP1 interrupt 
+	  check_FB();
 
+       
+  
+	  CNIF &= ~(1<< ACMP1);
+
+   }
+	
+}
+#endif 
 

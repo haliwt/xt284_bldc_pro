@@ -3,6 +3,11 @@
 
 idata  ADC_TYPES  ADC;
 CHANGE_TYPES  temp3;
+unsigned int change_voltage=0;
+unsigned int chagnge_voltage_1 = 0;//用于转速控制计算的中间变量
+
+
+
 void ADC_IRQHandler(void)  interrupt 19 
 {
 
@@ -32,7 +37,7 @@ void	adc_value_init(void)
 }
 
 
-static  void  delay_adc_us(void)
+static  void  delay_us(void)
 {
 	_nop_();
 	_nop_();
@@ -62,7 +67,7 @@ uint16_t	get_current_now(void)
 	ADCON0 |= 0x80;
 	ADCON1 = 0x3F|0x80;
 	ADCLDO = 0x00;//5V
-	delay_adc_us();
+	delay_us();
 	_start_ADC;
 	while(ADCON0&0x02);
 	temp4.change.count[1] = ADRESL;
@@ -83,7 +88,7 @@ void	check_current_offset(void)
 	ADCON0 |= 0x80;
 	ADCON1 = OP_current_channal|0x80;
 	ADCLDO = 0x00;//5V
-	delay_adc_us();
+	delay_us();
 	ADC.current_sum = 0;
 	for(ADC.current_count=0;ADC.current_count<16;ADC.current_count++)
 	{
@@ -109,7 +114,7 @@ void	read_current(void)
 	ADCON0 |= 0x80;
 	ADCON1 = OP_current_channal|0x80;
 	ADCLDO = 0x00;//5V
-	delay_adc_us();
+	delay_us();
 	_start_ADC;
 	while(ADCON0&0x02);
 	temp3.change.count[1] = ADRESL;
@@ -134,19 +139,27 @@ void	read_current(void)
 	}
 	
 }
-
+/**************************************************************
+    *
+    *Function Name:read_voltage(void)
+    *Function: 保护电压，高于1v，电机停止工作，1v以下电机工作
+    *
+    *
+    *
+**************************************************************/
 void	read_voltage(void)
 {
 	while(ADCON0&0x02);
-	ADCON0 &= ~0x80;
-	ADCON1 = voltage_channal|0x80;
+	ADCON0 &= ~0x80; //ADCHS4
+//	ADCON1 = voltage_channal|0x80;  //voltage_channale = 0x5C  AN12
+    ADCON1 = 0x01|0x80;  //WT.EDIT。2020.09.29 AN1 
 	ADCLDO = 0xE0;//3V
-	delay_adc_us();
+	delay_us();
 	_start_ADC;
 	while(ADCON0&0x02);
 	temp3.change.count[1] = ADRESL;
 	temp3.change.count[0] = ADRESH&0x0f;
-	ADC.voltage_sum +=temp3.change.math;
+	ADC.voltage_sum +=temp3.change.math;  //鐢靛帇楂樹簬 1v淇濇姢锛屼綆浜?v锛岀數鏈哄伐浣?
 	if(++ADC.voltage_count>=16)
 	{
 		ADC.voltage_count = 0;
@@ -154,14 +167,14 @@ void	read_voltage(void)
 		ADC.voltage_sum = 0;
 	}
 }
-
+/*****************************************************************/
 void	read_pwm_adc(void)
 {
 	while(ADCON0&0x02);
 	ADCON0 &= ~0x80;
 	ADCON1 = pwm_adc_channal|0x80;
 	ADCLDO = 0x00;//5V
-	delay_adc_us();
+	delay_us();
 	_start_ADC;
 	while(ADCON0&0x02);
 	temp3.change.count[1] = ADRESL;
@@ -175,10 +188,56 @@ void	read_pwm_adc(void)
 	}
 }
 
+/********************************************************************************
+    *
+    *Function Name:void read_change_voltage(void)
+    *Function :电压调速
+    *
+    *
+*********************************************************************************/
+void read_change_voltage(void)
+{
+	while(ADCON0&0x02);
+	ADCON0 &= ~0x80;
+	ADCON1 = change_voltage_channal|0x80;//选择通道  //AN8
+	ADCLDO = 0x00;//3V
+	delay_us();
+	_start_ADC;
+	while(ADCON0&0x02);
+	temp3.change.count[1] = ADRESL;
+	temp3.change.count[0] = ADRESH&0x0f;
+	ADC.change_voltage_sum +=temp3.change.math;
+	if(++ADC.change_voltage_count>=16)//16次取平均值
+	{
+		ADC.change_voltage_count = 0;
+		ADC.change_voltage = ADC.change_voltage_sum>>6;
+//		if(ADC.change_voltage>=590)//2.8V时采集回来的值是590
+//		{
+//			ADC.change_voltage = 590;
+//		}
+		if(ADC.change_voltage<=233)
+		{
+			change_voltage = (ADC.change_voltage<<1)+(ADC.change_voltage>>3);
+		}
+		else
+		{
+			chagnge_voltage_1 = ADC.change_voltage -230;//取值范围是0~358
+			change_voltage = 483 +(chagnge_voltage_1>>1)+(chagnge_voltage_1>>2);
+		}
+		
+		if(change_voltage>=800)
+		{
+			change_voltage=750;
+		}
+		ADC.change_voltage_sum = 0;
+	}
+}
+
+
 void	scan_adc_channal(void)
 {
-	read_current();
-	read_voltage();
-	read_pwm_adc();
+	//read_current();   //cancel ,works
+	read_voltage();    //cancel ,don;t works.
+	//read_pwm_adc(); //取消，works
 }
 
