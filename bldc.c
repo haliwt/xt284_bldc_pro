@@ -174,7 +174,6 @@ void  out_pwm(unsigned int  in)
 	*
 	*
 *******************************************************************/
-
 void LOOP(void)
 {
 	unsigned char i;
@@ -246,7 +245,10 @@ void LOOP(void)
 			    //if(TF1)//
 				{
 					TF1 = 0;
-                    delay_us(20);//WT.EDIT 
+                    //delay_us(20);//WT.EDIT 
+                    // delay_us(30);//WT.EDIT 
+                    //delay_us(10);//WT.EDIT--BETTER
+                    delay_us(5); //WT.EDIT 
 					BLDC.loop_status = _COM_CHARGE;
 				}
 				break;
@@ -329,10 +331,9 @@ void LOOP(void)
 				}*/
 				break;
 			case  _WAIT_COM://这里是等待延时30时间，但是这个延时时间并不一定是30度，根据实际情况调整
-				//if(TF1)//WT.EDIT 
+				if(TF1)
 				{
 					TF1 = 0;
-					delay_us(10); //WT.EDIT 
 					BLDC.loop_status = _COM_CHARGE;
 				}
 				break;
