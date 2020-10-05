@@ -175,12 +175,14 @@ void  out_pwm(unsigned int  in)
 	*
 *******************************************************************/
 
-void	LOOP(void)
+void LOOP(void)
 {
 	unsigned char i;
 	if(BLDC.pwm_set==800){
 
-	    switch(BLDC.loop_status)
+			
+       #if 1
+		switch(BLDC.loop_status)
 		{
 			case   _WAIT_CHECK:
 				if(TF1)//这里其实才是等待消磁,定时器溢出中断标志位
@@ -192,7 +194,8 @@ void	LOOP(void)
 			case   _CHECK_ZERO_B:
 				if(!(BLDC.EMI_flag&0x80))
 				{
-					BLDC.loop_status = _CHECK_ZERO;
+				
+                    BLDC.loop_status = _CHECK_ZERO;
 				}
 				/*if(TF1)
 				{
@@ -203,7 +206,7 @@ void	LOOP(void)
 			case  _CHECK_ZERO://消磁完了之后等待过零点
 				BLDC.zero_now_time.one.h  = TH0;
 				BLDC.zero_now_time.one.l  = TL0;//这个值不停的跟新，直到比较器发生跳变
-				if(BLDC.EMI_flag&0x80)					//此时记录的就是上次过零点和下次过零点之间的时间，也就是60度的时间
+				if(BLDC.EMI_flag&0x80)			//此时记录的就是上次过零点和下次过零点之间的时间，也就是60度的时间
 				{
 					TH0 = 0;
 					TL0 = 0;
@@ -223,7 +226,7 @@ void	LOOP(void)
 					
 					BLDC.step_time_sum += BLDC.step_read;
 				
-							if(++BLDC.step_time_count>=64)
+							if(++BLDC.step_time_count>=64)//if(++BLDC.step_time_count>=64) //WT.EDIT
 							{
 								BLDC.step_time = BLDC.step_time_sum>>5;
 								BLDC.step_time_count = 0;
@@ -240,9 +243,10 @@ void	LOOP(void)
 				}*/
 				break;
 			case  _WAIT_COM://这里是等待延时30时间，但是这个延时时间并不一定是30度，根据实际情况调整
-				if(TF1)//
+			    //if(TF1)//
 				{
 					TF1 = 0;
+                    delay_us(20);//WT.EDIT 
 					BLDC.loop_status = _COM_CHARGE;
 				}
 				break;
@@ -260,7 +264,7 @@ void	LOOP(void)
 				break;
 		}
 
-
+      #endif 
 	}
 	else{
 	for(i=0;i<8;i++)
@@ -325,9 +329,10 @@ void	LOOP(void)
 				}*/
 				break;
 			case  _WAIT_COM://这里是等待延时30时间，但是这个延时时间并不一定是30度，根据实际情况调整
-				if(TF1)//
+				//if(TF1)//WT.EDIT 
 				{
 					TF1 = 0;
+					delay_us(10); //WT.EDIT 
 					BLDC.loop_status = _COM_CHARGE;
 				}
 				break;
@@ -359,10 +364,7 @@ void  CHECK(void)
 {
 	if(++BLDC.check_over_time<5000)
 	{
-		if(BLDC.pwm_set ==800){ //WT.EDIT 
-			if(BLDC.check_over_time ==4980)
-				BLDC.check_over_time=5500;
-		}
+
 		BLDC.duzhuan_time = 0;
 		BLDC.EMF_now = 0;
 		C1CON2 = 0x00;//配置比较器1
