@@ -177,8 +177,8 @@ void  out_pwm(unsigned int  in)
 void LOOP(void)
 {
 	unsigned char i;
-	if(BLDC.pwm_set >720 ){
-
+	//if(BLDC.pwm_set >720 ){
+		{
 			
        #if 1
 		switch(BLDC.loop_status)
@@ -268,6 +268,7 @@ void LOOP(void)
 
       #endif 
 	}
+	#if 0
 	else{
 	for(i=0;i<8;i++)
 	{
@@ -352,6 +353,7 @@ void LOOP(void)
 		}
 	}
 		}
+	#endif 
 }
 /*******************************************************************
 	*
