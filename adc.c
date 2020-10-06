@@ -228,29 +228,30 @@ void read_change_voltage(void)
                 change_voltage= 800;
                 
             }
-			else if(change_voltage >720 && change_voltage <800){  //95%
-		   	      change_voltage=760;
+			#if 0
+				else if(change_voltage >720 && change_voltage <800){  //95%
+			   	      change_voltage=760;
 
-		   }
-          
-		   else if( change_voltage <=720 && change_voltage >680){  //85%
-				
-		        change_voltage=720;
-				
+			   }
+	          
+			   else if( change_voltage <=720 && change_voltage >680){  //85%
+					
+			        change_voltage=720;
+					
 
-		   }
-		   else if( change_voltage < 680 && change_voltage >=640){  // 80%
-				
-		        change_voltage=640;
+			   }
+			   else if( change_voltage < 680 && change_voltage >=640){  // 80%
+					
+			        change_voltage=640;
 
-		   }
-		   else if( change_voltage <640 && change_voltage >=600){  // 75%
-				
-		        change_voltage=600;
+			   }
+			   else if( change_voltage <640 && change_voltage >=600){  // 75%
+					
+			        change_voltage=600;
 
-		   }
+			   }
            
-		  
+		  #endif 
           
 		 // BLDC.pwm_set = change_voltage;
         }
