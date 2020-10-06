@@ -206,33 +206,21 @@ void read_change_voltage(void)
 	delay_us();
 	_start_ADC;
 	while(ADCON0&0x02);
-	temp3.change.count[1] = ADRESL;
-	temp3.change.count[0] = ADRESH&0x0f;
+	temp3.change.count[1] = ADRESL;     //
+	temp3.change.count[0] = ADRESH&0x0f;  //右对齐数据11~8位
 	ADC.change_voltage_sum +=temp3.change.math;
 	if(++ADC.change_voltage_count>=16)//16次取平均值
 	{
 		ADC.change_voltage_count = 0;
 		ADC.change_voltage = ADC.change_voltage_sum>>4;
-        UART_SendBuff(UART0,ADC.change_voltage);
-//		if(ADC.change_voltage>=590)//2.8V时采集回来的值是590
-//		{
-//			ADC.change_voltage = 590;
-//		}
-		if(ADC.change_voltage<=233)
-		{
-			change_voltage = (ADC.change_voltage<<1)+(ADC.change_voltage>>3);
-		}
-		else
-		{
-			chagnge_voltage_1 = ADC.change_voltage -230;//取值范围是0~358
-			change_voltage = 483 +(chagnge_voltage_1>>1)+(chagnge_voltage_1>>2);
-		}
 		
-		if(change_voltage>=800)
-		{
-			//change_voltage=750;
-			change_voltage=800;
-		}
+		
+        UART_SendBuff(UART0,ADC.change_voltage>>4);
+
+	    chagnge_voltage_1=ADC.change_voltage>>4;
+		
+		change_voltage = (800 *  chagnge_voltage_1) / 255 ;
+		
 		ADC.change_voltage_sum = 0;
 	}
 }
