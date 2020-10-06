@@ -156,10 +156,12 @@ void P1EI_IRQHandler(void)  interrupt 8
  **
  ** \return none
  ******************************************************************************/
+ #if 0
 void P2EI_IRQHandler(void)  interrupt 9 
 {
 
 }
+#endif 
 /******************************************************************************
  ** \brief	 GPIO 3 interrupt service function
  **

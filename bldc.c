@@ -889,6 +889,7 @@ void	BREAK(void)
 *******************************************************************/
 void	check_FB(void)
 {
+  
 	switch(BLDC.status)
 	{
 		case   _STOP:

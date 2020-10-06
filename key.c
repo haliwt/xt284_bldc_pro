@@ -48,18 +48,18 @@ typedef  struct  _state_
  key_types key;
 
 
-#define  POWER_KEY      P2_4
 
 
 
 
-#if 0
-void	key_value_init(void)
+
+#if 1
+static void	key_value_init(void)
 {
 	key.read = 0;
 	key.buffer = 0;
 	key.value = 0;
-	key.inc_delay = 0;
+	//key.inc_delay = 0;
 	key.on_time = 0;
 	key.off_time = 0;
 	key.state = 0;
@@ -73,30 +73,18 @@ void	key_value_init(void)
  ** Return Ref:NO
  **   
  ******************************************************************************/
-uint8_t KEY_Scan(void)
+static uint8_t KEY_Scan(void)
 {
 	uint8_t  reval = 0;
 
 	key.read = _KEY_ALL_OFF; //0x1F 
 
 
-//	if(POWER_KEY == 1)
-	{
-//		key.read &= ~0x01; // 0x1E
+	if(POWER_KEY == 1)
+    {
+		key.read &= ~0x01; // 0x1E
 	}
-	if(WIND_KEY == 1)
-	{
-		key.read &= ~0x02;   //0x1C
-	}
-	if(TIMER_KEY == 1)
-	{
-		key.read &= ~0x04;  //0x1B
-	}
-	if(FILTER_KEY == 1)
-	{
-		key.read &= ~0x08;  //0x17
-	}
-
+	
 	
 	switch(key.state )
 	{
@@ -104,7 +92,7 @@ uint8_t KEY_Scan(void)
 		{
 			if(key.read != _KEY_ALL_OFF)
 			{
-				key.buffer   = key.read; //例如：key.buffer = 0x1E  POWER KEY 
+				key.buffer   = key.read; //例如：key.buffer = 0x1E	    POWER KEY 
 				key.state    = first;
 				key.on_time  = 0;
 				key.off_time = 0;
@@ -115,7 +103,7 @@ uint8_t KEY_Scan(void)
 		{
 			if(key.read == key.buffer) //继续按下
 			{
-				if(++key.on_time> 10) //消抖  0.5us
+				if(++key.on_time> 80) //消抖  0.5us
 				{
 					key.value = key.buffer^_KEY_ALL_OFF; // key.value = 0x1E ^ 0x1f = 0x01
 					key.on_time = 0;
@@ -132,14 +120,16 @@ uint8_t KEY_Scan(void)
 		{
 			if(key.read == key.buffer) //再次确认按键是否按下
 			{
-				if(++key.on_time>300)//长按按键
+				
+				if(++key.on_time>3000)//长按按键，按键长按时间 3000个单位（时间）
 				{
+					key.value = key.value|0x80;  // 赋值，哪个按键按下的（返回值）key.value(P14) = 0x01 | 0x80 =0X81
+					key.on_time = 0;  //运行时间 0
 					
-					key.value = key.value|0x80; //key.value = 0x01 | 0x80  =0x81  
-					key.on_time = 0;
-					
-					key.state   = finish;
-				}
+					key.state   = finish;  //进入下一case ：
+				 }
+			
+				
 			}
 			else if(key.read == _KEY_ALL_OFF)  //按键松开
 				{
@@ -193,110 +183,23 @@ uint8_t KEY_Scan(void)
  ******************************************************************************/
  void KEY_Handing(void)
 {
-     
+      static uint8_t pressflg =0;
 	  uint8_t keyflg =0;
-	  if(Telecom.power_state ==1){
+	  keyflg = KEY_Scan();
+	switch(keyflg)
+	{
+        case _KEY_TRG_1_POWER   : 
+			pressflg = pressflg ^ 0x01;
+			if(pressflg ==1){
+				LED_POWER_RED =1;
 
-		  
-			if(Telecom.timer_state == 1&& Telecom.keyEvent ==0){
-	                 Telecom.timer_state=0;
-					 Telecom.wind_state =0;
-			         Telecom.net_state =0;
-					 Telecom.TimerOn =0;
-			         Telecom.keyEvent =1;
-					 Telecom.TimerEvent = 0; //计时，时间计时开始时间
-                     timer0_ten_num=0; //清空PM 检测值
-			
-			        
-					Telecom.TimeBaseUint ++ ;
-					if(Telecom.TimeHour == 8){
-					    Telecom.TimeBaseUint=0;
-					}
-					else if(Telecom.TimeBaseUint == 10){
-						Telecom.TimeBaseUint=0;
-						Telecom.TimeMinute++;
-						if(Telecom.TimeMinute==6){ 
-							Telecom.TimeMinute =0;
-							Telecom.TimeHour ++;
-							{
-							   if(Telecom.TimeHour == 8){
-									
-										Telecom.TimeBaseUint=0;
-										Telecom.TimeMinute=0;
-										
-								}
-							    if(Telecom.TimeHour >8){
-									Telecom.TimeBaseUint=0;
-									Telecom.TimeMinute=0;
-										
-									Telecom.TimeHour=0;
-
-								}
-							   
-							 
-							}
-						}	
-					}
-					 Telecom.keyEvent =0;
-					Telecom.TimerEvent = 0;
-			      LEDDisplay_TimerTim(Telecom.TimeHour,Telecom.TimeMinute,Telecom.TimeBaseUint);
-				}
-				
-			if(Telecom.wind_state ==1 && keyflg ==0){
-			       //  NetKeyNum =0;
-					 keyflg =1;
-					Telecom.wind_state =0;
-					 Telecom.timer_state=0;
-					   Telecom.net_state =0;
-			          timer0_ten_num=0; //清空PM检查值
-			           delay_20us(1000);
-			        
-
-				 if(Telecom.WindLevelData ==5)Telecom.WindLevelData =0;
-					 Telecom.WindLevelData ++ ;
-                     if(Telecom.WindLevelData ==5)Telecom.WindLevelData =1;
-					 	
-					switch (Telecom.WindLevelData ){
-
-					    case  wind_sleep :
-						  LEDDisplay_SleepLamp();
-						  Telecom.WindSelectLevel =wind_sleep;
-						  OutputData(0x01);
-						break;
-						
-						case wind_middle:
-						
-							OutputData(0x02);
-							Telecom.WindSelectLevel =wind_middle;
-						break;
-							
-						case wind_high:
-							OutputData(0x03);
-							Telecom.WindSelectLevel =wind_high;
-					   break ;
-
-					   case wind_auto:
-						
-							 Telecom.WindSelectLevel =wind_auto;
-						break;
-					}
 			}
-			 
-		   if(Telecom.net_state ==1 && keyflg==0 ){
-		   	    Telecom.net_state =0;
-				 
-				keyflg =0;
-				     FLASH_Init();
-                    BUZZER_Config();
-                     delay_20us(5000)  ; 
-                   BUZ_DisableBuzzer();
-				   
-                    
-				   Flash_DisplayNumber();
-			 }
-		  
-	 }
-	 
+			else LED_POWER_RED =0;
+
+	   break;
+
+	}
+	
 
 }
 
@@ -341,12 +244,33 @@ uint8_t HDKey_Scan(uint8_t mode)
 		if(key_up&&(POWER_KEY== 1))
 		{
 		    key_up =0 ;
-			Delay_ms(40);
-			if(POWER_KEY== 1 ) 	return POWER_PRES;
+			Delay_ms(1000);
+			if(POWER_KEY== 1 )  return POWER_PRES;
 		
 		}
 		else if(POWER_KEY==0)key_up=1;
 		return 0;	//没有按键按下
+}
+/******************************************************************************
+ ** \brief	 GPIO 2 interrupt service function
+ **
+ ** \param [in]  none   
+ **
+ ** \return none
+ ******************************************************************************/
+void P2EI_IRQHandler(void)  interrupt 9
+{
+	#if 0
+	static uint8_t intflg=0;
+
+	
+		intflg= intflg ^ 0x01;
+		if(intflg ==1){
+           MOTOR_RUN_FLG =MOTOR_RUN;
+		}
+        else MOTOR_RUN_FLG=MOTOR_STOP ;
+		P2EXTIF &= ~(1<<4);
+	#endif 
 }
 
 

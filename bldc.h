@@ -29,5 +29,7 @@ unsigned int  soft_pwm(unsigned int in,unsigned int out);
 void  check_FB(void);
 void  LOOP(void);
 void	com_charge(void);
+void BLDC_stop(void);
+
 
 #endif
