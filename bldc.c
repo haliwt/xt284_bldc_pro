@@ -1011,7 +1011,7 @@ void	BLDC_main(void)
 			BLDC.pwm_out = soft_pwm(BLDC.pwm_set,BLDC.pwm_out);
 		}
 		out_pwm(BLDC.pwm_out);
-		//set_error(); //WT.EDIT cancel
+		//set_error(); //WT.EDIT cancel 2020.10.06
 		if(BLDC.error != _no_error)
 		{
 			BLDC_stop();

@@ -1,5 +1,6 @@
 #include<include.h>
 #include "my_type.h"
+#include "demo_uart.h"
 
 idata  ADC_TYPES  ADC;
 CHANGE_TYPES  temp3;
@@ -211,7 +212,8 @@ void read_change_voltage(void)
 	if(++ADC.change_voltage_count>=16)//16次取平均值
 	{
 		ADC.change_voltage_count = 0;
-		ADC.change_voltage = ADC.change_voltage_sum>>6;
+		ADC.change_voltage = ADC.change_voltage_sum>>4;
+        UART_SendBuff(UART0,ADC.change_voltage);
 //		if(ADC.change_voltage>=590)//2.8V时采集回来的值是590
 //		{
 //			ADC.change_voltage = 590;
@@ -228,7 +230,8 @@ void read_change_voltage(void)
 		
 		if(change_voltage>=800)
 		{
-			change_voltage=750;
+			//change_voltage=750;
+			change_voltage=800;
 		}
 		ADC.change_voltage_sum = 0;
 	}
