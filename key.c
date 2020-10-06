@@ -1,271 +1,352 @@
-//#include<include.h>
-//#include "my_type.h"
+#include<include.h>
+#include "my_type.h"
 
-//#define		_KEY_SP_EN				      0X01
-//#define		_KEY_SP_PL				      0X02
-//#define		_KEY_SP_INC				      0X04
-//#define		_KEY_SP_DEC				      0X08
-//#define		_KEY_P_ON				        0X10
-//#define		_KEY_P_OFF				      0X20
-
-//#define		_KEY_SP_INC_CONT				0X84
-//#define		_KEY_SP_DEC_CONT				0X88
+#define POWER_PRES 	      1
 
 
 
-//#define		_KEY_ALL_OFF				    0X3f
+#define		_KEY_ALL_OFF				0X1F
+
+//普通按键按下值
+#define		_KEY_TRG_1_POWER     			0x01  //电源普通按键按下---按键值
+#define		_KEY_TRG_2_WIND     			0x02  //风速按键按下--按键值
+#define		_KEY_TRG_3_TIMER     			0x04   //定时按键
+#define		_KEY_TRG_4_FILTER     			0x08
+#define		_KEY_TRG_5_WINDTI   			0x09
+
+//长按按键检查 按键值或者组合按键值
+#define		_KEY_CONT_1_POWER     	     0x81    //电源按键长按--按键值
+#define		_KEY_CONT_2_WIND     		 0x82    //风速按键长按--按键值
+#define		_KEY_CONT_3_TIMER     	     0x84    //定时按键长按 长按按键。
+#define		_KEY_CONT_4_FILTER     	     0x88    //长按键 --设置滤网键
+#define		_KEY_CONT_5_WINDTI     		 0x89
+
+
+#define		_KEY_CONT_1     	    0x81    //按键计数值
+#define		_KEY_CONT_2     		0x82
+#define		_KEY_CONT_3     		0x84
+#define		_KEY_CONT_4     	    0x88
+#define		_KEY_CONT_5     		0x90
+
+typedef  struct  _state_
+{
+ unsigned char         read;
+ unsigned char         buffer;
+ unsigned char         value;
+ unsigned short int    on_time;
+ unsigned short int    off_time;
+ enum{
+  start  = 0,
+  first  = 1,
+  second = 2,
+  cont   = 3,
+  end    = 4,
+  finish = 5,
+ }state;
+}key_types;
+
+ key_types key;
+
+
+#define  POWER_KEY      P2_4
 
 
 
-//extern  BLDC_TYPES    BLDC;
 
-//uint8_t  eeprom_updata_flag;
-////idata    KEY_TYPES       key;
-////extern   idata   DISPLAY_TYPES   led;
-//FLASH_TYPES  FLASH;
+#if 0
+void	key_value_init(void)
+{
+	key.read = 0;
+	key.buffer = 0;
+	key.value = 0;
+	key.inc_delay = 0;
+	key.on_time = 0;
+	key.off_time = 0;
+	key.state = 0;
+}
+
+/******************************************************************************
+ **
+ ** Function Name:	void KEY_FUNCTION(void)
+ ** Function : receive key input message 
+ ** Input Ref:NO
+ ** Return Ref:NO
+ **   
+ ******************************************************************************/
+uint8_t KEY_Scan(void)
+{
+	uint8_t  reval = 0;
+
+	key.read = _KEY_ALL_OFF; //0x1F 
 
 
-//void	key_value_init(void)
-//{
-//	key.read = 0;
-//	key.buffer = 0;
-//	key.value = 0;
-//	key.inc_delay = 0;
-//	key.on_time = 0;
-//	key.off_time = 0;
-//	key.state = 0;
-//}
+//	if(POWER_KEY == 1)
+	{
+//		key.read &= ~0x01; // 0x1E
+	}
+	if(WIND_KEY == 1)
+	{
+		key.read &= ~0x02;   //0x1C
+	}
+	if(TIMER_KEY == 1)
+	{
+		key.read &= ~0x04;  //0x1B
+	}
+	if(FILTER_KEY == 1)
+	{
+		key.read &= ~0x08;  //0x17
+	}
 
-//unsigned char	key_scan(void)
-//{
-//	unsigned char  reval = 0;
-//	unsigned char  read_ram = 0;
-//	read_ram = IIC_L_read(0x4f);
-//	key.read = _KEY_ALL_OFF;
-//	switch(read_ram)
-//	{
-//		case 0X4F:
-//			key.read &= ~_KEY_SP_EN;
-//			break;
-//		case 0x57:
-//			key.read &= ~_KEY_SP_PL;
-//			break;
-//		case 0x5f:
-//			key.read &= ~_KEY_SP_INC;
-//			break;
-//		case 0x47:
-//			key.read &= ~_KEY_SP_DEC;
-//			break;
-//		case 0x67:
-//			key.read &= ~_KEY_P_OFF;
-//			break;
-//		default:
-//			break;
-//	}
-//	if(!P2_5)
-//	{
-//		key.read &= ~_KEY_P_ON;
-//	}
-//	switch(key.state )
-//	{
-//		case start:
-//		{
-//			if(key.read != _KEY_ALL_OFF)
-//			{
-//				key.buffer   = key.read;
-//				key.state    = first;
-//				key.on_time  = 0;
-//				key.off_time = 0;
-//			}
-//			break;
-//		}
-//		case first:
-//		{
-//			if(key.read == key.buffer)
-//			{
-//				if(++key.on_time>10)
-//				{
-//					key.value = key.buffer^_KEY_ALL_OFF;
-//					key.on_time = 0;
-//					key.state   = second;
-//				}
-//			}
-//			else
-//			{
-//				key.state   = start;
-//			}
-//			break;
-//		}
-//		case second:
-//		{
-//			if(key.read == key.buffer)
-//			{
-//				if(++key.on_time>500)
-//				{
-//					key.value = key.value|0x80;
-//					key.on_time = 0;
-//					key.state   = finish;
-//				}
-//			}
-//			else if(key.read == _KEY_ALL_OFF)
-//			{
-//				if(++key.off_time>10)
-//				{
-//					key.state   = finish;
-//				}
-//			}
-//			break;
-//		}
-//		case finish:
-//		{
-//			reval = key.value;
-//			key.state   = end;
-//			break;
-//		}
-//		case end:
-//		{
-//			if(key.read == _KEY_ALL_OFF)
-//			{
-//				if(++key.off_time>10)
-//				{
-//					key.state   = start;
-//				}
-//			}
-//			else
-//			{
-//				if(key.value&0x80)
-//				{
-//					if(++key.inc_delay>10)
-//					{
-//						key.inc_delay = 0;
-//						reval = key.value;
-//					}
-//				}
-//			}
-//			break;
-//		}
-//		default:
-//		{
-//			break;
-//		}
-//	}
-//	
-//	return  reval;
-//}
+	
+	switch(key.state )
+	{
+		case start:
+		{
+			if(key.read != _KEY_ALL_OFF)
+			{
+				key.buffer   = key.read; //例如：key.buffer = 0x1E  POWER KEY 
+				key.state    = first;
+				key.on_time  = 0;
+				key.off_time = 0;
+			}
+			break;
+		}
+		case first:
+		{
+			if(key.read == key.buffer) //继续按下
+			{
+				if(++key.on_time> 10) //消抖  0.5us
+				{
+					key.value = key.buffer^_KEY_ALL_OFF; // key.value = 0x1E ^ 0x1f = 0x01
+					key.on_time = 0;
+					key.state   = second;
+				}
+			}
+			else
+			{
+				key.state   = start;
+			}
+			break;
+		}
+		case second:
+		{
+			if(key.read == key.buffer) //再次确认按键是否按下
+			{
+				if(++key.on_time>300)//长按按键
+				{
+					
+					key.value = key.value|0x80; //key.value = 0x01 | 0x80  =0x81  
+					key.on_time = 0;
+					
+					key.state   = finish;
+				}
+			}
+			else if(key.read == _KEY_ALL_OFF)  //按键松开
+				{
+					if(++key.off_time>5) //松开按键消抖
+					{
+						key.value = key.buffer^_KEY_ALL_OFF; // key.value = 0x1E ^ 0x1f = 0x01
+						
+						key.state   = finish; //一般按键按下状态
+					}
+				}
+		   
+			break;
+		}
+		case finish:
+		{
+			
+			 reval = key.value; //分两种情况： 1.普通按键的按下返回值 TIMER_KEY = 0x04  2.长按键返回值：TIMER_KEY = 0X84
+			key.state   = end;
+			break;
+		}
+		case end:
+		{
+			if(key.read == _KEY_ALL_OFF)
+			{
+				if(++key.off_time>10)
+				{
+					key.state   = start;
+				}
+			}
+			break;
+		}
+		default:
+		{
+			key.state   = start;
+			break;
+		}
+	}
+	return  reval;
+}
 
 
 
-//void	key_handing(void)
-//{
-//	unsigned char  temp;
-//	
-//	temp = key_scan();
-//	switch(temp)
-//	{
-//		case _KEY_P_ON:
-//			if(led.power_set == 0){led.power_set = 1;}
-//			break;
-//		case _KEY_P_OFF:
-//			if(led.power_set){led.power_set = 0;}
-//			break;
-//		case _KEY_SP_INC_CONT:
-//		case _KEY_SP_INC:
-//			if(led.state ==  _DIS_RPM)
-//			{
-//				if(led.power_on_off == 0){break;}
-//				if(led.pwm_hand<_pwm_max)
-//				{
-//					led.pwm_hand++;
-//				}
-//				else{led.pwm_hand=_pwm_max;}
-//			}
-//			else
-//			{
-//				if(led.pole<99)
-//				{
-//					led.pole++;
-//				}
-//			}
-//			break;
-//		case _KEY_SP_DEC_CONT:
-//		case _KEY_SP_DEC:
-//			if(led.state ==  _DIS_RPM)
-//			{
-//				if(led.power_on_off == 0){break;}
-//				if(led.pwm_hand>(_pwm_min_set+20))
-//				{
-//					led.pwm_hand--;
-//				}
-//				else{led.pwm_hand=(_pwm_min_set+20);}
-//			}
-//			else
-//			{
-//				if(led.pole>1)
-//				{
-//					led.pole--;
-//				}
-//			}
-//			break;
-//		case _KEY_SP_EN:
-//			if(led.state == _DIS_POLE)
-//			{
-//				eeprom_updata_flag = 1;
-//				led.state =  _DIS_RPM;
-//			}
-//			break;
-//		case _KEY_SP_PL:
-//			if(led.power_on_off){break;}
-//			led.state = _DIS_POLE;
-//			break;
-//		default:
-//			break;
-//	}
-//	if(P3_6==0)
-//	{
-//		led.power_set = 0;
-//	}
-//	if(led.state == _DIS_POLE)
-//	{
-//		led.power_set = 0;
-//		led.power_on_off = 0;
-//	}
-//	else
-//	{
-//		if((P3_6==0)||(led.power_set))
-//		{
-//			led.power_on_off = 1;
-//		}
-//		else
-//		{
-//			led.power_on_off = 0;
-//			if(FLASH.pwm_set.all != led.pwm_hand)
-//			{
-//				eeprom_updata_flag = 1;
-//			}
-//		}
-//	}
-//	if(led.power_on_off)
-//	{
-//		BLDC.pwm_set = led.pwm_hand;
-//	}
-//	else
-//	{
-//		BLDC.pwm_set = 0;
-//		BLDC.error  &= ~_cw_ccw_error;
-//		BLDC.error  &= ~_emf_Error;
-//		BLDC.error  &= ~_duzhuan_error;
-//		BLDC.error  &= ~_current_over_error;
-//		BLDC.error  &= ~_line_Error;
-//	}
-//	if(eeprom_updata_flag)
-//	{
-//		eeprom_updata_flag = 0;
-//		FLASH.pole = led.pole;
-//		FLASH.pwm_set.all = led.pwm_hand;
-//		eeprom_write(&FLASH);
-//	}
-//}
+
+/******************************************************************************
+ **
+ ** Function Name:	void KEY_FUNCTION(void)
+ ** Function : receive key input message 
+ ** Input Ref:NO
+ ** Return Ref:NO
+ **   
+ ******************************************************************************/
+ void KEY_Handing(void)
+{
+     
+	  uint8_t keyflg =0;
+	  if(Telecom.power_state ==1){
+
+		  
+			if(Telecom.timer_state == 1&& Telecom.keyEvent ==0){
+	                 Telecom.timer_state=0;
+					 Telecom.wind_state =0;
+			         Telecom.net_state =0;
+					 Telecom.TimerOn =0;
+			         Telecom.keyEvent =1;
+					 Telecom.TimerEvent = 0; //计时，时间计时开始时间
+                     timer0_ten_num=0; //清空PM 检测值
+			
+			        
+					Telecom.TimeBaseUint ++ ;
+					if(Telecom.TimeHour == 8){
+					    Telecom.TimeBaseUint=0;
+					}
+					else if(Telecom.TimeBaseUint == 10){
+						Telecom.TimeBaseUint=0;
+						Telecom.TimeMinute++;
+						if(Telecom.TimeMinute==6){ 
+							Telecom.TimeMinute =0;
+							Telecom.TimeHour ++;
+							{
+							   if(Telecom.TimeHour == 8){
+									
+										Telecom.TimeBaseUint=0;
+										Telecom.TimeMinute=0;
+										
+								}
+							    if(Telecom.TimeHour >8){
+									Telecom.TimeBaseUint=0;
+									Telecom.TimeMinute=0;
+										
+									Telecom.TimeHour=0;
+
+								}
+							   
+							 
+							}
+						}	
+					}
+					 Telecom.keyEvent =0;
+					Telecom.TimerEvent = 0;
+			      LEDDisplay_TimerTim(Telecom.TimeHour,Telecom.TimeMinute,Telecom.TimeBaseUint);
+				}
+				
+			if(Telecom.wind_state ==1 && keyflg ==0){
+			       //  NetKeyNum =0;
+					 keyflg =1;
+					Telecom.wind_state =0;
+					 Telecom.timer_state=0;
+					   Telecom.net_state =0;
+			          timer0_ten_num=0; //清空PM检查值
+			           delay_20us(1000);
+			        
+
+				 if(Telecom.WindLevelData ==5)Telecom.WindLevelData =0;
+					 Telecom.WindLevelData ++ ;
+                     if(Telecom.WindLevelData ==5)Telecom.WindLevelData =1;
+					 	
+					switch (Telecom.WindLevelData ){
+
+					    case  wind_sleep :
+						  LEDDisplay_SleepLamp();
+						  Telecom.WindSelectLevel =wind_sleep;
+						  OutputData(0x01);
+						break;
+						
+						case wind_middle:
+						
+							OutputData(0x02);
+							Telecom.WindSelectLevel =wind_middle;
+						break;
+							
+						case wind_high:
+							OutputData(0x03);
+							Telecom.WindSelectLevel =wind_high;
+					   break ;
+
+					   case wind_auto:
+						
+							 Telecom.WindSelectLevel =wind_auto;
+						break;
+					}
+			}
+			 
+		   if(Telecom.net_state ==1 && keyflg==0 ){
+		   	    Telecom.net_state =0;
+				 
+				keyflg =0;
+				     FLASH_Init();
+                    BUZZER_Config();
+                     delay_20us(5000)  ; 
+                   BUZ_DisableBuzzer();
+				   
+                    
+				   Flash_DisplayNumber();
+			 }
+		  
+	 }
+	 
+
+}
 
 
+#endif 
+static void Delay_ms(uint16_t n)   
+{  
+    uint16_t i=0,j;  
+    for(i=0;i<n;i++) {
+
+	     for(j=0;j<100;j++){
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+		  _nop_(); 
+	     }
+		 
+		  
+     } 
+}  
+
+
+/****************************************************
+	*
+	*Function Name: uint8_t HDKey_Scan(uint8_t mode)
+	*Function :
+	*Inpute Ref: 0 ---不支持连续按键
+	*Return Ref: 0 --没有按键按下， 1---有按键按下
+	*
+*****************************************************/
+uint8_t HDKey_Scan(uint8_t mode)
+{
+	
+		static uint8_t key_up=1;	 //°´¼üËÉ¿ª±êÖ¾
+		if(mode==1)key_up=1;	// 支持连续按键
+		if(key_up&&(POWER_KEY== 1))
+		{
+		    key_up =0 ;
+			Delay_ms(40);
+			if(POWER_KEY== 1 ) 	return POWER_PRES;
+		
+		}
+		else if(POWER_KEY==0)key_up=1;
+		return 0;	//没有按键按下
+}
 
 

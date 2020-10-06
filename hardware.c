@@ -29,7 +29,7 @@ void	gpio_init(void)
 	P1DS   = 0x00;  //输入模式
 	P1     = 0x00;  //输出
 	
-	P2TRIS = 0x0C;  //方向
+	P2TRIS = 0x48;  //方向 0B0100 1000  P26 =1输出 LED  P24=0 
 	P2OD   = 0x04;  //开漏
 	P2RD   = 0x00;  //下拉
 	P2UP   = 0x08;  //上拉
@@ -68,9 +68,9 @@ void	gpio_init(void)
 	P21CFG = 0x00;
 	P22CFG = 0x00;//
 	P23CFG = 0x00;//
-	P24CFG = 0x00;//
+	P24CFG = 0x00;// key input
 	P25CFG = 0x00;//
-	P26CFG = 0x01;//Vin
+	P26CFG = 0x00;//Vin GPIO WT.EDIT  LED 输出
 	
 	P30CFG = 0x01;//OP_OUT
 	P31CFG = 0x01;//OP_N

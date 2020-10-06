@@ -9,6 +9,7 @@ extern unsigned int change_voltage;
 
 void	main(void)
 {
+    static uint8_t keyflg =0,preflg=0;
 	hardware_init();
 	//TM1650_init();
 	bldc_value_init();
@@ -36,9 +37,17 @@ void	main(void)
 	
 	while(1)
 	{
-		BLDC.pwm_set = change_voltage;
-		//BLDC.pwm_set = 720;//800;//720//760//640//800;
-   
+		//BLDC.pwm_set = change_voltage;
+		BLDC.pwm_set = 200;//800;//720//760//640//800;
+         keyflg = HDKey_Scan(0);
+			if(keyflg ==1){
+                 preflg = preflg ^ 0x01;
+                if(preflg ==1)
+				   LED_POWER_RED =1;
+                else  LED_POWER_RED =0;
+
+			}
+   #if 0
 		if(EIF2&0x01) //
 		{
 			EIF2 &= ~0x01;
@@ -48,12 +57,12 @@ void	main(void)
 			scan_adc_channal();
 			read_change_voltage();
             BLDC_main();
-		
+		   
             
-			//key_handing();
-			//display();
+			
+			
 		}
-		
+		#endif 
 	}
 }
 
