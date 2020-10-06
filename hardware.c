@@ -267,7 +267,7 @@ void	op_init(void)
 
 void	adc_init(void)
 {
-	ADCON0 = 0x48; //0B0100 1000  //OP0_O ----”“∂‘∆Î
+	ADCON0 = 0x48; //0B0100 1000  //OP0_O 
 	ADCON1 = 0x5B; //
 	ADCON2 = 0x00;
 	ADCMPC = 0x00;

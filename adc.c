@@ -1,6 +1,6 @@
 #include<include.h>
 #include "my_type.h"
-#include "demo_uart.h"
+#include "bldc.h"
 
 idata  ADC_TYPES  ADC;
 CHANGE_TYPES  temp3;
@@ -13,6 +13,9 @@ void ADC_IRQHandler(void)  interrupt 19
 {
 
 }
+
+
+
 
 void	adc_value_init(void)
 {
@@ -202,24 +205,60 @@ void read_change_voltage(void)
 	while(ADCON0&0x02);
 	ADCON0 &= ~0x80; // ADCON0 = 0x48 & (~0x80) = 0x48
 	ADCON1 = change_voltage_channal|0x80;//选择通道 0X58  //AN8 =P22
-	ADCLDO = 0x00;//3V
+	ADCLDO = 0xE0;//3V
 	delay_us();
 	_start_ADC;
 	while(ADCON0&0x02);
-	temp3.change.count[1] = ADRESL;     //
-	temp3.change.count[0] = ADRESH&0x0f;  //右对齐数据11~8位
+	temp3.change.count[1] = ADRESL;
+	temp3.change.count[0] = ADRESH&0x0f;
 	ADC.change_voltage_sum +=temp3.change.math;
-	if(++ADC.change_voltage_count>=16)//16次取平均值
+	if(++ADC.change_voltage_count>=8)//8次取平均值
 	{
 		ADC.change_voltage_count = 0;
-		ADC.change_voltage = ADC.change_voltage_sum>>4;
-		
-		
-        UART_SendBuff(UART0,ADC.change_voltage>>4);
+        ADC.change_voltage = ADC.change_voltage_sum>>3; //WT.EDIT
+        
+		ADC.change_voltage = ADC.change_voltage >>2;
+       
+      
+        if(ADC.change_voltage >10 ){
+        
+           change_voltage=ADC.change_voltage;
+		    if(change_voltage>=800)
+            {
+                change_voltage= 800;
+                
+            }
+			else if(change_voltage >720 && change_voltage <800){  //95%
+		   	      change_voltage=760;
 
-	    chagnge_voltage_1=ADC.change_voltage>>4;
-		
-		change_voltage = (800 *  chagnge_voltage_1) / 255 ;
+		   }
+          
+		   else if( change_voltage <=720 && change_voltage >680){  //85%
+				
+		        change_voltage=720;
+				
+
+		   }
+		   else if( change_voltage < 680 && change_voltage >=640){  // 80%
+				
+		        change_voltage=640;
+
+		   }
+		   else if( change_voltage <640 && change_voltage >=600){  // 75%
+				
+		        change_voltage=600;
+
+		   }
+           
+		  
+          
+		 // BLDC.pwm_set = change_voltage;
+        }
+		else {
+			change_voltage=0;
+           // BLDC.pwm_set = change_voltage;
+		}
+
 		
 		ADC.change_voltage_sum = 0;
 	}

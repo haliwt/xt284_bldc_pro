@@ -1,6 +1,5 @@
 #include<include.h>
 #include "my_type.h"
-#include "demo_uart.h"
 
 
 SYS_TYPES sys;
@@ -18,7 +17,6 @@ void	main(void)
 	//led_value_init();
 	//key_value_init();
 	check_current_offset();
-    UART0_Config();
 	MOS_OFF;
 	BLDC.status = 1;
 	BLDC.error = _pwm_limit_error; 
@@ -39,7 +37,7 @@ void	main(void)
 	while(1)
 	{
 		BLDC.pwm_set = change_voltage;
-		//BLDC.pwm_set = 400;//800;//720//800;
+		//BLDC.pwm_set = 720;//800;//720//760//640//800;
    
 		if(EIF2&0x01) //
 		{
