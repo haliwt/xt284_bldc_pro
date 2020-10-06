@@ -111,8 +111,8 @@ void	check_current_offset(void)
 void	read_current(void)
 {
 	while(ADCON0&0x02);
-	ADCON0 |= 0x80;
-	ADCON1 = OP_current_channal|0x80;
+	ADCON0 |= 0x80; // ADCON0 =0x48 ;
+	ADCON1 = OP_current_channal|0x80; //0X5F = 0B0101 1111 AN22 = P30
 	ADCLDO = 0x00;//5V
 	delay_us();
 	_start_ADC;
@@ -150,9 +150,9 @@ void	read_current(void)
 void	read_voltage(void)
 {
 	while(ADCON0&0x02);
-	ADCON0 &= ~0x80; //ADCHS4
-//	ADCON1 = voltage_channal|0x80;  //voltage_channale = 0x5C  AN12
-    ADCON1 = 0x01|0x80;  //WT.EDIT。2020.09.29 AN1 
+	ADCON0 &= ~0x80; //ADCHS4 =0
+	ADCON1 = voltage_channal|0x80;  //voltage_channale = 0x51 0101 1100  AN1=IO
+   // ADCON1 = 0x01|0x80;  //WT.EDIT。2020.09.29 AN1 =P01
 	ADCLDO = 0xE0;//3V
 	delay_us();
 	_start_ADC;
@@ -163,7 +163,7 @@ void	read_voltage(void)
 	if(++ADC.voltage_count>=16)
 	{
 		ADC.voltage_count = 0;
-		ADC.voltage = ADC.voltage_sum>>4;
+		ADC.voltage = ADC.voltage_sum>>4; // 1/16 平均值
 		ADC.voltage_sum = 0;
 	}
 }
@@ -172,7 +172,8 @@ void	read_pwm_adc(void)
 {
 	while(ADCON0&0x02);
 	ADCON0 &= ~0x80;
-	ADCON1 = pwm_adc_channal|0x80;
+	ADCON1 = pwm_adc_channal|0x80; //0X5B =0B0101 1011 = 01011 
+	
 	ADCLDO = 0x00;//5V
 	delay_us();
 	_start_ADC;
@@ -198,8 +199,8 @@ void	read_pwm_adc(void)
 void read_change_voltage(void)
 {
 	while(ADCON0&0x02);
-	ADCON0 &= ~0x80;
-	ADCON1 = change_voltage_channal|0x80;//选择通道  //AN8
+	ADCON0 &= ~0x80; // ADCON0 = 0x48 & (~0x80) = 0x48
+	ADCON1 = change_voltage_channal|0x80;//选择通道 0X58  //AN8 =P22
 	ADCLDO = 0x00;//3V
 	delay_us();
 	_start_ADC;

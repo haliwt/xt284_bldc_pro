@@ -97,7 +97,7 @@ void	gpio_init(void)
 
 void	pwm_init(void)
 {
-	PWMCON = 0x0A;
+	PWMCON = 0x0A; //1.独立模式   2.对称计数使能      	3.中心对齐
 	PWMOE  = 0x3F;
 	
 	PWM01PSC = 0x01;//分频
@@ -267,7 +267,7 @@ void	op_init(void)
 
 void	adc_init(void)
 {
-	ADCON0 = 0x48; //0B0100 1000  //OP0_O
+	ADCON0 = 0x48; //0B0100 1000  //OP0_O 
 	ADCON1 = 0x5B; //
 	ADCON2 = 0x00;
 	ADCMPC = 0x00;

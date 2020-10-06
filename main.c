@@ -36,10 +36,10 @@ void	main(void)
 	
 	while(1)
 	{
-		//BLDC.pwm_set = change_voltage;
-		BLDC.pwm_set = 800;//800;//720//800;
+		BLDC.pwm_set = change_voltage;
+		//BLDC.pwm_set = 400;//800;//720//800;
    
-		if(EIF2&0x01)
+		if(EIF2&0x01) //
 		{
 			EIF2 &= ~0x01;
 			temp1.change.math = ~4000; //1ms 

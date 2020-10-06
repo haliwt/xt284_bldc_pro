@@ -177,7 +177,7 @@ void  out_pwm(unsigned int  in)
 void LOOP(void)
 {
 	unsigned char i;
-	if(BLDC.pwm_set==800){
+	if(BLDC.pwm_set >720){
 
 			
        #if 1
@@ -1011,7 +1011,7 @@ void	BLDC_main(void)
 			BLDC.pwm_out = soft_pwm(BLDC.pwm_set,BLDC.pwm_out);
 		}
 		out_pwm(BLDC.pwm_out);
-		set_error();
+		//set_error(); //WT.EDIT cancel
 		if(BLDC.error != _no_error)
 		{
 			BLDC_stop();

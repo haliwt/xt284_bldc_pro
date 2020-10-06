@@ -8,7 +8,6 @@
 #include <pwm.H>
 #include <adc.H>
 #include <key.H>
-#include <TM1650.H>
 #include <flash.H>
 #include "intrins.h" 
 
@@ -42,7 +41,7 @@
 
 #define   OP_current_channal     0x5F
 //#define   current_channal        0x5E
-#define   voltage_channal        0x5C
+#define   voltage_channal       0x51  //  0x5C 
 #define   pwm_adc_channal        0x5B
 #define   change_voltage_channal        0x58	
 
