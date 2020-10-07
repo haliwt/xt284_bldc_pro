@@ -29,14 +29,14 @@ void	gpio_init(void)
 	P1DS   = 0x00;  //输入模式
 	P1     = 0x00;  //输出
 	
-	P2TRIS = 0x0C;  //方向
+	P2TRIS = 0x5C;  //方向 0B0101 1100 
 	P2OD   = 0x04;  //开漏
 	P2RD   = 0x00;  //下拉
 	P2UP   = 0x08;  //上拉
 	P2DR   = 0x00;  //驱动
 	P2SR   = 0x00;  //斜率
 	P2DS   = 0x0C;  //输入模式
-	P2     = 0x7C;  //输出
+	P2     = 0x7C;  //输出  0B 0111 1100
 	
 	P3TRIS = 0x00;  //方向
 	P3OD   = 0x00;  //开漏
@@ -68,9 +68,9 @@ void	gpio_init(void)
 	P21CFG = 0x00;
 	P22CFG = 0x00;//
 	P23CFG = 0x00;//
-	P24CFG = 0x00;//
+	P24CFG = 0x00;//GPIO 
 	P25CFG = 0x00;//
-	P26CFG = 0x01;//Vin
+	P26CFG = 0x00;//Vin GPIO
 	
 	P30CFG = 0x01;//OP_OUT
 	P31CFG = 0x01;//OP_N

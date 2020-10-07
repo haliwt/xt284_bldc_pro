@@ -193,11 +193,11 @@ void	read_voltage(void)
 	}
 }
 /*****************************************************************/
-void	read_pwm_adc(void)
+void read_pwm_adc(void)
 {
 	while(ADCON0&0x02);
 	ADCON0 &= ~0x80;
-	ADCON1 = pwm_adc_channal|0x80; //0X5B =0B0101 1011 = 01011 
+	ADCON1 = pwm_adc_channal|0x80; //0X5B =0B0101 1011 = 01011 =AN11  //控制继电器 “A”
 	
 	ADCLDO = 0x00;//5V
 	delay_us();
@@ -250,11 +250,12 @@ void read_change_voltage(void)
                 
             }
 			
-          
+          MOTOR_LED =1;
 		 
         }
 		else {
 			change_voltage=0;
+			MOTOR_LED =0;
            
 		}
 
@@ -268,6 +269,6 @@ void	scan_adc_channal(void)
 {
 	read_current();   //cancel ,works
 	read_voltage();    //cancel ,don;t works.
-	read_pwm_adc(); //取消，works
+	//read_pwm_adc(); //取消，works,外部控制PWM信号电压 现在重复
 }
 

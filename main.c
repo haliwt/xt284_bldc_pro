@@ -36,6 +36,7 @@ void	main(void)
 	
 	while(1)
 	{
+		POWER_LED =1;
 		BLDC.pwm_set = change_voltage;
 		//BLDC.pwm_set = 720;//800;//720//760//640//800;
    
@@ -55,6 +56,7 @@ void	main(void)
 		}
 		
 	}
+	  
 }
 
 
