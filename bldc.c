@@ -966,7 +966,7 @@ void	set_error(void)
 		BLDC.error  |= _current_over_error;
 	}
 	#endif 
-	#if 0
+	#if 0  //硬件没有这部分电路支持此功能
 	if((ADC.voltage>_U(_set_over_voltage))||(ADC.voltage<_U(_set_min_voltage)))
 	{
 		BLDC.error  |= _voltage_over_error;

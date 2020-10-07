@@ -103,7 +103,7 @@
 
 #define   _U(a)      (unsigned int)((float)(a)*1241/10)
 #define   _I(a)      (unsigned int)((float)(a)*1325/10)
-#define   LIMIT_MAX_CURRENT    225//Ref :2V 5.5A  WT.EDIT    
+#define   LIMIT_MAX_CURRENT    245//Ref :2V 6A  WT.EDIT    
 
 
 
