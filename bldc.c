@@ -248,7 +248,7 @@ void LOOP(void)
                     //delay_us(20);//WT.EDIT 
                     // delay_us(30);//WT.EDIT 
                     //delay_us(10);//WT.EDIT--BETTER
-                    delay_us(5); //WT.EDIT 
+                    delay_us(6); //WT.EDIT 
 					BLDC.loop_status = _COM_CHARGE;
 				}
 				break;
@@ -944,8 +944,8 @@ void	BLDC_stop(void)
 	*
 	*Function Name: void set_error(void)
 	*Function :
-	*
-	*
+	*Input Ref:
+	*Return Ref:
 	*
 *******************************************************************/
 
@@ -960,11 +960,13 @@ void	set_error(void)
 	{
 		BLDC.error  |= _pwm_limit_error;
 	}
-	#if 0
-	if(ADC.current>_I(_set_over_current))
+ #if 1
+	if(ADC.current > LIMIT_MAX_CURRENT)//if(ADC.current>_I(_set_over_current)) //
 	{
 		BLDC.error  |= _current_over_error;
 	}
+	#endif 
+	#if 0
 	if((ADC.voltage>_U(_set_over_voltage))||(ADC.voltage<_U(_set_min_voltage)))
 	{
 		BLDC.error  |= _voltage_over_error;

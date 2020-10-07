@@ -41,14 +41,14 @@
 
 #define   OP_current_channal     0x5F
 //#define   current_channal        0x5E
-#define   voltage_channal       0x51  //  0x5C 
+#define   voltage_channal       0x51  //WT.EDIT   0x5C 
 #define   pwm_adc_channal        0x5B
 #define   change_voltage_channal        0x58	
 
 
-#define   _set_over_voltage     28
+#define   _set_over_voltage    28
 #define   _set_min_voltage      8
-#define   _set_over_current     5
+#define   _set_over_current     4// WT.EDIT 2020.10.07 //5
 #define   _en_duzhuan_time      500
 #define   _soft_step_time       5
 
@@ -103,6 +103,10 @@
 
 #define   _U(a)      (unsigned int)((float)(a)*1241/10)
 #define   _I(a)      (unsigned int)((float)(a)*1325/10)
+#define   LIMIT_MAX_CURRENT    225//Ref :2V 5.5A  WT.EDIT    
+
+
+
 
 #define	_LINK_CHECK_CURRENT_SET			0.5
 

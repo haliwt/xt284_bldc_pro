@@ -77,7 +77,7 @@ uint16_t get_current_now(void)
 	static  CHANGE_TYPES  temp4;
 	ADCON0 |= 0x80; //ADCON0 = 0X48 init
 	ADCON1 = 0x3F|0x80; //0x3F =0B 0011 1111 =  OP0_O = P30 电流采样电压
-	ADCLDO = 0x00;//5V
+	ADCLDO = 0xA0;//2V //WT.EDIT 
 	delay_us();
 	_start_ADC;
 	while(ADCON0&0x02);
@@ -105,7 +105,7 @@ void check_current_offset(void)
 	MOS_OFF;
 	ADCON0 |= 0x80;
 	ADCON1 = OP_current_channal|0x80;////0x3F =0B 0011 1111 =  OP0_O = P30 电流采样电压
-	ADCLDO = 0x00;//5V
+	ADCLDO = 0xA0;//2V WT.EDIT 2020.10.07
 	delay_us();
 	ADC.current_sum = 0;
 	for(ADC.current_count=0;ADC.current_count<16;ADC.current_count++)
@@ -119,7 +119,7 @@ void check_current_offset(void)
 		ADC.current_sum += temp4.change.math;
 		
 	}
-	ADC.current_offset = ADC.current_sum>>4;
+	ADC.current_offset = ADC.current_sum>>4; //平均值
 	ADC.current_sum = 0;
 	ADC.current_count = 0;
 	
@@ -139,17 +139,17 @@ void read_current(void)
 	while(ADCON0&0x02);
 	ADCON0 |= 0x80; // ADCON0 =0x48 ;
 	ADCON1 = OP_current_channal|0x80; //0X5F = 0B0101 1111 AN22 = P30 -4pin
-	ADCLDO = 0x00;//5V
+	ADCLDO = 0xA0;//2V ,WT.EDIT
 	delay_us();
 	_start_ADC;
 	while(ADCON0&0x02);
 	temp3.change.count[1] = ADRESL;
 	temp3.change.count[0] = ADRESH&0x0f; //右对齐
 	
-	ADC.current_sum -= ADC.current_read[ADC.current_count]; //这一步 赋值
+	ADC.current_sum -= ADC.current_read[ADC.current_count]; //16次取样
 	ADC.current_read[ADC.current_count] = temp3.change.math;
 	ADC.current_sum += temp3.change.math;
-	ADC.current_ram = ADC.current_sum>>4; //ADC 右对齐 8bit
+	ADC.current_ram = ADC.current_sum>>4; //取平均值 2^12 = 4096
 	if(ADC.current_ram<=ADC.current_offset)
 	{
 		ADC.current = 0;
@@ -159,7 +159,7 @@ void read_current(void)
 		ADC.current = ADC.current_ram - ADC.current_offset; //
 	}
 	
-	if(++ADC.current_count>=16)
+	if(++ADC.current_count>=16) //
 	{
 		ADC.current_count = 0;
 	}
@@ -178,7 +178,6 @@ void	read_voltage(void)
 	while(ADCON0&0x02);
 	ADCON0 &= ~0x80; //ADCHS4 =0
 	ADCON1 = voltage_channal|0x80;  //voltage_channale = 0x51 0101 1100  AN1=IO //原 AN12 
-   // ADCON1 = 0x01|0x80;  //WT.EDIT。2020.09.29 AN1 =P01
 	ADCLDO = 0xE0;//3V
 	delay_us();
 	_start_ADC;
@@ -250,36 +249,13 @@ void read_change_voltage(void)
                 change_voltage= 800;
                 
             }
-			#if 0
-				else if(change_voltage >720 && change_voltage <800){  //95%
-			   	      change_voltage=760;
-
-			   }
-	          
-			   else if( change_voltage <=720 && change_voltage >680){  //85%
-					
-			        change_voltage=720;
-					
-
-			   }
-			   else if( change_voltage < 680 && change_voltage >=640){  // 80%
-					
-			        change_voltage=640;
-
-			   }
-			   else if( change_voltage <640 && change_voltage >=600){  // 75%
-					
-			        change_voltage=600;
-
-			   }
-           
-		  #endif 
+			
           
-		 // BLDC.pwm_set = change_voltage;
+		 
         }
 		else {
 			change_voltage=0;
-           // BLDC.pwm_set = change_voltage;
+           
 		}
 
 		
