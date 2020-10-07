@@ -12,7 +12,7 @@
 #include "intrins.h" 
 
 
-#define		MOS_U_V			{PWMMASKE = 0x39;C1CON0 = 0x82;C1CON2 = 0x00;}
+#define		MOS_U_V			{PWMMASKE = 0x39;C1CON0 = 0x82;C1CON2 = 0x00;} // A+ B -
 #define		MOS_U_W			{PWMMASKE = 0x2D;C1CON0 = 0x81;C1CON2 = 0x20;}
 #define		MOS_V_W			{PWMMASKE = 0x27;C1CON0 = 0x80;C1CON2 = 0x00;}
 #define		MOS_V_U			{PWMMASKE = 0x36;C1CON0 = 0x82;C1CON2 = 0x20;}
@@ -20,7 +20,7 @@
 #define		MOS_W_V			{PWMMASKE = 0x1B;C1CON0 = 0x80;C1CON2 = 0x20;}
 
  
-#define		MOS_BREAK		{PWMMASKE = 0x3F;}//PWMFBKC = 0x10;}
+#define		MOS_BREAK		{PWMMASKE = 0x3F;}//PWMFBKC = 0x10;} //1 -掩码数据输出，0-PWM输出
 #define		MOS_OFF			{PWMMASKE = 0x3f;}//PWMFBKC = 0x00;}
 
 #define   _FG_H               P0_1 = 0;

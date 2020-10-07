@@ -185,7 +185,7 @@ void	pwm_init(void)
 	
 	
 	PWMMASKE = 0x3F; //掩码
-	PWMMASKD = 0x00;
+	PWMMASKD = 0x00; //掩码输出 000000
 	PWMFBKD = 0x2A;
 	PWMFBKC = 0x00; //刹车
 	
@@ -283,14 +283,14 @@ void	adc_init(void)
 
 void	time01_init(void)
 {
-	TMOD  = 0x11;
+	TMOD  = 0x11;  //
 	TCON  = 0x50;
-//	TL0   = 0x00;
-//	TH0   = 0x00;
+	TL0   = 0x00;
+	TH0   = 0x00;
 	CKCON = 0x00; //Fsys =48MHz  T0 = 1/（48/12） =1/4MHZ = 0.25us 65536 *0.25 =16ms
 
-	TL0 = 0x5f;  //1ms //WT.EDIT
-	TH0 = 0x00;
+//	TL0 = 0x5f;  //1ms //WT.EDIT
+//	TH0 = 0x00;
 }
 
 void	time2_init(void)  //pwm采样，中断最高优先级

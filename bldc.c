@@ -176,7 +176,7 @@ void  out_pwm(unsigned int  in)
 *******************************************************************/
 void LOOP(void)
 {
-	unsigned char i;
+	//unsigned char i;
 	//if(BLDC.pwm_set >720 ){
 		{
 			
@@ -628,20 +628,20 @@ void	confirm_phase(void)
 	
 	k = _IPD_GET_TIMES;//采样次数
 	j = _IPD_GET_IDLE; //停止间隔
-	MOS_OFF;
+	MOS_OFF;  //输出0000 
 	out_pwm(_pwm_max);
-	Iuv = get_current_now();
+	Iuv = get_current_now();  //采样电阻0.02R 上半桥道通，Pmos管  
 	MOS_OFF;
 	
 	for(i=0;i<j;i++)
 	{
 		Iuv = get_current_now();
 	}
-	MOS_U_V;
+	MOS_U_V; //A+ B- "6"
 	Iuv = 0;
 	for(i=0;i<k;i++)
 	{
-		Iuv += get_current_now();
+		Iuv += get_current_now(); //Iuv > Ivu
 	}
 	MOS_OFF;	
 	
@@ -649,7 +649,7 @@ void	confirm_phase(void)
 	{
 		Iwv = get_current_now();
 	}
-	MOS_W_V;
+	MOS_W_V; //C+ B- '4'
 	Iwv = 0;
 	for(i=0;i<k;i++)
 	{
@@ -661,7 +661,7 @@ void	confirm_phase(void)
 	{
 		Iwu = get_current_now();
 	}
-	MOS_W_U;
+	MOS_W_U; //C+ A- '5'
 	Iwu = 0;
 	for(i=0;i<k;i++)
 	{
@@ -673,7 +673,7 @@ void	confirm_phase(void)
 	{
 		Ivu = get_current_now();
 	}
-	MOS_V_U;
+	MOS_V_U; //B+ A- '1'
 	Ivu = 0;
 	for(i=0;i<k;i++)
 	{
@@ -685,7 +685,7 @@ void	confirm_phase(void)
 	{
 		Ivw = get_current_now();
 	}
-	MOS_V_W;
+	MOS_V_W; //B+ C- '3'
 	Ivw = 0;
 	for(i=0;i<k;i++)
 	{
@@ -697,7 +697,7 @@ void	confirm_phase(void)
 	{
 		Iuw = get_current_now();
 	}
-	MOS_U_W;
+	MOS_U_W; //A+ C- '2'
 	Iuw = 0;
 	for(i=0;i<k;i++)
 	{
@@ -710,7 +710,7 @@ void	confirm_phase(void)
 		Ioffset += ADC.current_offset;
 	}
 	angle = 0;
-	if(Iuv>Ivu){angle |= 0x01;}
+	if(Iuv>Ivu){angle |= 0x01;} //顺序通电，采样电压值比较
 	if(Ivw>Iwv){angle |= 0x02;}
 	if(Iwu>Iuw){angle |= 0x04;}
 	
@@ -744,8 +744,8 @@ void	confirm_phase(void)
 	*
 	*Function Name: void OPEN(void)
 	*Function :
-	*
-	*
+	*Input Ref:
+	*Return Ref:
 	*
 *******************************************************************/
 void  OPEN(void)
@@ -760,13 +760,13 @@ void  OPEN(void)
 				BLDC.check_over_time = 0;
 			  BLDC.open_period = _open_max_time;
 				BLDC.zero_check_time.all =  BLDC.open_period;
-				TH1 = 0;
+				TH1 = 0; //定时器 1
 				TL1 = 0;
 				TF1 = 0;
 				BLDC.open_status = OPEN_WAIT_CHECK;
 				break;
 			case   OPEN_WAIT_CHECK:
-				if(TF1)
+				if(TF1) //计数器 1溢出中断 0.25us*65535 =16.384ms 如何判断比较好？
 				{
 					TF1 = 0;
 					BLDC.open_status = OPEN_CHECK_ZERO;
@@ -784,15 +784,15 @@ void  OPEN(void)
 					BLDC.turn_OK_count = 0;
 				}
 				break;
-			case  OPEN_CHECK_ZERO:
-				BLDC.zero_now_time.one.h  = TH0;
+			case  OPEN_CHECK_ZERO: //过零点
+				BLDC.zero_now_time.one.h  = TH0; //定时器值--实际的时间值 计时开始 定时器0
 				BLDC.zero_now_time.one.l  = TL0;
-				if(BLDC.EMI_flag&0x80)
+				if(BLDC.EMI_flag&0x80) //检查电压比较器-输出变化，BEMF反向电动势
 				{
-					if(++BLDC.EMI_OK_count>=10)
+					if(++BLDC.EMI_OK_count>=10) //经过暂短延时 判断
 					{
 						BLDC.EMI_OK_count = 0;
-						TH0 = 0;
+						TH0 = 0; //定时器 0
 						TL0 = 0;
 						TF0 = 0;
 						BLDC.zero_period.all =  (BLDC.zero_now_time.all<<2);//240
@@ -801,13 +801,13 @@ void  OPEN(void)
 							BLDC.turn_OK_count = 0;
 							MOS_OFF;
 							BLDC.output_time.all = BLDC.zero_now_time.all >>1;//30
-							BLDC.output_time.all -= (BLDC.zero_now_time.all >>2);//30
+							BLDC.output_time.all -= (BLDC.zero_now_time.all >>2);//30度 
 							BLDC.zero_check_time.all = BLDC.output_time.all >>1;
-							BLDC.status = _LOOP;
+							BLDC.status = _LOOP; //进入循环
 							TL1 = ~BLDC.zero_check_time.one.l;					
 							TH1 = ~BLDC.zero_check_time.one.h; 
 							TF1 = 0;
-							BLDC.loop_status = _WAIT_CHECK;
+							BLDC.loop_status = _WAIT_CHECK; //进入循环的状态中的，WAIT
 						}
 						else
 						{
@@ -833,7 +833,7 @@ void  OPEN(void)
 					BLDC.open_period = _open_max_time;
 					if(++BLDC.start_times>3)
 					{
-						BLDC.error  |= _emf_Error;
+						BLDC.error  |= _emf_Error; //反向电动势错误
 						BLDC.start_times = 0;
 					}
 				}
@@ -960,6 +960,7 @@ void	set_error(void)
 	{
 		BLDC.error  |= _pwm_limit_error;
 	}
+	#if 0
 	if(ADC.current>_I(_set_over_current))
 	{
 		BLDC.error  |= _current_over_error;
@@ -968,6 +969,7 @@ void	set_error(void)
 	{
 		BLDC.error  |= _voltage_over_error;
 	}
+	#endif 
 }
 
 void	reset_error(void)
@@ -1013,7 +1015,7 @@ void	BLDC_main(void)
 			BLDC.pwm_out = soft_pwm(BLDC.pwm_set,BLDC.pwm_out);
 		}
 		out_pwm(BLDC.pwm_out);
-		//set_error(); //WT.EDIT cancel
+		set_error(); //WT.EDIT cancel
 		if(BLDC.error != _no_error)
 		{
 			BLDC_stop();

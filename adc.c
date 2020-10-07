@@ -64,12 +64,19 @@ static  void  delay_us(void)
 	_nop_();
 	_nop_();
 }
-
-uint16_t	get_current_now(void)
+/**************************************************************
+    *
+    *Function Name:uint16_t get_current_now(void)
+    *Function: 
+    *Input Ref:NO
+    *Return Ref: 采样电压值
+    *
+**************************************************************/
+uint16_t get_current_now(void)
 {
 	static  CHANGE_TYPES  temp4;
-	ADCON0 |= 0x80;
-	ADCON1 = 0x3F|0x80;
+	ADCON0 |= 0x80; //ADCON0 = 0X48 init
+	ADCON1 = 0x3F|0x80; //0x3F =0B 0011 1111 =  OP0_O = P30 电流采样电压
 	ADCLDO = 0x00;//5V
 	delay_us();
 	_start_ADC;
@@ -80,8 +87,15 @@ uint16_t	get_current_now(void)
 	return temp4.change.math;
 }
 
-
-void	check_current_offset(void)
+/**************************************************************
+    *
+    *Function Name:void check_current_offset(void)
+    *Function: 
+    *Input Ref:NO
+    *Return Ref:NO
+    *
+**************************************************************/
+void check_current_offset(void)
 {
 	static  CHANGE_TYPES  temp4;
 	MOS_OFF;
@@ -90,7 +104,7 @@ void	check_current_offset(void)
 	
 	MOS_OFF;
 	ADCON0 |= 0x80;
-	ADCON1 = OP_current_channal|0x80;
+	ADCON1 = OP_current_channal|0x80;////0x3F =0B 0011 1111 =  OP0_O = P30 电流采样电压
 	ADCLDO = 0x00;//5V
 	delay_us();
 	ADC.current_sum = 0;
@@ -111,30 +125,38 @@ void	check_current_offset(void)
 	
 	EA = 1;
 }
+/**************************************************************
+    *
+    *Function Name:void read_current(void)
+    *Function: 
+    *Input Ref:NO
+    *Return Ref:NO
+    *
+**************************************************************/
 
-void	read_current(void)
+void read_current(void)
 {
 	while(ADCON0&0x02);
 	ADCON0 |= 0x80; // ADCON0 =0x48 ;
-	ADCON1 = OP_current_channal|0x80; //0X5F = 0B0101 1111 AN22 = P30
+	ADCON1 = OP_current_channal|0x80; //0X5F = 0B0101 1111 AN22 = P30 -4pin
 	ADCLDO = 0x00;//5V
 	delay_us();
 	_start_ADC;
 	while(ADCON0&0x02);
 	temp3.change.count[1] = ADRESL;
-	temp3.change.count[0] = ADRESH&0x0f;
+	temp3.change.count[0] = ADRESH&0x0f; //右对齐
 	
-	ADC.current_sum -= ADC.current_read[ADC.current_count];
+	ADC.current_sum -= ADC.current_read[ADC.current_count]; //这一步 赋值
 	ADC.current_read[ADC.current_count] = temp3.change.math;
 	ADC.current_sum += temp3.change.math;
-	ADC.current_ram = ADC.current_sum>>4;
+	ADC.current_ram = ADC.current_sum>>4; //ADC 右对齐 8bit
 	if(ADC.current_ram<=ADC.current_offset)
 	{
 		ADC.current = 0;
 	}
 	else
 	{
-		ADC.current = ADC.current_ram - ADC.current_offset;
+		ADC.current = ADC.current_ram - ADC.current_offset; //
 	}
 	
 	if(++ADC.current_count>=16)
@@ -147,15 +169,15 @@ void	read_current(void)
     *
     *Function Name:read_voltage(void)
     *Function: 保护电压，高于1v，电机停止工作，1v以下电机工作
-    *
-    *
+    *Input Ref:NO
+    *Return Ref:NO
     *
 **************************************************************/
 void	read_voltage(void)
 {
 	while(ADCON0&0x02);
 	ADCON0 &= ~0x80; //ADCHS4 =0
-	ADCON1 = voltage_channal|0x80;  //voltage_channale = 0x51 0101 1100  AN1=IO
+	ADCON1 = voltage_channal|0x80;  //voltage_channale = 0x51 0101 1100  AN1=IO //原 AN12 
    // ADCON1 = 0x01|0x80;  //WT.EDIT。2020.09.29 AN1 =P01
 	ADCLDO = 0xE0;//3V
 	delay_us();
@@ -268,8 +290,8 @@ void read_change_voltage(void)
 
 void	scan_adc_channal(void)
 {
-	//read_current();   //cancel ,works
+	read_current();   //cancel ,works
 	read_voltage();    //cancel ,don;t works.
-	//read_pwm_adc(); //取消，works
+	read_pwm_adc(); //取消，works
 }
 
