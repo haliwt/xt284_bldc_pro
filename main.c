@@ -50,9 +50,7 @@ void	main(void)
 			read_change_voltage();
             BLDC_main();
 		
-            
-			//key_handing();
-			//display();
+        
 		}
 		
 	}
