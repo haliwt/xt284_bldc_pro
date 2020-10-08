@@ -181,6 +181,7 @@ typedef  struct
 }CHANGE_TYPES;
 
 
+extern BLDC_TYPES    BLDC;
 
 
 #endif

@@ -17,6 +17,7 @@ CHANGE_TYPES  CH;
  **
  ** \return none
 ******************************************************************************/
+#if 0
 static  void  delay_us(void)
 {
 	_nop_();
@@ -29,7 +30,7 @@ static  void  delay_us(void)
 	_nop_();
 	_nop_();
 }
-
+#endif 
 
 void Timer2_IRQHandler(void)  interrupt 5 
 {
@@ -137,7 +138,7 @@ void  pwm_value_init(void)
 
 
 
-
+#if 0
 unsigned int  pwm_handing(void)
 {
 	if(++pwm.always_count>10)
@@ -187,5 +188,5 @@ unsigned int  pwm_handing(void)
 	return  pwm.out;
 }
 
-
+#endif 
 

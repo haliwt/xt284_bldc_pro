@@ -21,9 +21,10 @@ void	main(void)
 	BLDC.status = 1;
 	BLDC.error = _pwm_limit_error; 
 	BLDC.pwm_set = 1000;
+	#if 1
 	while(BLDC.pwm_set)
 	{
-		if(EIF2&0x01)//Timer3¼ÆÊýÆ÷Òç³ö
+		if(EIF2&0x01)//Timer3 overflow interrupt flag bit 
 		{
 			EIF2 &= ~0x01;
 			temp1.change.math = ~4000;
@@ -33,14 +34,13 @@ void	main(void)
 		}
 	}
 	BLDC.pwm_set = 0;
-	
+	#endif 
 	while(1)
 	{
 		POWER_LED =1;
 		BLDC.pwm_set = change_voltage;
 		//BLDC.pwm_set = 720;//800;//720//760//640//800;
-   
-		if(EIF2&0x01) //
+        if(EIF2&0x01) //
 		{
 			EIF2 &= ~0x01;
 			temp1.change.math = ~4000; //1ms 
@@ -50,8 +50,11 @@ void	main(void)
 			read_change_voltage();
             BLDC_main();
 		
-        
+            
+		
 		}
+		
+      
 		
 	}
 	  

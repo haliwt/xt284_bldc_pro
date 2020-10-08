@@ -7,8 +7,8 @@
 #include <bldc.H>
 #include <pwm.H>
 #include <adc.H>
-#include <key.H>
-#include <flash.H>
+//#include <key.H>
+//#include <flash.H>
 #include "intrins.h" 
 
 
@@ -47,8 +47,8 @@
 
 
 #define   _set_over_voltage    28
-#define   _set_min_voltage      8
-#define   _set_over_current     4// WT.EDIT 2020.10.07 //5
+#define   _set_min_voltage      0//WT.EDIT 2020.10.08//8
+#define   _set_over_current     5
 #define   _en_duzhuan_time      500
 #define   _soft_step_time       5
 
@@ -103,7 +103,7 @@
 
 #define   _U(a)      (unsigned int)((float)(a)*1241/10)
 #define   _I(a)      (unsigned int)((float)(a)*1325/10)
-#define   LIMIT_MAX_CURRENT    245//Ref :2V 6A  WT.EDIT    
+#define   LIMIT_MAX_CURRENT    369//(Ref :2V) 9A  WT.EDIT    
 
 
 

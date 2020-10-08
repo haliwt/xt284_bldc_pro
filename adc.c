@@ -9,6 +9,7 @@ unsigned int chagnge_voltage_1 = 0;//用于转速控制计算的中间变量
 
 
 
+
 void ADC_IRQHandler(void)  interrupt 19 
 {
 
@@ -193,6 +194,7 @@ void	read_voltage(void)
 	}
 }
 /*****************************************************************/
+#if 0
 void read_pwm_adc(void)
 {
 	while(ADCON0&0x02);
@@ -213,7 +215,7 @@ void read_pwm_adc(void)
 		ADC.pwm_adc_sum = 0;
 	}
 }
-
+#endif 
 /********************************************************************************
     *
     *Function Name:void read_change_voltage(void)
@@ -223,6 +225,8 @@ void read_pwm_adc(void)
 *********************************************************************************/
 void read_change_voltage(void)
 {
+	static uint8_t poweron =0;
+    uint8_t i=0;
 	while(ADCON0&0x02);
 	ADCON0 &= ~0x80; // ADCON0 = 0x48 & (~0x80) = 0x48
 	ADCON1 = change_voltage_channal|0x80;//选择通道 0X58  //AN8 =P22
@@ -233,30 +237,52 @@ void read_change_voltage(void)
 	temp3.change.count[1] = ADRESL;
 	temp3.change.count[0] = ADRESH&0x0f;
 	ADC.change_voltage_sum +=temp3.change.math;
-	if(++ADC.change_voltage_count>=8)//8次取平均值
+	if(++ADC.change_voltage_count>=16)//8次取平均值
 	{
 		ADC.change_voltage_count = 0;
-        ADC.change_voltage = ADC.change_voltage_sum>>3; //WT.EDIT
+        ADC.change_voltage = ADC.change_voltage_sum>>6; //WT.EDIT
         
-		ADC.change_voltage = ADC.change_voltage >>2;
+		//ADC.change_voltage = ADC.change_voltage >>2;
        
       
-        if(ADC.change_voltage >10 ){
+        if(ADC.change_voltage >60 ){
         
-           change_voltage=ADC.change_voltage;
-		    if(change_voltage>=800)
+		  change_voltage=ADC.change_voltage;
+            #if 0
+		  if(poweron ==0){
+		  	 
+                switch(poweron)
+                {
+                        case 0:{MOS_U_V;} //A+ B- "6"
+                        case 1:{MOS_W_V;} //C+ B- "4"
+                        case 2:{MOS_W_U;} //C+ A- "5"
+                        case 3:{MOS_V_U;} //B+ A- "1"
+                        case 4:{MOS_V_W;} //B+ C- "3"
+                        case 5:{MOS_U_W;} //A+ C- "2"
+                        
+                        poweron++ ;
+                }
+            
+            	 poweron++ ;
+			  	
+		  } 
+          #endif 
+		   if(change_voltage>=800)
             {
                 change_voltage= 800;
                 
+				
             }
+		   
 			
           MOTOR_LED =1;
 		 
         }
 		else {
 			change_voltage=0;
-			MOTOR_LED =0;
-           
+			
+			 MOTOR_LED =0;
+             poweron=0;
 		}
 
 		

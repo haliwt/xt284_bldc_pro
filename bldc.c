@@ -22,7 +22,7 @@
 
 #define  FG         P0_1
 
-
+uint8_t theFirstOn ;
 
 // 用于反电势检测的择多滤波器配置表
 /*
@@ -917,17 +917,18 @@ void	check_FB(void)
 *******************************************************************/
 void	BLDC_start(void)
 {
-	BLDC.mode = _run;
-	bldc_value_init();//电机的各个状态值初始化
-	BLDC.status = _CHECK;
-	ON_BLDC_INTE;
+	    BLDC.mode = _run;
+		bldc_value_init();//电机的各个状态值初始化
+		BLDC.status = _CHECK;
+		ON_BLDC_INTE;
+	
 }
 /*******************************************************************
 	*
 	*Function Name: void BLDC_stop(void)
 	*Function :
-	*
-	*
+    *Input Ref:
+    *Return Ref:
 	*
 *******************************************************************/
 void	BLDC_stop(void)
@@ -976,6 +977,7 @@ void	set_error(void)
 
 void	reset_error(void)
 {
+	#if 0
 	if(++BLDC.reset_time>(_set_reset_time>>2))
 	{
 		//BLDC.error  &= ~_cw_ccw_error;
@@ -995,10 +997,14 @@ void	reset_error(void)
 	{
 		BLDC.error  &= ~_pwm_limit_error;
 	}
+	#endif 
+	BLDC.error = _no_error;// WT.EDIT 
+	#if 0
 	if((ADC.voltage<_U(_set_over_voltage-1))&&(ADC.voltage>_U(_set_min_voltage+1)))
 	{
 		BLDC.error  &= ~_voltage_over_error;
 	}
+	#endif 
 }
 
 void	BLDC_main(void)

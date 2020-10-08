@@ -21,6 +21,7 @@
 #define  _BREAK          4
 
 
+extern uint8_t theFirstOn;
 
 void	bldc_value_init(void);
 void	BLDC_main(void);
@@ -31,5 +32,9 @@ unsigned int  soft_pwm(unsigned int in,unsigned int out);
 void  check_FB(void);
 void  LOOP(void);
 void	com_charge(void);
+void BLDC_main(void);
+void BLDC_start();
+
+
 
 #endif
